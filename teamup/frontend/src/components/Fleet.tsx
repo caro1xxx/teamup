@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 const Wrap = styled.div`
   .fleet_item {
     font-size: 13px;
-    padding: 10px 15px;
+    padding: 10px  150px 10px 15px;
     .fleet_name {
       color: #625e5e;
     }
