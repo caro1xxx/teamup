@@ -1,138 +1,135 @@
 import React, { useState } from "react";
-import { nanoid } from "nanoid";
 import styled from "styled-components";
-import OptionsNavBarItem from "./components/OptionsNavBarItem";
-import Logo from "./components/Logo";
-import UserBaseInfo from "./components/UserBaseInfo";
-import Fleet from "./components/Fleet";
-const AppWrap = styled.div`
+import NavBarItem from "./components/NavBarItem";
+import User from "./components/User";
+import Search from "./components/Search";
+import FleetItem from "./components/FleetItem";
+import { nanoid } from "nanoid";
+type Props = {};
+
+const Wrap = styled.div`
   display: flex;
 `;
 
-const OptionsWrap = styled.div`
-  width: 90px;
+const NavBar = styled.div`
+  width: calc(5vw);
+  background-color: #0d0d14;
   height: calc(100vh);
 `;
 
-const FleetStyle = styled.div`
-  background-color: #1b1a1d;
+const List = styled.div`
+  width: calc(15vw);
+  background-color: #1a1a1d;
   height: calc(100vh);
 `;
 
-const ChatStyle = styled.div`
-  width: 60%;
-  height: calc(100vh);
+const Chat = styled.div`
+  flex: 1;
   background-color: #0e0e10;
+  height: calc(100vh);
 `;
 
-type Props = {};
+const Other = styled.div`
+  width: calc(20vw);
+  background-color: #1a1a1d;
+  height: calc(100vh);
+`;
+
+const Logo = styled.div`
+  margin: 2vh 0px;
+  text-align: center;
+`;
 
 const App = (props: Props) => {
-  const [optionsList, setOptionsList] = useState({
-    options: [
-      {
-        name: "hulu",
-        key: nanoid(),
-        img: require("./assets/images/hulu.png"),
-        background: "#fff",
-      },
-      {
-        name: "netfilx",
-        key: nanoid(),
-        img: require("./assets/images/netflix.png"),
-        background: "#000",
-      },
-      {
-        name: "spotify",
-        key: nanoid(),
-        img: require("./assets/images/spotify.png"),
-        background: "#1dd75f",
-      },
-      {
-        name: "youtube",
-        key: nanoid(),
-        img: require("./assets/images/youtube.png"),
-        background: "#fff",
-      },
-      {
-        name: "Disney",
-        key: nanoid(),
-        img: require("./assets/images/Disney.png"),
-        background: "#ff8dd9",
-      },
-      {
-        name: "nintendo",
-        key: nanoid(),
-        img: require("./assets/images/nintendo.png"),
-        background: "#ffffff",
-      },
-      {
-        name: "Pornhub",
-        key: nanoid(),
-        img: require("./assets/images/Pornhub.png"),
-        background: "#fff",
-      },
-    ],
-  });
+  const [NavBarList, _] = useState([
+    { name: nanoid(), key: nanoid() },
+    { name: nanoid(), key: nanoid() },
+    { name: nanoid(), key: nanoid() },
+    { name: nanoid(), key: nanoid() },
+  ]);
 
-  const [fleetList, setFleetsList] = useState({
-    data: [
-      {
-        id: "1",
-        key: nanoid(),
-        name: "Jack的Netflix车队",
-        status: [
-          {
-            number: 1,
-            id: nanoid(),
-            avator: require("./assets/avator/guest.png"),
-          },
-          "unknow",
-          "unknow",
-          "unknow",
-          "unknow",
-        ],
-      },
-      {
-        id: "1",
-        key: nanoid(),
-        name: "Jack的Netflix车队",
-        status: [
-          {
-            number: 1,
-            id: nanoid(),
-            avator: require("./assets/avator/guest.png"),
-          },
-          {
-            number: 1,
-            id: nanoid(),
-            avator: require("./assets/avator/guest.png"),
-          },
-          "unknow",
-          "unknow",
-          "unknow",
-        ],
-      },
-    ],
-  });
+  const [Fleet, setFleet] = useState([
+    {
+      title: "bezos1的车队",
+      type: "Spotify 30天",
+      sum: 15,
+      key: nanoid(),
+      user: [
+        { avator: "green", key: nanoid(), itemKey: nanoid() },
+        { avator: "red", key: nanoid(), itemKey: nanoid() },
+        { avator: "blue", key: nanoid(), itemKey: nanoid() },
+        { avator: "#e989f2", key: nanoid(), itemKey: nanoid() },
+      ],
+    },
+    {
+      title: "jack的车队",
+      type: "Spotify 30天",
+      sum: 15,
+      key: nanoid(),
+      user: [
+        { avator: "green", key: nanoid(), itemKey: nanoid() },
+        { avator: "red", key: nanoid(), itemKey: nanoid() },
+        { avator: "blue", key: nanoid(), itemKey: nanoid() },
+        { avator: "#e989f2", key: nanoid(), itemKey: nanoid() },
+      ],
+    },
+    {
+      title: "tom的车队",
+      type: "Spotify 30天",
+      sum: 15,
+      key: nanoid(),
+      user: [
+        { avator: "green", key: nanoid(), itemKey: nanoid() },
+        { avator: "red", key: nanoid(), itemKey: nanoid() },
+        { avator: "blue", key: nanoid(), itemKey: nanoid() },
+        { avator: "#e989f2", key: nanoid(), itemKey: nanoid() },
+      ],
+    },
+    {
+      title: "lucy的车队",
+      type: "Spotify 30天",
+      sum: 15,
+      key: nanoid(),
+      user: [
+        { avator: "green", key: nanoid(), itemKey: nanoid() },
+        { avator: "red", key: nanoid(), itemKey: nanoid() },
+        { avator: "blue", key: nanoid(), itemKey: nanoid() },
+        { avator: "#e989f2", key: nanoid(), itemKey: nanoid() },
+      ],
+    },
+    {
+      title: "jnro的车队",
+      type: "Spotify 30天",
+      sum: 15,
+      key: nanoid(),
+      user: [
+        { avator: "green", key: nanoid(), itemKey: nanoid() },
+        { avator: "red", key: nanoid(), itemKey: nanoid() },
+        { avator: "blue", key: nanoid(), itemKey: nanoid() },
+        { avator: "#e989f2", key: nanoid(), itemKey: nanoid() },
+      ],
+    },
+  ]);
 
   return (
-    <AppWrap>
-      <OptionsWrap>
-        <Logo />
-        {optionsList.options.map((item) => {
-          return <OptionsNavBarItem key={item.key} data={item} />;
+    <Wrap>
+      <NavBar>
+        <Logo>TEAMUP</Logo>
+        {NavBarList.map((item) => {
+          return <NavBarItem />;
         })}
-      </OptionsWrap>
-
-      <FleetStyle>
-        <UserBaseInfo />
-        {fleetList.data.map((item) => {
-          return <Fleet key={item.key} data={item} />;
+      </NavBar>
+      <List>
+        <User />
+        <Search />
+        <div style={{ height: "20px" }}></div>
+        {Fleet.map((item) => {
+          return <FleetItem fleet={[{ ...item }]} />;
         })}
-      </FleetStyle>
-      <ChatStyle>1</ChatStyle>
-    </AppWrap>
+      </List>
+      <Chat></Chat>
+      <Other></Other>
+    </Wrap>
   );
 };
 
