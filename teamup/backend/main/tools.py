@@ -1,22 +1,37 @@
+import time
+from django.core.mail import send_mail
+from backend import settings
+import jwt
 import random
+import re
 
-def randomNumber():
-    num_digits = random.randint(4, 6)
-    min_value = 10 ** (num_digits - 1)
-    max_value = (10 ** num_digits) - 1
-    return random.randint(min_value, max_value)
+def checkIsNotEmpty(data, *args):
+  if data is None or len(str(data)) <= 0:
+      return False
+  return True
+
+def getCurrentTimestamp():
+    current_timestamp = int(time.time())
+    return current_timestamp
+
+def encrypteToken(self,user):
+    payload = {
+        'username': user.username,
+        'admin': user.admin,
+        'premium': user.premium,
+        'create_time': getCurrentTimestamp(),
+        'expire_time':getCurrentTimestamp() + settings.JWT_EXPIRATION_DELTA
+    }
+    token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return token.decode('utf-8')
+
+def GenertorCode():
+    return ''.join(random.sample('0123456789', k=6))
 
 
-def userDeviceSystem(user_agent):
-    if 'Windows' in user_agent:
-        return 'Windows'
-    elif 'Macintosh' in user_agent:
-        return 'Mac'
-    elif 'Linux' in user_agent:
-        return 'Linux'
-    elif 'Android' in user_agent:
-        return 'Android'
-    elif 'iOS' in user_agent:
-        return 'iOS'
+def validateEmailFormat(email):
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.match(email_pattern, email):
+        return True
     else:
-        return 'Unknown'
+        return False

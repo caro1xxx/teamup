@@ -1,12 +1,10 @@
 from django.contrib import admin
-from django.conf.urls import url
-from django.urls import re_path, path
+from django.urls import path,re_path
+from main import views
 
-
-from main.views.User import Login, Register, ImpliedRegister
 
 urlpatterns = [
-    url(r'^api/login/$', Login.as_view()),
-    url(r'^api/register/$', Register.as_view()),
-    url(r'^api/impliedRegister/$', ImpliedRegister.as_view()),
+    # re_path('admin/', admin.site.urls),
+    path('api/v1/teamup/register/', views.register.as_view()),
+    re_path(r'^api/v1/teamup/sendcode/$', views.sendEmailCode.as_view()),
 ]

@@ -134,6 +134,7 @@ const Item = (props: ItemProps) => {
         {props.room.teammate.map((item, index) => {
           return (
             <PeopleItem
+              key={item.key}
               people={item}
               index={index}
               surplus={props.room.surplus}

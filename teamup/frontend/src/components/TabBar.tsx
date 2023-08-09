@@ -66,7 +66,7 @@ const TabBar = (props: Props) => {
     <Wrap>
       {barList.map((item) => {
         return (
-          <div className="item">
+          <div className="item" key={item.key}>
             <img
               src={item.image}
               className={item.select ? "select" : ""}
