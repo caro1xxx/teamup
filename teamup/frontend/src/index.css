@@ -1,6 +1,11 @@
 body {
   margin: 0;
-  background-color: #1A1A1D;
+  background-color: #1b1c1e;
   color: white;
-  font-size: 1.3vw;
+  font-size: 15px;
+  font-family: "Helvetica";
+}
+
+::-webkit-scrollbar{
+  display: none;
 }
