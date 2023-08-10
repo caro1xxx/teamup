@@ -28,6 +28,9 @@ def encrypteToken(self,user):
 def GenertorCode():
     return ''.join(random.sample('0123456789', k=6))
 
+def decodeToken(token):
+    return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)
+
 
 def validateEmailFormat(email):
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'

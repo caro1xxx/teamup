@@ -1,6 +1,11 @@
 import { nanoid } from "nanoid";
 import React from "react";
 import styled from "styled-components";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import {
+  changeRegisterPupup,
+  changeLoginPupup,
+} from "../redux/modules/userSlice";
 type Props = {};
 
 const Wrap = styled.div`
@@ -89,6 +94,18 @@ const OptionLis = [
 ];
 
 const NavBar = (props: Props) => {
+  const dispatch = useAppDispatch();
+  const username = useAppSelector((state) => state.user.username) as string;
+  const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
+
+  const openRegister = () => {
+    dispatch(changeRegisterPupup());
+  };
+
+  const openLogin = () => {
+    dispatch(changeLoginPupup());
+  };
+
   return (
     <Wrap>
       <Logo>
@@ -101,11 +118,60 @@ const NavBar = (props: Props) => {
         })}
       </Options>
       <User>
-        <div className="login">登录</div>
-        <div className="signup">注册</div>
+        {isLogin ? (
+          <UserInfo username={username} />
+        ) : (
+          <>
+            <div className="login" onClick={openLogin}>
+              登录
+            </div>
+            <div className="signup" onClick={openRegister}>
+              注册
+            </div>
+          </>
+        )}
       </User>
     </Wrap>
   );
 };
 
 export default NavBar;
+
+type UserProps = {
+  username: string;
+};
+
+const UserWrap = styled.div`
+  display: flex;
+  vertical-align: top;
+  justify-content: center;
+  align-items: center;
+  .avator {
+    margin-right: 10px;
+    height: 35px;
+    width: 35px;
+    border-radius: 25px;
+    background-color: green;
+    user-select: none;
+    cursor: pointer;
+    line-height: 35px;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 18px;
+  }
+  .username {
+    user-select: none;
+    cursor: pointer;
+    font-weight: lighter;
+    font-size: 18px;
+  }
+`;
+
+const UserInfo = (props: UserProps) => {
+  return (
+    <UserWrap>
+      <div className="avator">{props.username.charAt(0)}</div>
+      <div className="username">{props.username}</div>
+    </UserWrap>
+  );
+};

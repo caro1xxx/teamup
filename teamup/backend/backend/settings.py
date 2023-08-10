@@ -51,9 +51,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # jwt
-JWT_SECRET_KEY = 'hahahh'
+JWT_SECRET_KEY = 'teampjwtkey'
 JWT_ALGORITHM = 'HS256'
-JWT_EXPIRATION_DELTA = 3600
+JWT_EXPIRATION_DELTA = 259200
 
 # 数据库
 DATABASES = {

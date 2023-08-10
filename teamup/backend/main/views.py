@@ -3,8 +3,8 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User
 from backend import settings
-from main.contants import RegisterResponseCode, CommonErrorcode
-from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat
+from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCode
+from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
 from django.core.cache import cache
 import json
 
@@ -37,6 +37,7 @@ class register(APIView):
             cache.delete('code_' + UserData['email'])
             RegisterUser = User.objects.create(username = UserData['username'], password = UserData['password'], email = UserData['email'] ,create_time = getCurrentTimestamp())
             RegisterResponseCode.success['access_token'] = encrypteToken(self,RegisterUser)
+            RegisterResponseCode.success['create_time'] = RegisterUser.create_time
 
             return JsonResponse(RegisterResponseCode.success)
             
@@ -53,8 +54,8 @@ class sendEmailCode(APIView):
         try:
             email = request.GET.get('email', None)
 
-            if email is None:
-                return JsonResponse(CommonErrorcode.paramsError)
+            if email is None or email == '':
+                return JsonResponse(CommonErrorcode.emailError)
             if validateEmailFormat(email) is False:
                 return JsonResponse(CommonErrorcode.emailError)
             
@@ -66,4 +67,58 @@ class sendEmailCode(APIView):
             
         except Exception as e:
             # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+        
+
+class Login(APIView):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            token = request.GET.get('access_token', None)
+
+            if token is None or token == '':
+                return JsonResponse(CommonErrorcode.paramsError)
+            payload = decodeToken(token)
+            if payload['expire_time'] <= getCurrentTimestamp():
+                return JsonResponse(LoginResponseCode.tokenExpires)
+            
+            LoginResponseCode.tokenToInfoSuccess['username'] = payload['username']
+            LoginResponseCode.tokenToInfoSuccess['admin'] = payload['admin']
+            LoginResponseCode.tokenToInfoSuccess['premium'] = payload['premium']
+            LoginResponseCode.tokenToInfoSuccess['create_time'] = payload['create_time']
+            class UserInfo:
+                username = payload['username']
+                admin = payload['admin']
+                premium = payload['premium']
+            LoginResponseCode.tokenToInfoSuccess['access_token'] = encrypteToken(self,UserInfo)
+            return JsonResponse(LoginResponseCode.tokenToInfoSuccess)
+            
+        except Exception as e:
+            print(str(e))
+            return JsonResponse(CommonErrorcode.illegallyError)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            UserData = json.loads(request.body).get('data', None)
+            if UserData['username'] == '' or UserData['username'] is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+            UserFields = User.objects.filter(username = UserData['username']).first()
+            
+            if UserFields is None or UserFields.password != UserData['password']:
+                return JsonResponse(LoginResponseCode.usernameOrPasswordError)
+            
+            LoginResponseCode.loginSuccess['username'] = UserFields.username
+            LoginResponseCode.loginSuccess['admin'] =  UserFields.admin
+            LoginResponseCode.loginSuccess['premium'] =  UserFields.premium
+            LoginResponseCode.loginSuccess['create_time'] =  UserFields.create_time
+            class UserInfo:
+                username = UserFields.username
+                admin = UserFields.admin
+                premium = UserFields.premium
+            LoginResponseCode.loginSuccess['access_token'] = encrypteToken(self,UserInfo)
+            
+            return JsonResponse(LoginResponseCode.loginSuccess)
+
+        except Exception as e:
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

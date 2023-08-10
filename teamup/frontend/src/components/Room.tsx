@@ -5,7 +5,6 @@ import PeopleItem from "./PeopleItem";
 import ShareIcon from "../assets/images/share.png";
 import WarningIcon from "../assets/images/warning.png";
 import FavoriteIcon from "../assets/images/favorite.png";
-import AddIcon from "../assets/images/add.png";
 type Props = {};
 
 const Wrap = styled.div`
@@ -18,7 +17,7 @@ const Wrap = styled.div`
 `;
 
 const Room = (props: Props) => {
-  const [RoomList, setRoomList] = useState([
+  const [RoomList] = useState([
     {
       roomName: "bezos的车队",
       key: nanoid(),
