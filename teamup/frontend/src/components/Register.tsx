@@ -7,7 +7,7 @@ import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { changeRegisterPupup, saveUserInfo } from "../redux/modules/userSlice";
 import { UserInfo } from "../types/methodTypes";
-import { Validator } from "../utils/tools";
+import { Validator,stopEventPropagation } from "../utils/tools";
 import { batchSetStorage } from "../utils/localstorage";
 import md5 from "md5";
 
@@ -100,7 +100,7 @@ const Form = styled.div`
 const { Search } = Input;
 let timerFlag = 60;
 
-const AccountHandle = (props: Props) => {
+const Register = (props: Props) => {
   const [AccountInfo, setAccountInfo] = useState({
     username: "",
     password: "",
@@ -185,9 +185,16 @@ const AccountHandle = (props: Props) => {
     dispatch(changeRegisterPupup());
   };
 
+  const onKeyDownEnter = (event: any) => {
+    if (event.code !== "Enter") return;
+    createUser({ ...AccountInfo });
+  };
+
   return (
-    <Wrap>
+    <Wrap onClick={closeRegister}>
       <Body
+      onClick={(e) => stopEventPropagation(e)}
+        onKeyDown={onKeyDownEnter}
         style={{
           backgroundImage:
             'url("' + require("../assets/images/logback.png") + '")',
@@ -274,4 +281,4 @@ const AccountHandle = (props: Props) => {
   );
 };
 
-export default AccountHandle;
+export default Register;

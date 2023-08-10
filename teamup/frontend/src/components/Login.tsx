@@ -6,7 +6,7 @@ import { changeLoginPupup, saveUserInfo } from "../redux/modules/userSlice";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { Input, Button } from "antd";
 import { LoginUserInfo } from "../types/methodTypes";
-import { Validator } from "../utils/tools";
+import { Validator, stopEventPropagation } from "../utils/tools";
 import { fecther } from "../utils/fecther";
 import { batchSetStorage } from "../utils/localstorage";
 import md5 from "md5";
@@ -156,9 +156,16 @@ const Login = (props: Props) => {
     }
   };
 
+  const onKeyDownEnter = (event: any) => {
+    if (event.code !== "Enter") return;
+    login(userinfo);
+  };
+
   return (
-    <Wrap>
+    <Wrap onClick={closeLogin}>
       <Body
+        onClick={(e) => stopEventPropagation(e)}
+        onKeyDown={onKeyDownEnter}
         style={{
           backgroundImage:
             'url("' + require("../assets/images/logback.png") + '")',

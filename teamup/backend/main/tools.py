@@ -19,6 +19,7 @@ def encrypteToken(self,user):
         'username': user.username,
         'admin': user.admin,
         'premium': user.premium,
+        'email':user.email,
         'create_time': getCurrentTimestamp(),
         'expire_time':getCurrentTimestamp() + settings.JWT_EXPIRATION_DELTA
     }

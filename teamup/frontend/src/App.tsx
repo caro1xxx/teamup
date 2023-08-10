@@ -4,14 +4,19 @@ import NavBar from "./components/NavBar";
 import Introduce from "./components/Introduce";
 import TabBar from "./components/TabBar";
 import Room from "./components/Room";
-import { getStorage, setStorage } from "./utils/localstorage";
-import { saveUserInfo, loginExpiration } from "./redux/modules/userSlice";
-import AccountHandle from "./components/AccountHandle";
+import { getStorage, setStorage, clearStorage } from "./utils/localstorage";
+import {
+  saveUserInfo,
+  loginExpiration,
+  changeRegisterPupup,
+  saveDetailInfo,
+} from "./redux/modules/userSlice";
+import Register from "./components/Register";
 import Login from "./components/Login";
 
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 
-import { message } from "antd";
+import { message, ConfigProvider, theme } from "antd";
 import { fecther } from "./utils/fecther";
 type Props = {};
 
@@ -42,8 +47,20 @@ const App = (props: Props) => {
     let result = await fecther(`login/?access_token=${token}`, {}, "get");
     if (result.code !== 200) {
       dispatch(loginExpiration());
+    } else if (result.code === 409) {
+      clearStorage();
+      dispatch(changeRegisterPupup());
     } else {
       dispatch(saveUserInfo([result.username, result.access_token]));
+      dispatch(
+        saveDetailInfo([
+          result.username,
+          result.create_time,
+          result.email,
+          result.admin,
+          result.premium,
+        ])
+      );
       setStorage("access_token", result.access_token);
     }
   };
@@ -55,20 +72,26 @@ const App = (props: Props) => {
 
   useEffect(() => {
     if (!getStorage("access_token")) return;
-    getUserInfo(getStorage("access_token"));
-  }, [null]);
+    getUserInfo(getStorage("access_token")); // eslint-disable-next-line
+  }, []);
 
   return (
     <>
-      <Wrap>
-        <NavBar />
-        <Introduce />
-        <TabBar />
-        <Room />
-      </Wrap>
-
-      {isregisterPupup ? <AccountHandle /> : null}
-      {isLoginPupup ? <Login /> : null}
+      <ConfigProvider
+        theme={{
+          algorithm: theme.darkAlgorithm,
+        }}
+      >
+        {" "}
+        <Wrap>
+          <NavBar />
+          <Introduce />
+          <TabBar />
+          <Room />
+        </Wrap>
+        {isregisterPupup ? <Register /> : null}
+        {isLoginPupup ? <Login /> : null}
+      </ConfigProvider>
     </>
   );
 };

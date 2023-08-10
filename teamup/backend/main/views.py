@@ -85,11 +85,13 @@ class Login(APIView):
             LoginResponseCode.tokenToInfoSuccess['username'] = payload['username']
             LoginResponseCode.tokenToInfoSuccess['admin'] = payload['admin']
             LoginResponseCode.tokenToInfoSuccess['premium'] = payload['premium']
+            LoginResponseCode.tokenToInfoSuccess['email'] = payload['email']
             LoginResponseCode.tokenToInfoSuccess['create_time'] = payload['create_time']
             class UserInfo:
                 username = payload['username']
                 admin = payload['admin']
                 premium = payload['premium']
+                email = payload['email']
             LoginResponseCode.tokenToInfoSuccess['access_token'] = encrypteToken(self,UserInfo)
             return JsonResponse(LoginResponseCode.tokenToInfoSuccess)
             
@@ -110,11 +112,13 @@ class Login(APIView):
             LoginResponseCode.loginSuccess['username'] = UserFields.username
             LoginResponseCode.loginSuccess['admin'] =  UserFields.admin
             LoginResponseCode.loginSuccess['premium'] =  UserFields.premium
+            LoginResponseCode.loginSuccess['email'] =  UserFields.email
             LoginResponseCode.loginSuccess['create_time'] =  UserFields.create_time
             class UserInfo:
                 username = UserFields.username
                 admin = UserFields.admin
                 premium = UserFields.premium
+                email = UserFields.email
             LoginResponseCode.loginSuccess['access_token'] = encrypteToken(self,UserInfo)
             
             return JsonResponse(LoginResponseCode.loginSuccess)

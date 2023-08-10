@@ -13,7 +13,7 @@ class RegisterResponseCode:
 
 class LoginResponseCode:
     tokenToInfoSuccess = {'code':200,'message':'获取成功'}
-    tokenExpires = {'code':404,'message':'access_token过期'}
+    tokenExpires = {'code':409,'message':'access_token过期'}
     usernameOrPasswordError = {'code':404,'message':'用户名或密码错误'}
     loginSuccess = {'code':200,'message':'登录成功'}
 

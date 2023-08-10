@@ -1,11 +1,16 @@
 import { nanoid } from "nanoid";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { Popover, Segmented } from "antd";
+import UserIcon from "../assets/images/user.png";
+import Base from "./User/Base";
+import Info from "./User/Info";
 import {
   changeRegisterPupup,
   changeLoginPupup,
 } from "../redux/modules/userSlice";
+
 type Props = {};
 
 const Wrap = styled.div`
@@ -84,7 +89,6 @@ const User = styled.div`
     align-items: center;
   }
 `;
-
 const OptionLis = [
   { title: "首页", key: nanoid() },
   { title: "大厅", key: nanoid() },
@@ -169,9 +173,60 @@ const UserWrap = styled.div`
 
 const UserInfo = (props: UserProps) => {
   return (
-    <UserWrap>
-      <div className="avator">{props.username.charAt(0)}</div>
-      <div className="username">{props.username}</div>
-    </UserWrap>
+    <Popover
+      placement="bottom"
+      title={<AccountInfo />}
+      color={"#313131"}
+      content={<BottomContent />}
+      trigger="click"
+    >
+      <UserWrap>
+        <div className="avator">{props.username.charAt(0)}</div>
+        <div className="username">{props.username}</div>
+      </UserWrap>
+    </Popover>
+  );
+};
+
+const Account = styled.div`
+  color: white;
+  .top {
+    display: flex;
+    vertical-align: top;
+    align-items: center;
+
+    img {
+      margin-right: 10px;
+    }
+  }
+`;
+
+const AccountInfo = () => {
+  return (
+    <Account>
+      <div className="top">
+        <img src={UserIcon} alt="user" width={20} height={20} />
+        用户信息
+      </div>
+    </Account>
+  );
+};
+
+const BottomContent = () => {
+  const [currentBarValue, setCurrentBarValue] = useState<string | number>(
+    "基础"
+  );
+
+  const detailInfo = useAppSelector((state) => state.user.detailInfo);
+
+  return (
+    <Account>
+      <Segmented
+        options={["基础", "消息", "订单", "收藏", "设置"]}
+        value={currentBarValue}
+        onChange={setCurrentBarValue}
+      />
+      {currentBarValue === "基础" ? <Base detailInfo={detailInfo} /> : <Info />}
+    </Account>
   );
 };

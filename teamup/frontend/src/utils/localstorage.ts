@@ -21,3 +21,7 @@ export const batchSetStorage = (data: any): boolean => {
     return false;
   }
 };
+
+export const clearStorage = () => {
+  localStorage.clear();
+};

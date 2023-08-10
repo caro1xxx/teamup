@@ -68,3 +68,31 @@ export class Validator {
     }
   }
 }
+
+// 阻止事件传播
+export const stopEventPropagation = (e: any) => {
+  e.stopPropagation();
+  e.nativeEvent.stopImmediatePropagation();
+};
+
+export const parseStampTime = (stamp: number) => {
+  const D = new Date(stamp * 1000);
+  return `${D.getFullYear()}/${D.getMonth() + 1}/${D.getDate()} ${
+    D.getHours() < 10 ? "0" + D.getHours() : D.getHours()
+  }:${D.getMinutes() < 10 ? "0" + D.getMinutes() : D.getMinutes()}:${
+    D.getSeconds() < 10 ? "0" + D.getSeconds() : D.getSeconds()
+  }`;
+};
+
+export const calculateTimeDifference = (stamp: number) => {
+  const diffStamp = new Date().getTime() / 1000 - stamp;
+  const diffTime =
+    diffStamp > 60
+      ? diffStamp > 3600
+        ? diffStamp > 86400
+          ? parseInt(diffStamp / 86400 + "") + "天"
+          : parseInt(diffStamp / 3600 + "") + "小时"
+        : parseInt(diffStamp / 60 + "") + "分钟"
+      : diffStamp + "秒";
+  return diffTime;
+};
