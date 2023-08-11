@@ -1,15 +1,4 @@
-// export const checkComplete = (
-//   target: any,
-//   data: any,
-//   exclude?: string[]
-// ): boolean => {
-//   for (let i in target) {
-//     if (!data[i] && !exclude?.includes(i)) {
-//       return false;
-//     }
-//   }
-//   return true;
-// };
+import { nanoid } from "nanoid";
 
 // 策略
 const Strategies = {
@@ -95,4 +84,20 @@ export const calculateTimeDifference = (stamp: number) => {
         : parseInt(diffStamp / 60 + "") + "分钟"
       : diffStamp + "秒";
   return diffTime;
+};
+
+export const randomNumber = () => Math.floor(Math.random() * 5) + 6;
+
+export const generatorEmtryArray = (num: number) => {
+  if (num === 0) return [];
+  let arr = [];
+  for (let i = 0; i < num; i++) {
+    arr.push({ key: nanoid() });
+  }
+  return arr;
+};
+
+export const randomHexColor = () => {
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16); // 生成随机的 24 位颜色值
+  return `#${randomColor}`;
 };

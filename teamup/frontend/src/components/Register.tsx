@@ -7,7 +7,7 @@ import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { changeRegisterPupup, saveUserInfo } from "../redux/modules/userSlice";
 import { UserInfo } from "../types/methodTypes";
-import { Validator,stopEventPropagation } from "../utils/tools";
+import { Validator, stopEventPropagation } from "../utils/tools";
 import { batchSetStorage } from "../utils/localstorage";
 import md5 from "md5";
 
@@ -16,7 +16,7 @@ type Props = {};
 const Wrap = styled.div`
   position: fixed;
   background-color: #3a3a3a30;
-  z-index: 10;
+  z-index: 1000;
   top: 0;
   right: 0;
   left: 0;
@@ -193,7 +193,7 @@ const Register = (props: Props) => {
   return (
     <Wrap onClick={closeRegister}>
       <Body
-      onClick={(e) => stopEventPropagation(e)}
+        onClick={(e) => stopEventPropagation(e)}
         onKeyDown={onKeyDownEnter}
         style={{
           backgroundImage:

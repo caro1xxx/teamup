@@ -15,7 +15,7 @@ type Props = {};
 const Wrap = styled.div`
   position: fixed;
   background-color: #3a3a3a30;
-  z-index: 10;
+  z-index: 1000;
   top: 0;
   right: 0;
   left: 0;

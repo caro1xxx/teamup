@@ -8,9 +8,8 @@ from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, Gene
 from django.core.cache import cache
 import json
 
-from .task import send_async_email
 
-
+from main.task import send_async_email
 
 class register(APIView):
     def post(self, request, *args, **kwargs):
@@ -70,7 +69,7 @@ class sendEmailCode(APIView):
             return JsonResponse(CommonErrorcode.serverError)
         
 
-class Login(APIView):
+class login(APIView):
 
     def get(self, request, *args, **kwargs):
         try:

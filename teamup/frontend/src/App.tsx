@@ -4,6 +4,7 @@ import NavBar from "./components/NavBar";
 import Introduce from "./components/Introduce";
 import TabBar from "./components/TabBar";
 import Room from "./components/Room";
+import Category from "./components/Category";
 import { getStorage, setStorage, clearStorage } from "./utils/localstorage";
 import {
   saveUserInfo,
@@ -18,7 +19,11 @@ import { useAppSelector, useAppDispatch } from "./redux/hooks";
 
 import { message, ConfigProvider, theme } from "antd";
 import { fecther } from "./utils/fecther";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 type Props = {};
+
+const MemoizedRoom = React.memo(Room);
 
 const Wrap = styled.div`
   width: 1200px;
@@ -76,23 +81,32 @@ const App = (props: Props) => {
   }, []);
 
   return (
-    <>
+    <BrowserRouter>
       <ConfigProvider
         theme={{
           algorithm: theme.darkAlgorithm,
         }}
       >
-        {" "}
         <Wrap>
           <NavBar />
           <Introduce />
-          <TabBar />
-          <Room />
+          <Routes>
+            <Route path="/" element={<TabBar />} />
+            <Route path="/netflix" element={<TabBar />} />
+            <Route path="/disney" element={<TabBar />} />
+            <Route path="/hulu" element={<TabBar />} />
+            <Route path="/spotify" element={<TabBar />} />
+            <Route path="/nintendo" element={<TabBar />} />
+            <Route path="/youtube" element={<TabBar />} />
+            <Route path="/pornhub" element={<TabBar />} />
+          </Routes>
+          <Category />
+          <MemoizedRoom />
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}
       </ConfigProvider>
-    </>
+    </BrowserRouter>
   );
 };
 
