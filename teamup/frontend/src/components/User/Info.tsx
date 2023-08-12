@@ -75,7 +75,7 @@ const Wrap = styled.div`
 `;
 
 const Info = (props: Props) => {
-  const [message, setMessage] = useState([
+  const [message] = useState([
     {
       content: "https://react.dev/reference/react/useState",
       key: nanoid(),

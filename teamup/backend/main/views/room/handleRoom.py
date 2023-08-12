@@ -62,7 +62,28 @@ class Team(APIView):
     # get team all people
     def get(self, request, *args, **kwargs):
         try:
-            pass
+            room_pk = request.GET.get('pk', None)
+
+            if room_pk is None or room_pk == '':
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            try:
+                room = Room.objects.get(pk=room_pk)
+            except ObjectDoesNotExist:
+                return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            users_in_room = room.users.all()
+            user_join_list = [user.username for user in users_in_room]
+
+            RoomResponseCode.getSuccess['data'] = {
+                "room_id": room.id,
+                "room_name": room.name,
+                "users": user_join_list,
+                "max_quorum": room.type.max_quorum,
+                "surplus": room.type.max_quorum - room.take_seat_quorum,
+            }
+
+            return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:
             # print(str(e))
@@ -72,16 +93,16 @@ class Team(APIView):
     def post(self, request, *args, **kwargs):
         try:
             roomId = json.loads(request.body).get('room_id', None)
-            userId = json.loads(request.body).get('user_id', None)
+            username = json.loads(request.body).get('username', None)
 
             if roomId is None or roomId == '':
                 return JsonResponse(CommonErrorcode.paramsError)
-            if userId is None or userId == '':
+            if username is None or username == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
             try:
                 room = Room.objects.get(pk=roomId)
-                user = User.objects.get(pk=userId)
+                user = User.objects.get(username=username)
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
@@ -103,16 +124,16 @@ class Team(APIView):
     def delete(self, request, *args, **kwargs):
         try:
             roomId = json.loads(request.body).get('room_id', None)
-            userId = json.loads(request.body).get('user_id', None)
+            username = json.loads(request.body).get('username', None)
 
             if roomId is None or roomId == '':
                 return JsonResponse(CommonErrorcode.paramsError)
-            if userId is None or userId == '':
+            if username is None or username == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
             try:
                 room = Room.objects.get(pk=roomId)
-                user = User.objects.get(pk=userId)
+                user = User.objects.get(username=username)
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
@@ -124,5 +145,5 @@ class Team(APIView):
             return JsonResponse(RoomResponseCode.quitSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

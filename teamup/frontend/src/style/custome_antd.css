@@ -1,0 +1,19 @@
+.btn {
+  background-color: #05b665;
+  color: #fff;
+  border-color: #05b665;
+}
+.btn:hover {
+  background-color: #2a9263ac !important;
+  border-color: #2a9263ac !important;
+}
+
+.btn_error {
+  background-color: #ee5b5b;
+  color: #fff;
+  border-color: #ee5b5b;
+}
+.btn_error:hover {
+  background-color: #eb9696 !important;
+  border-color: #eb9696 !important;
+}

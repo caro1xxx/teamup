@@ -26,4 +26,4 @@ class RoomResponseCode:
     joinSuccess = {'code': 200, 'message': '加入车队成功'}
     joinError = {'code': 403, 'message': '加入车队失败'}
     roomOrUserNotFound = {'code': 404, 'message': '车队或用户不存在'}
-    quitSuccess = {'code': 200, 'message': '退出房间成功'}
+    quitSuccess = {'code': 200, 'message': '退出车队成功'}

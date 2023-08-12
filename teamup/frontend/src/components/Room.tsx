@@ -6,7 +6,7 @@ import { useAppDispatch } from "../redux/hooks";
 import ShareIcon from "../assets/images/share.png";
 import WarningIcon from "../assets/images/warning.png";
 import FavoriteIcon from "../assets/images/favorite.png";
-import { Skeleton } from "antd";
+import { Skeleton, Drawer } from "antd";
 import {
   randomNumber,
   generatorEmtryArray,
@@ -15,7 +15,9 @@ import {
 import { useLocation } from "react-router-dom";
 import { fecther } from "../utils/fecther";
 import { changeMessage } from "../redux/modules/notifySlice";
-type Props = {};
+import { RoomInfo } from "../types/paramsTypes";
+import { RoomItemProps } from "../types/componentsPropsTypes";
+import { ChatDrawerTitle, ChatDrawerTeam, ChatDrawerBody } from "./Chat";
 
 const Wrap = styled.div`
   margin-top: 20px;
@@ -28,7 +30,7 @@ const Wrap = styled.div`
 
 const loadingEmtryArray = generatorEmtryArray(randomNumber());
 
-const Room = (props: Props) => {
+const Room = () => {
   const [RoomList, setRoomList] = useState([
     {
       roomName: "",
@@ -38,20 +40,27 @@ const Room = (props: Props) => {
       teammate: [{ username: "", key: nanoid(), avatorColor: "pink" }],
       surplus: 0,
       description: "",
-      pk: "",
+      pk: 0,
     },
   ]);
   const location = useLocation();
   const dispatch = useAppDispatch();
-
   const [isLoading, setIsLoading] = useState(true);
+  const [userToRoomInfo, setUserToRoomInfo] = useState({
+    isDrawer: false,
+    roomName: "",
+    roomId: "",
+    pk: 0,
+    key: "",
+  });
 
   const getTypeOfRooms = async (type: string) => {
     let result = await fecther(`room/?type=${type.split("/")[1]}`, {}, "get");
     if (result.code !== 200) dispatch(changeMessage([result.message, false]));
     else {
+      setIsLoading(true);
       let roomList: any = [];
-      result.data.map((item: any, index: number) => {
+      result.data.forEach((item: any, index: number) => {
         roomList.push({
           pk: item.pk,
           roomName: item.name,
@@ -62,7 +71,7 @@ const Room = (props: Props) => {
           surplus: item.surplus,
           description: textPhase(item.description),
         });
-        item.users.map((item: any) => {
+        item.users.forEach((item: any) => {
           roomList[index].teammate.push({
             username: item,
             key: nanoid(),
@@ -79,12 +88,37 @@ const Room = (props: Props) => {
     return text.substring(0, 100) + "...";
   };
 
+  // 打开房间
+  const openRoom = (roomInfo: RoomInfo) => {
+    const data = { ...roomInfo, isDrawer: !userToRoomInfo.isDrawer };
+    setUserToRoomInfo(data);
+  };
+
+  // 关闭房间
+  const closeRoom = () =>
+    setUserToRoomInfo({ ...userToRoomInfo, isDrawer: false });
+
   useEffect(() => {
-    getTypeOfRooms(location.pathname);
+    getTypeOfRooms(location.pathname); // eslint-disable-next-line
   }, [location.pathname]);
 
   return (
     <Wrap>
+      <Drawer
+        title={
+          <ChatDrawerTitle
+            roomName={userToRoomInfo.roomName}
+            roomId={userToRoomInfo.roomId}
+          />
+        }
+        placement="right"
+        open={userToRoomInfo.isDrawer}
+        onClose={closeRoom}
+        width="500px"
+      >
+        <ChatDrawerTeam pk={userToRoomInfo.pk} />
+        <ChatDrawerBody />
+      </Drawer>
       {isLoading ? (
         <>
           {loadingEmtryArray?.map((item) => {
@@ -93,8 +127,8 @@ const Room = (props: Props) => {
         </>
       ) : (
         <>
-          {RoomList.map((item) => {
-            return <Item room={item} key={item.key} />;
+          {RoomList.map((item, index) => {
+            return <Item room={item} key={item.key} open={openRoom} />;
           })}
         </>
       )}
@@ -103,22 +137,6 @@ const Room = (props: Props) => {
 };
 
 export default Room;
-
-type ItemProps = {
-  room: {
-    roomName: string;
-    key: string;
-    roomId: string;
-    online: number;
-    teammate: {
-      username: string;
-      key: string;
-      avatorColor: string;
-    }[];
-    surplus: number;
-    description: string;
-  };
-};
 
 const ItemWrap = styled.div`
   cursor: pointer;
@@ -177,9 +195,18 @@ const ItemWrap = styled.div`
   }
 `;
 
-const Item = (props: ItemProps) => {
+const Item = (props: RoomItemProps) => {
   return (
-    <ItemWrap>
+    <ItemWrap
+      onClick={() =>
+        props.open({
+          roomName: props.room.roomName,
+          key: props.room.key,
+          roomId: props.room.roomId,
+          pk: props.room.pk,
+        })
+      }
+    >
       <div className="title">
         <div>{props.room.roomName}</div>
         <div className="roomid">#{props.room.roomId}</div>
