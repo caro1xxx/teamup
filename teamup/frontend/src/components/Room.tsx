@@ -121,9 +121,13 @@ const Room = () => {
         onClose={closeRoom}
         width="500px"
       >
-        <ChatDrawerTeam pk={userToRoomInfo.pk} />
+        <ChatDrawerTeam pk={userToRoomInfo.pk} key={userToRoomInfo.key} />
         <ChatHint />
-        <ChatDrawerBody pk={userToRoomInfo.pk} />
+        <ChatDrawerBody
+          key={nanoid()}
+          pk={userToRoomInfo.pk}
+          roomName={userToRoomInfo.roomName}
+        />
       </Drawer>
       {isLoading ? (
         <>

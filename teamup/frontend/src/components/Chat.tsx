@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import React, { useEffect, useState, useReducer, useRef } from "react";
 import styled from "styled-components";
 import FleetBackIcon from "../assets/images/fleet_back.png";
 import { fecther } from "../utils/fecther";
@@ -7,9 +7,9 @@ import {
   generatorEmtryArray,
   randomHexColor,
   parseStampTime,
-  addItem,
-  searchItemsByRoomId,
 } from "../utils/tools";
+import { setStorage, getStorage } from "../utils/localstorage";
+import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { Button } from "antd";
@@ -212,16 +212,20 @@ const messageReducer = (state, action) => {
   }
 };
 
-export const ChatDrawerBody = (props: { pk: number }) => {
+export const ChatDrawerBody = (props: { pk: number; roomName: string }) => {
   const [message, dispatchMessage] = useReducer(messageReducer, []);
   const username = useAppSelector((state) => state.user.username) as string;
   const access_token = useAppSelector(
     (state) => state.user.access_token
   ) as string;
+  const dbIdx = useRef(1);
 
+  // 接收消息处理程序 + 存入indexedb
   const receptionMessage = async (msg: any) => {
     const jsonMessage = JSON.parse(msg);
     if (jsonMessage.message === "连接成功") return;
+
+    // 构建
     const newItem = {
       user: jsonMessage.username,
       key: nanoid(),
@@ -234,7 +238,43 @@ export const ChatDrawerBody = (props: { pk: number }) => {
           ? 1
           : 2,
     };
+
+    // 判断对应存储空间和localstorage内是否标记
+    if (!getStorage(props.roomName)) {
+      setStorage(props.roomName, 1);
+      const newDBVersion = parseInt(getStorage("db_version")) + 3;
+      setStorage("db_version", newDBVersion);
+      const db = await createOrOpenDB(props.roomName, newDBVersion);
+    } else {
+      const db = await createOrOpenDB(
+        props.roomName,
+        parseInt(getStorage("db_version"))
+      );
+    }
+
     dispatchMessage({ type: "ADD_MESSAGE", payload: newItem });
+
+    // 不保存system发送的消息
+    if (jsonMessage.username === "system") return;
+    // 添加到数据库
+    addItem("teamup_chat_record_db", props.roomName, getStorage("db_version"), {
+      ...newItem,
+      id: dbIdx.current++,
+    });
+  };
+
+  const initMessageRecord = async () => {
+    if (getStorage(props.roomName)) {
+      let result = await getAllItems(
+        "teamup_chat_record_db",
+        props.roomName,
+        getStorage("db_version")
+      );
+      result.map((item) =>
+        dispatchMessage({ type: "ADD_MESSAGE", payload: item })
+      );
+      dbIdx.current = result[result.length - 1].id + 2;
+    }
   };
 
   useEffect(() => {
@@ -242,13 +282,14 @@ export const ChatDrawerBody = (props: { pk: number }) => {
       `ws://192.168.31.69/ws/room/${props.pk}/${access_token}/`
     );
     chatSocketRef.onopen = function () {
+      initMessageRecord();
       chatSocketRef.onmessage = (event) => receptionMessage(event.data);
     };
 
     return () => {
       chatSocketRef.close();
     };
-  }, [null]);
+  }, []);
 
   return (
     <div>

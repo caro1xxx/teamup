@@ -76,6 +76,7 @@ const App = (props: Props) => {
   }, [notifyAdditive, notifyflag, notifyMessage]);
 
   useEffect(() => {
+    if (!getStorage("db_version")) setStorage("db_version", 1);
     if (!getStorage("access_token")) return;
     getUserInfo(getStorage("access_token")); // eslint-disable-next-line
   }, []);
