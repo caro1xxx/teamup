@@ -6,7 +6,7 @@ from main.contants import CommonErrorcode, RoomResponseCode
 from main.tools import customizePaginator, getCurrentTimestamp, randomNum
 import json
 from django.core.exceptions import ObjectDoesNotExist
-import time
+from django.core.cache import cache
 
 
 class room(APIView):
@@ -47,14 +47,18 @@ class room(APIView):
         try:
             createDate = json.loads(request.body).get('data', None)
 
-            Room.objects.create(
+            roomFields = Room.objects.create(
                 name=createDate['name'], description=createDate['description'], create_time=getCurrentTimestamp(
                 ),
                 creator_id=createDate['create_user_id'], type_id=createDate['create_type_id'], take_seat_quorum=0, uuid=randomNum())
+
+            cache.set('room_' + str(roomFields.pk),
+                      json.dumps({}), 60 * 60 * 24)
+            print(1)
             return JsonResponse(RoomResponseCode.createdSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
 

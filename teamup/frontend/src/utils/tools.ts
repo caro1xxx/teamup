@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-
+import { openDB } from "idb";
 // 策略
 const Strategies = {
   isNonEmpty(value: string, errorMsg: string) {
@@ -101,3 +101,52 @@ export const randomHexColor = () => {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16); // 生成随机的 24 位颜色值
   return `#${randomColor}`;
 };
+
+const dbPromise = openDB("my-database", 1, {
+  upgrade(db) {
+    // 在数据库升级时创建对象存储空间
+    if (!db.objectStoreNames.contains("items")) {
+      db.createObjectStore("items", { keyPath: "id" });
+    }
+  },
+});
+
+export async function addItem(item: any) {
+  const db = await dbPromise;
+  const tx = db.transaction("items", "readwrite");
+  const store = tx.objectStore("items");
+  await store.put(item);
+}
+
+export async function getItem(itemId: number) {
+  const db = await dbPromise;
+  const tx = db.transaction("items", "readonly");
+  const store = tx.objectStore("items");
+  return await store.get(itemId);
+}
+
+export async function searchItemsByRoomId(roomId: number) {
+  const db = await dbPromise;
+  const tx = db.transaction("items", "readonly");
+  const store = tx.objectStore("items");
+  console.log(store);
+  // @ts-ignore
+  const items = [];
+
+  const cursorRequest = store.openCursor();
+  // @ts-ignore
+  cursorRequest.onsuccess = (event) => {
+    const cursor = event.target.result;
+    if (cursor) {
+      if (cursor.value.roomid === roomId) {
+        items.push(cursor.value);
+      }
+      cursor.continue();
+    }
+  };
+
+  // @ts-ignore
+  await tx.complete; // 等待事务完成
+  // @ts-ignore
+  return items;
+}

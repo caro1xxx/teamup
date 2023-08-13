@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useReducer } from "react";
 import styled from "styled-components";
 import FleetBackIcon from "../assets/images/fleet_back.png";
 import { fecther } from "../utils/fecther";
 import { nanoid } from "nanoid";
-import { generatorEmtryArray, randomHexColor } from "../utils/tools";
+import {
+  generatorEmtryArray,
+  randomHexColor,
+  parseStampTime,
+  addItem,
+  searchItemsByRoomId,
+} from "../utils/tools";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { Button } from "antd";
@@ -13,6 +19,7 @@ const RoomDrawerWrap = styled.div`
   display: flex;
   font-size: 20px;
   align-items: center;
+
   .id {
     color: #05b665;
     font-weight: lighter;
@@ -35,7 +42,6 @@ export const ChatDrawerTitle = (props: {
 
 const TeamWrap = styled.div`
   height: 50px;
-  border-radius: 5px;
   display: flex;
   .auditorium {
     height: 35px;
@@ -188,6 +194,140 @@ export const ChatDrawerTeam = (props: { pk: number }) => {
   );
 };
 
-export const ChatDrawerBody = () => {
-  return <div></div>;
+const HintWrap = styled.div`
+  margin: 20px 0px;
+`;
+
+export const ChatHint = () => {
+  return <HintWrap>请文明发言，遵守法律法规</HintWrap>;
+};
+
+// @ts-ignore
+const messageReducer = (state, action) => {
+  switch (action.type) {
+    case "ADD_MESSAGE":
+      return [...state, action.payload];
+    default:
+      return state;
+  }
+};
+
+export const ChatDrawerBody = (props: { pk: number }) => {
+  const [message, dispatchMessage] = useReducer(messageReducer, []);
+  const username = useAppSelector((state) => state.user.username) as string;
+  const access_token = useAppSelector(
+    (state) => state.user.access_token
+  ) as string;
+
+  const receptionMessage = async (msg: any) => {
+    const jsonMessage = JSON.parse(msg);
+    if (jsonMessage.message === "连接成功") return;
+    const newItem = {
+      user: jsonMessage.username,
+      key: nanoid(),
+      message: jsonMessage.message,
+      create_time: jsonMessage.create_time,
+      who:
+        jsonMessage.username === "system"
+          ? 0
+          : jsonMessage.username === username
+          ? 1
+          : 2,
+    };
+    dispatchMessage({ type: "ADD_MESSAGE", payload: newItem });
+  };
+
+  useEffect(() => {
+    const chatSocketRef = new WebSocket(
+      `ws://192.168.31.69/ws/room/${props.pk}/${access_token}/`
+    );
+    chatSocketRef.onopen = function () {
+      chatSocketRef.onmessage = (event) => receptionMessage(event.data);
+    };
+
+    return () => {
+      chatSocketRef.close();
+    };
+  }, [null]);
+
+  return (
+    <div>
+      {message.map((item: any) => {
+        return (
+          <MessageItem
+            key={item.key}
+            user={item.user}
+            message={item.message}
+            who={item.who}
+            create_time={item.create_time}
+          />
+        );
+      })}
+    </div>
+  );
+};
+
+const MsgItemWrap = styled.div<{ $who: number }>`
+  position: relative;
+  display: flex;
+  vertical-align: top;
+  justify-content: ${(props) =>
+    props.$who === 0 ? "center" : props.$who === 1 ? "end" : "start"};
+  align-items: center;
+  .system {
+    color: #636363;
+    font-size: 12px;
+    margin: 10px 0px;
+  }
+  .other {
+    margin: 20px 0px;
+    padding: 10px;
+    color: #000;
+    border-radius: 3px;
+    max-width: 300px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    background-color: #05b665;
+  }
+  .self {
+    margin: 20px 0px;
+    background-color: #fff;
+    padding: 10px;
+    color: #000;
+    border-radius: 3px;
+    max-width: 300px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  .time {
+    position: absolute;
+    right: ${(props) => (props.$who === 1 ? "0px" : "")};
+    left: ${(props) => (props.$who === 2 ? "0px" : "")};
+    bottom: 0px;
+    font-size: 10px;
+    color: white;
+    font-weight: lighter;
+  }
+`;
+
+const MessageItem = (props: {
+  user: string;
+  message: string;
+  who: number;
+  create_time: number;
+}) => {
+  return (
+    <MsgItemWrap $who={props.who}>
+      <div
+        className={
+          props.who === 0 ? "system" : props.who === 1 ? "self" : "other"
+        }
+      >
+        {props.message}
+        {props.who !== 0 ? (
+          <div className="time">{parseStampTime(props.create_time)}</div>
+        ) : null}
+      </div>
+    </MsgItemWrap>
+  );
 };

@@ -17,13 +17,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'rest_framework',
+    'channels',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  #跨域访问
+    'corsheaders.middleware.CorsMiddleware',  # 跨域访问
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -48,7 +49,20 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+ASGI_APPLICATION = 'backend.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 
 # jwt
 JWT_SECRET_KEY = 'teampjwtkey'
@@ -62,8 +76,8 @@ DATABASES = {
         'NAME': 'teamup',
         'USER': 'teamup',
         'PASSWORD': '4896qwer',
-        'HOST':'127.0.0.1',
-        'PORT':'3306',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -84,7 +98,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
 # 时区
 LANGUAGE_CODE = 'zh-hans'
 TIME_ZONE = 'Asia/Shanghai'
@@ -97,7 +110,6 @@ STATIC_URL = 'static/'
 
 # 大文件
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 
 # 邮件
@@ -121,11 +133,11 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 10000},
-            "DECODE_RESPONSES": True,			
-            "PASSWORD": "",		
-            'MAX_ENTRIES': 10000, 
+            "DECODE_RESPONSES": True,
+            "PASSWORD": "",
+            'MAX_ENTRIES': 10000,
             'CULL_FREQUENCY': 3,
-            'TIMEOUT': 7200, 	
+            'TIMEOUT': 7200,
         }
     }
 }

@@ -17,7 +17,12 @@ import { fecther } from "../utils/fecther";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { RoomInfo } from "../types/paramsTypes";
 import { RoomItemProps } from "../types/componentsPropsTypes";
-import { ChatDrawerTitle, ChatDrawerTeam, ChatDrawerBody } from "./Chat";
+import {
+  ChatDrawerTitle,
+  ChatDrawerTeam,
+  ChatDrawerBody,
+  ChatHint,
+} from "./Chat";
 
 const Wrap = styled.div`
   margin-top: 20px;
@@ -117,7 +122,8 @@ const Room = () => {
         width="500px"
       >
         <ChatDrawerTeam pk={userToRoomInfo.pk} />
-        <ChatDrawerBody />
+        <ChatHint />
+        <ChatDrawerBody pk={userToRoomInfo.pk} />
       </Drawer>
       {isLoading ? (
         <>
