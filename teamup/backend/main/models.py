@@ -16,6 +16,9 @@ class User(models.Model):
 
 class RoomType(models.Model):
     name = models.CharField(max_length=32, unique=True)
+    level = models.CharField(max_length=128, verbose_name='天数')
+    price = models.FloatField()
+    type = models.IntegerField(verbose_name='平台账号或者自备账号')
     max_quorum = models.IntegerField()
 
     def natural_key(self):

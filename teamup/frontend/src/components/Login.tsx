@@ -150,16 +150,17 @@ const Login = (props: Props) => {
             result.avator_color,
           ])
         );
-        setUserInfo({ ...userinfo, isLoading: true });
-        closeLogin();
-        dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));
-        setUserInfo({ ...userinfo, isLoading: true });
+        window.location.reload();
+        // setUserInfo({ ...userinfo, isLoading: true });
+        // closeLogin();
+        // dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));
+        // setUserInfo({ ...userinfo, isLoading: true });
         return;
       }
-      dispatch(changeMessage([result.message, false]));
-      setTimeout(() => {
-        setUserInfo({ ...userinfo, isLoading: false });
-      }, 500);
+      // dispatch(changeMessage([result.message, false]));
+      // setTimeout(() => {
+      //   setUserInfo({ ...userinfo, isLoading: false });
+      // }, 500);
     }
   };
 

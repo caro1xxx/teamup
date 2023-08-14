@@ -65,6 +65,10 @@ const Room = () => {
     },
   ]);
   const [TeamInfo, setTeamInfo] = React.useState<TeamInfoProps>({
+    level: "",
+    type: 1,
+    price: 99,
+    isHomeowner: false,
     max_quorum: 0,
     surplus: 0,
     surplusEmtryArray: [{ key: "" }],
@@ -120,12 +124,20 @@ const Room = () => {
     let result = await fecther(`team/?pk=${pk}`, {}, "get");
     if (result.code !== 200) return;
     let oldValue: TeamInfoProps = {
+      level: "",
+      type: 1,
+      price: 99,
+      isHomeowner: false,
       max_quorum: 0,
       surplus: 0,
       surplusEmtryArray: [{ key: "" }],
       join_users: [{ key: "", name: "", avatorColor: "" }],
       isJoin: false,
     };
+    oldValue.isHomeowner = result.data.homeowner === username ? true : false;
+    oldValue.level = result.data.level;
+    oldValue.type = result.data.type;
+    oldValue.price = result.data.price;
     oldValue.max_quorum = result.data.max_quorum;
     oldValue.surplus = result.data.surplus;
     oldValue.surplusEmtryArray = generatorEmtryArray(result.data.surplus);
@@ -160,13 +172,17 @@ const Room = () => {
 
   // join team
   const joinTeam = async () => {
-    if (!checkIslogin) {
+    if (!checkIslogin()) {
       dispatch(changeMessage([`请先登录或注册`, false]));
+      return;
+    }
+    if (TeamInfo.isHomeowner) {
+      dispatch(changeMessage([`队长禁止退出车队`, false]));
       return;
     }
     let result = await fecther(
       "team/",
-      { room_id: userToRoomInfo.pk, username },
+      { room_id: userToRoomInfo.pk, username: username },
       TeamInfo.isJoin ? "delete" : "post"
     );
     if (result.code === 200) {
@@ -307,6 +323,7 @@ const Room = () => {
 
   // ws
   useEffect(() => {
+    if (!checkIslogin()) return;
     if (websocketRef.current === null && userToRoomInfo.pk !== 0) {
       connectRoom();
     }
@@ -332,8 +349,12 @@ const Room = () => {
       >
         <ChatDrawerTeam data={TeamInfo} join={joinTeam} />
         <ChatHint />
-        <ChatDrawerBody message={message} />
-        <ChatMessageInput send={sendMessage} />
+        <ChatDrawerBody message={message} isLogin={isLogin} />
+        <ChatMessageInput
+          pk={userToRoomInfo.pk}
+          send={sendMessage}
+          isLogin={isLogin}
+        />
       </Drawer>
       {isLoading ? (
         <>

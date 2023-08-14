@@ -103,7 +103,7 @@ export const MsgItemWrap = styled.div<{ $who: number }>`
 export const InputWrap = styled.div`
   position: absolute;
   bottom: 0px;
-  height: 50px;
+  height: 90px;
   width: 450px;
   .cutomer .ant-input-search-button {
     background-color: #05b665;
@@ -125,5 +125,81 @@ export const InputWrap = styled.div`
   .ant-input-focused {
     border-color: #2a9263ac;
     box-shadow: none;
+  }
+`;
+
+export const PleaseWrap = styled.div`
+  height: calc(100vh - 350px - 50px);
+  width: 100%;
+  position: relative;
+
+  .mask {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    background-color: #1f1f1f9f;
+    backdrop-filter: blur(2px);
+    border-radius: 5px;
+    display: inline-flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    span {
+      cursor: pointer;
+      color: #05b665;
+      font-weight: bolder;
+    }
+  }
+
+  .fake {
+    display: flex;
+    div {
+      background-color: #05b665;
+      max-width: 300px;
+      padding: 10px 5px;
+      border-radius: 3px;
+      margin: 10px 0px;
+    }
+  }
+`;
+
+export const TeamTypeWrap = styled.div`
+  cursor: pointer;
+  user-select: none;
+  div {
+    display: flex;
+    vertical-align: top;
+    justify-content: start;
+    align-items: center;
+    margin: 10px 0px;
+  }
+  .hint {
+    width: 100%;
+    text-align: end;
+    font-size: 10px;
+  }
+`;
+
+export const InputOptionsWrap = styled.div`
+  margin: 10px 0px 5px 0px;
+  height: 30px;
+  display: flex;
+
+  .options_back {
+    padding: 0px 5px;
+
+    cursor: pointer;
+    display: inline-flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #0f0f10;
+  }
+  .options_back:hover {
+    background-color: #525252;
   }
 `;

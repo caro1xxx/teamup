@@ -81,16 +81,20 @@ class Team(APIView):
 
             RoomResponseCode.getSuccess['data'] = {
                 "room_id": room.id,
+                "homeowner": room.creator.username,
                 "room_name": room.name,
                 "users": user_join_list,
                 "max_quorum": room.type.max_quorum,
+                "price": room.type.price,
+                "level": room.type.level,
+                "type": room.type.type,
                 "surplus": room.type.max_quorum - room.take_seat_quorum,
             }
 
             return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # join team
@@ -150,4 +154,29 @@ class Team(APIView):
 
         except Exception as e:
             # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+
+class Handler(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            room_pk = request.GET.get('room_pk', None)
+
+            if room_pk == '' or room_pk is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            try:
+                room = Room.objects.get(pk=room_pk)
+            except ObjectDoesNotExist:
+                return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            users_in_room = room.users.all()
+            user_join_list = [user.username for user in users_in_room]
+
+            print(user_join_list)
+            RoomResponseCode.getSuccess['data'] = user_join_list
+            return JsonResponse(RoomResponseCode.getSuccess)
+
+        except Exception as e:
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

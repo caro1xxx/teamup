@@ -17,6 +17,10 @@ export type RoomItemProps = {
 };
 
 export type TeamInfoProps = {
+  type: number;
+  level: string;
+  price: number;
+  isHomeowner: boolean;
   max_quorum: number;
   surplus: number;
   surplusEmtryArray: { key: string }[];
