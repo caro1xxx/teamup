@@ -1,42 +1,58 @@
-import { nanoid } from "nanoid";
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import React, { useEffect } from "react";
+import { Wrap, ItemWrap } from "../style/room";
 import PeopleItem from "./PeopleItem";
-import { useAppDispatch } from "../redux/hooks";
+import ChatDrawerTitle from "./Chat/ChatDrawerTitle";
+import ChatDrawerTeam from "./Chat/ChatDrawerTeam";
+import ChatHint from "./Chat/ChatHint";
+import ChatDrawerBody from "./Chat/ChatDrawerBody";
+import ChatMessageInput from "./Chat/ChatMessageInput";
+
+// assets
 import ShareIcon from "../assets/images/share.png";
 import WarningIcon from "../assets/images/warning.png";
 import FavoriteIcon from "../assets/images/favorite.png";
-import { Skeleton, Drawer } from "antd";
-import {
-  randomNumber,
-  generatorEmtryArray,
-  randomHexColor,
-} from "../utils/tools";
+
+// tools
+import { nanoid } from "nanoid";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { useLocation } from "react-router-dom";
 import { fecther } from "../utils/fecther";
 import { changeMessage } from "../redux/modules/notifySlice";
-import { RoomInfo } from "../types/paramsTypes";
-import { RoomItemProps } from "../types/componentsPropsTypes";
 import {
-  ChatDrawerTitle,
-  ChatDrawerTeam,
-  ChatDrawerBody,
-  ChatHint,
-} from "./Chat";
+  randomNumber,
+  generatorEmtryArray,
+  textPhase,
+  checkVaildate,
+} from "../utils/tools";
+import { Skeleton, Drawer } from "antd";
+import { getStorage, setStorage } from "../utils/localstorage";
+import { messageReducer } from "../utils/reducers";
+import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 
-const Wrap = styled.div`
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-column-gap: 20px;
-  grid-row-gap: 20px;
-`;
+// types
+import { RoomInfo } from "../types/paramsTypes";
+import {
+  RoomItemProps,
+  TeamInfoProps,
+  UserToRoomInfoProps,
+} from "../types/componentsPropsTypes";
 
 const loadingEmtryArray = generatorEmtryArray(randomNumber());
 
 const Room = () => {
-  const [RoomList, setRoomList] = useState([
+  /*tools */
+  const dispatch = useAppDispatch();
+  const location = useLocation();
+  const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
+  const username = useAppSelector((state) => state.user.username) as string;
+  const msg = useAppSelector((state) => state.chat.message) as string;
+  const flag = useAppSelector((state) => state.chat.flag) as number;
+  const access_token = useAppSelector(
+    (state) => state.user.access_token
+  ) as string;
+
+  /*state */
+  const [RoomList, setRoomList] = React.useState([
     {
       roomName: "",
       key: nanoid(),
@@ -48,17 +64,27 @@ const Room = () => {
       pk: 0,
     },
   ]);
-  const location = useLocation();
-  const dispatch = useAppDispatch();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userToRoomInfo, setUserToRoomInfo] = useState({
-    isDrawer: false,
-    roomName: "",
-    roomId: "",
-    pk: 0,
-    key: "",
+  const [TeamInfo, setTeamInfo] = React.useState<TeamInfoProps>({
+    max_quorum: 0,
+    surplus: 0,
+    surplusEmtryArray: [{ key: "" }],
+    join_users: [{ key: "", name: "", avatorColor: "" }],
+    isJoin: false,
   });
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [userToRoomInfo, setUserToRoomInfo] =
+    React.useState<UserToRoomInfoProps>({
+      isDrawer: false,
+      roomName: "",
+      roomId: "",
+      pk: 0,
+      key: "",
+    });
+  const [message, dispatchMessage] = React.useReducer(messageReducer, []);
+  const websocketRef = React.useRef<WebSocket | null>(null);
+  const dbIdx = React.useRef(1);
 
+  /*request */
   const getTypeOfRooms = async (type: string) => {
     let result = await fecther(`room/?type=${type.split("/")[1]}`, {}, "get");
     if (result.code !== 200) dispatch(changeMessage([result.message, false]));
@@ -78,9 +104,9 @@ const Room = () => {
         });
         item.users.forEach((item: any) => {
           roomList[index].teammate.push({
-            username: item,
+            username: item.user,
             key: nanoid(),
-            avatorColor: randomHexColor(),
+            avatorColor: item.avator_color,
           });
         });
       });
@@ -89,45 +115,225 @@ const Room = () => {
     }
   };
 
-  const textPhase = (text: string) => {
-    return text.substring(0, 100) + "...";
+  // 获取车队信息
+  const getTeamInfo = async (pk: number) => {
+    let result = await fecther(`team/?pk=${pk}`, {}, "get");
+    if (result.code !== 200) return;
+    let oldValue: TeamInfoProps = {
+      max_quorum: 0,
+      surplus: 0,
+      surplusEmtryArray: [{ key: "" }],
+      join_users: [{ key: "", name: "", avatorColor: "" }],
+      isJoin: false,
+    };
+    oldValue.max_quorum = result.data.max_quorum;
+    oldValue.surplus = result.data.surplus;
+    oldValue.surplusEmtryArray = generatorEmtryArray(result.data.surplus);
+    oldValue.join_users = [];
+    result.data.users.forEach((item: any) => {
+      oldValue.join_users.push({
+        key: nanoid(),
+        name: item.username,
+        avatorColor: item.avator_color,
+      });
+      if (item.username === username) oldValue.isJoin = true;
+    });
+    setTeamInfo(oldValue);
   };
 
+  /**methods */
   // 打开房间
   const openRoom = (roomInfo: RoomInfo) => {
-    const data = { ...roomInfo, isDrawer: !userToRoomInfo.isDrawer };
+    const data = { ...roomInfo, isDrawer: true };
+    getTeamInfo(roomInfo.pk);
     setUserToRoomInfo(data);
   };
 
   // 关闭房间
-  const closeRoom = () =>
-    setUserToRoomInfo({ ...userToRoomInfo, isDrawer: false });
+  const closeRoom = () => {
+    if (websocketRef.current !== null) {
+      websocketRef.current.close();
+      websocketRef.current = null;
+    }
+    setUserToRoomInfo({ ...userToRoomInfo!, isDrawer: false });
+  };
 
+  // join team
+  const joinTeam = async () => {
+    if (!checkIslogin) {
+      dispatch(changeMessage([`请先登录或注册`, false]));
+      return;
+    }
+    let result = await fecther(
+      "team/",
+      { room_id: userToRoomInfo.pk, username },
+      TeamInfo.isJoin ? "delete" : "post"
+    );
+    if (result.code === 200) {
+      let oldValue = { ...TeamInfo };
+      if (oldValue.isJoin) {
+        for (let i = 0; i < oldValue.join_users.length; i++) {
+          if (oldValue.join_users[i].name === username) {
+            oldValue.join_users.splice(i, 1);
+            break;
+          }
+        }
+        TeamInfo.surplusEmtryArray.push({ key: nanoid() });
+        oldValue.surplus = oldValue.surplus - 1;
+      } else {
+        oldValue.surplus = oldValue.surplus + 1;
+        TeamInfo.surplusEmtryArray.shift();
+        oldValue.join_users.push({
+          key: nanoid(),
+          name: username,
+          avatorColor: getStorage("avator_color"),
+        });
+      }
+      setTeamInfo({ ...oldValue, isJoin: TeamInfo.isJoin ? false : true });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+  };
+
+  const checkIslogin = () => {
+    if (!isLogin) return false;
+    return true;
+  };
+
+  // 读取历史消息
+  const initMessageRecord = React.useCallback(async () => {
+    if (getStorage(userToRoomInfo.roomId)) {
+      let result = await getAllItems(
+        "teamup_chat_record_db",
+        userToRoomInfo.roomId,
+        getStorage("db_version")
+      );
+      result.map((item) => dispatchMessage({ type: "push", payload: item }));
+      if (result.length === 0) return;
+      dbIdx.current = result[result.length - 1].id + 4;
+      dispatchMessage({
+        type: "ADD_MESSAGE",
+        payload: {
+          create_time: new Date().getTime() / 1000,
+          id: dbIdx.current - 2,
+          key: nanoid(),
+          message: "以上为历史消息",
+          user: "system",
+          who: 0,
+        },
+      });
+      // moveChatBottom();
+    }
+  }, [userToRoomInfo.pk]);
+
+  // 接收消息处理程序 + 存入indexedb
+  const receptionMessage = async (msg: any) => {
+    const jsonMessage = JSON.parse(msg);
+    if (jsonMessage.message === "连接成功") return;
+
+    // 构建
+    const newItem = {
+      user: jsonMessage.username,
+      key: nanoid(),
+      message: jsonMessage.message,
+      create_time: jsonMessage.create_time,
+      who:
+        jsonMessage.username === "system"
+          ? 0
+          : jsonMessage.username === username
+          ? 1
+          : 2,
+    };
+    // 判断对应存储空间和localstorage内是否标记
+    if (!getStorage(userToRoomInfo.roomId)) {
+      setStorage(userToRoomInfo.roomId, 1);
+      const newDBVersion = parseInt(getStorage("db_version")) + 3;
+      setStorage("db_version", newDBVersion);
+      await createOrOpenDB(userToRoomInfo.roomId, newDBVersion);
+    } else {
+      await createOrOpenDB(
+        userToRoomInfo.roomId,
+        parseInt(getStorage("db_version"))
+      );
+    }
+
+    dispatchMessage({ type: "push", payload: newItem });
+
+    // 不保存system发送的消息
+    if (jsonMessage.username === "system") return;
+    // 添加到数据库
+    addItem(
+      "teamup_chat_record_db",
+      userToRoomInfo.roomId,
+      getStorage("db_version"),
+      {
+        ...newItem,
+        id: dbIdx.current++,
+      }
+    );
+    // moveChatBottom();
+  };
+
+  const connectRoom = React.useCallback(() => {
+    if (!websocketRef.current) {
+      dispatchMessage({ type: "clear" });
+      websocketRef.current = new WebSocket(
+        `ws://192.168.31.69/ws/room/${userToRoomInfo.pk}/${access_token}/`
+      );
+      websocketRef.current.onopen = function () {
+        initMessageRecord();
+        if (!websocketRef.current) return;
+        websocketRef.current.onmessage = (event) => {
+          receptionMessage(event.data);
+        };
+      };
+    }
+  }, [userToRoomInfo.pk]);
+
+  const sendMessage = (value: string) => {
+    if (!checkVaildate(value)) {
+      dispatch(changeMessage([`请有效字符`, false]));
+      return;
+    }
+    if (!websocketRef.current) return;
+    websocketRef.current.send(JSON.stringify({ message: value, username }));
+  };
+
+  // listen router
   useEffect(() => {
     getTypeOfRooms(location.pathname); // eslint-disable-next-line
   }, [location.pathname]);
 
+  // ws
+  useEffect(() => {
+    if (websocketRef.current === null && userToRoomInfo.pk !== 0) {
+      connectRoom();
+    }
+    return () => {};
+  }, [userToRoomInfo.pk]);
+
   return (
     <Wrap>
       <Drawer
+        style={{ position: "relative" }}
         title={
-          <ChatDrawerTitle
-            roomName={userToRoomInfo.roomName}
-            roomId={userToRoomInfo.roomId}
-          />
+          userToRoomInfo && (
+            <ChatDrawerTitle
+              roomName={userToRoomInfo.roomName}
+              roomId={userToRoomInfo.roomId}
+            />
+          )
         }
         placement="right"
-        open={userToRoomInfo.isDrawer}
+        open={userToRoomInfo && userToRoomInfo.isDrawer}
         onClose={closeRoom}
         width="500px"
       >
-        <ChatDrawerTeam pk={userToRoomInfo.pk} key={userToRoomInfo.key} />
+        <ChatDrawerTeam data={TeamInfo} join={joinTeam} />
         <ChatHint />
-        <ChatDrawerBody
-          key={nanoid()}
-          pk={userToRoomInfo.pk}
-          roomName={userToRoomInfo.roomName}
-        />
+        <ChatDrawerBody message={message} />
+        <ChatMessageInput send={sendMessage} />
       </Drawer>
       {isLoading ? (
         <>
@@ -147,63 +353,6 @@ const Room = () => {
 };
 
 export default Room;
-
-const ItemWrap = styled.div`
-  cursor: pointer;
-  user-select: none;
-  background-color: #232323;
-  border-radius: 5px;
-  position: relative;
-  height: 320px;
-  .options {
-    position: absolute;
-    bottom: 30px;
-    left: 30px;
-    display: flex;
-    img {
-      width: 15px;
-      height: 15px;
-      margin-right: 10px;
-    }
-    div {
-      font-size: 12px;
-      flex: 1;
-      color: #d5d5d5;
-    }
-  }
-  .title {
-    font-size: 15px;
-    margin: 40px 30px 10px 30px;
-    font-weight: bolder;
-    display: flex;
-    .roomid {
-      color: #05b665;
-      font-weight: lighter;
-      font-size: 10px;
-      flex: 1;
-      display: inline-flex;
-      justify-content: end;
-      align-items: center;
-    }
-  }
-  .description {
-    height: 120px;
-    font-size: 12px;
-    line-height: 20px;
-    margin: 20px 30px;
-    font-weight: lighter;
-    text-indent: 2em;
-    color: #d5d5d5d1;
-  }
-  .people_list {
-    display: flex;
-    margin: 0px 30px;
-    position: relative;
-    .loading_avator {
-      margin-right: 10px;
-    }
-  }
-`;
 
 const Item = (props: RoomItemProps) => {
   return (

@@ -15,3 +15,19 @@ export type RoomItemProps = {
   };
   open: (roomInfo: RoomInfo) => void;
 };
+
+export type TeamInfoProps = {
+  max_quorum: number;
+  surplus: number;
+  surplusEmtryArray: { key: string }[];
+  join_users: { key: string; name: string; avatorColor: string }[];
+  isJoin: boolean;
+};
+
+export type UserToRoomInfoProps = {
+  isDrawer: boolean;
+  roomName: string;
+  roomId: string;
+  pk: number;
+  key: string;
+};

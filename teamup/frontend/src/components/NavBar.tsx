@@ -101,6 +101,12 @@ const NavBar = (props: Props) => {
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.user.username) as string;
   const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
+  const avator_color = useAppSelector(
+    (state) => state.user.avator_color
+  ) as string;
+  const avator_color_backup = useAppSelector(
+    (state) => state.user.detailInfo.avator_color
+  ) as string;
 
   const openRegister = () => {
     dispatch(changeRegisterPupup());
@@ -123,7 +129,12 @@ const NavBar = (props: Props) => {
       </Options>
       <User>
         {isLogin ? (
-          <UserInfo username={username} />
+          <UserInfo
+            username={username}
+            avator_color={
+              avator_color === "green" ? avator_color_backup : avator_color
+            }
+          />
         ) : (
           <>
             <div className="login" onClick={openLogin}>
@@ -143,6 +154,7 @@ export default NavBar;
 
 type UserProps = {
   username: string;
+  avator_color: string;
 };
 
 const UserWrap = styled.div`
@@ -155,7 +167,7 @@ const UserWrap = styled.div`
     height: 35px;
     width: 35px;
     border-radius: 25px;
-    background-color: green;
+    /* background-color: green; */
     user-select: none;
     cursor: pointer;
     line-height: 35px;
@@ -181,7 +193,9 @@ const UserInfo = (props: UserProps) => {
       trigger="click"
     >
       <UserWrap>
-        <div className="avator">{props.username.charAt(0)}</div>
+        <div className="avator" style={{ backgroundColor: props.avator_color }}>
+          {props.username.charAt(0)}
+        </div>
         <div className="username">{props.username}</div>
       </UserWrap>
     </Popover>

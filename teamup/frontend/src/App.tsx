@@ -5,7 +5,12 @@ import Introduce from "./components/Introduce";
 import TabBar from "./components/TabBar";
 import Room from "./components/Room";
 import Category from "./components/Category";
-import { getStorage, setStorage, clearStorage } from "./utils/localstorage";
+import {
+  getStorage,
+  setStorage,
+  clearStorage,
+  batchSetStorage,
+} from "./utils/localstorage";
 import {
   saveUserInfo,
   loginExpiration,
@@ -48,7 +53,7 @@ const App = (props: Props) => {
   ) as boolean;
 
   const getUserInfo = async (token: string) => {
-    dispatch(saveUserInfo(["", ""]));
+    dispatch(saveUserInfo(["", "", ""]));
     let result = await fecther(`login/?access_token=${token}`, {}, "get");
     if (result.code !== 200) {
       dispatch(loginExpiration());
@@ -56,7 +61,13 @@ const App = (props: Props) => {
       clearStorage();
       dispatch(changeRegisterPupup());
     } else {
-      dispatch(saveUserInfo([result.username, result.access_token]));
+      dispatch(
+        saveUserInfo([
+          result.username,
+          result.access_token,
+          result.avator_color,
+        ])
+      );
       dispatch(
         saveDetailInfo([
           result.username,
@@ -64,9 +75,13 @@ const App = (props: Props) => {
           result.email,
           result.admin,
           result.premium,
+          result.avator_color,
         ])
       );
-      setStorage("access_token", result.access_token);
+      batchSetStorage({
+        access_token: result.access_token,
+        avator_color: result.avator_color,
+      });
     }
   };
 

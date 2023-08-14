@@ -141,8 +141,15 @@ const Login = (props: Props) => {
       if (result.code === 200) {
         batchSetStorage({
           access_token: result.access_token,
+          avator_color: result.avator_color,
         });
-        dispatch(saveUserInfo([userInfo.username, result.access_token]));
+        dispatch(
+          saveUserInfo([
+            userInfo.username,
+            result.access_token,
+            result.avator_color,
+          ])
+        );
         setUserInfo({ ...userinfo, isLoading: true });
         closeLogin();
         dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));

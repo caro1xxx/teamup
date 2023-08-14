@@ -26,6 +26,7 @@ def encrypteToken(self, user):
         'admin': user.admin,
         'premium': user.premium,
         'email': user.email,
+        'avator_color': user.avator_color,
         'create_time': getCurrentTimestamp(),
         'expire_time': getCurrentTimestamp() + settings.JWT_EXPIRATION_DELTA
     }

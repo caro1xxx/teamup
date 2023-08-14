@@ -3,6 +3,7 @@ export type RoomInfo = {
   roomId: string;
   key: string;
   pk: number;
+  isDrawer: boolean;
 };
 
 export type TeamInfo = {

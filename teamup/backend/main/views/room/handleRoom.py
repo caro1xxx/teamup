@@ -33,7 +33,7 @@ class room(APIView):
                                         "type": room.type.name,
                                         "take_seat_quorum": room.take_seat_quorum,
                                         "surplus": room.type.max_quorum - room.take_seat_quorum,
-                                        "users": [user.username for user in users_in_room], })
+                                        "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], })
 
             RoomResponseCode.getSuccess['data'] = roomAndRoomUser
             return JsonResponse(RoomResponseCode.getSuccess)
@@ -53,12 +53,11 @@ class room(APIView):
                 creator_id=createDate['create_user_id'], type_id=createDate['create_type_id'], take_seat_quorum=0, uuid=randomNum())
 
             cache.set('room_' + str(roomFields.pk),
-                      json.dumps({}), 60 * 60 * 24)
-            print(1)
+                      json.dumps({}), 60 * 60 * 24 * 3)
             return JsonResponse(RoomResponseCode.createdSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
 
@@ -77,7 +76,8 @@ class Team(APIView):
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
             users_in_room = room.users.all()
-            user_join_list = [user.username for user in users_in_room]
+            user_join_list = [{"username": user.username,
+                               "avator_color": user.avator_color} for user in users_in_room]
 
             RoomResponseCode.getSuccess['data'] = {
                 "room_id": room.id,
@@ -149,5 +149,5 @@ class Team(APIView):
             return JsonResponse(RoomResponseCode.quitSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

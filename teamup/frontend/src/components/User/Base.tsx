@@ -5,6 +5,7 @@ import VipIcon from "../../assets/images/vip.png";
 import { parseStampTime } from "../../utils/tools";
 import { clearStorage } from "../../utils/localstorage";
 import { Divider, Button } from "antd";
+import { deleteDB } from "../../utils/chatDB";
 
 type Props = {
   detailInfo: {
@@ -35,6 +36,7 @@ const Content = styled.div`
 
 const logOut = () => {
   clearStorage();
+  deleteDB();
   window.location.reload();
 };
 

@@ -4,6 +4,7 @@ import type { RootState } from "../store";
 interface userState {
   username: string;
   isLogin: boolean;
+  avator_color: string;
   access_token: string;
   registerPupup: boolean;
   loginPupup: boolean;
@@ -13,6 +14,7 @@ interface userState {
     email: string;
     admin: boolean;
     premium: boolean;
+    avator_color: string;
   };
 }
 
@@ -20,6 +22,7 @@ const initialState: userState = {
   username: "",
   access_token: "",
   isLogin: false,
+  avator_color: "green",
   registerPupup: false,
   loginPupup: false,
   detailInfo: {
@@ -28,6 +31,7 @@ const initialState: userState = {
     email: "",
     admin: false,
     premium: false,
+    avator_color: "green",
   },
 };
 
@@ -39,6 +43,7 @@ export const userSlice = createSlice({
       state.isLogin = true;
       state.username = payload.payload[0];
       state.access_token = payload.payload[1];
+      state.avator_color = payload.payload[2];
       return;
     },
     changeRegisterPupup: (state) => {
@@ -58,6 +63,7 @@ export const userSlice = createSlice({
       state.detailInfo.email = payload.payload[2];
       state.detailInfo.admin = payload.payload[3] === 1 ? true : false;
       state.detailInfo.premium = payload.payload[4] === 1 ? true : false;
+      state.detailInfo.avator_color = payload.payload[5];
     },
   },
 });

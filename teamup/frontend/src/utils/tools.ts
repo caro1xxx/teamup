@@ -101,3 +101,12 @@ export const randomHexColor = () => {
   const randomColor = Math.floor(Math.random() * 16777215).toString(16); // 生成随机的 24 位颜色值
   return `#${randomColor}`;
 };
+
+export const textPhase = (text: string) => {
+  return text.substring(0, 100) + "...";
+};
+
+export const checkVaildate = (value: string) => {
+  if (value === "" || value === " " || !value) return false;
+  return true;
+};

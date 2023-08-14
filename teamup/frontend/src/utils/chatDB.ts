@@ -7,7 +7,7 @@ export const createOrOpenDB = (storeName: string, version: number) => {
     request.onupgradeneeded = function (event: any) {
       const db = event.target.result;
 
-      const objectStore = db.createObjectStore(storeName, { keyPath: "id" });
+      db.createObjectStore(storeName, { keyPath: "id" });
 
       // 创建索引（如果需要）
       // objectStore.createIndex("name", "name", { unique: false });
@@ -47,4 +47,10 @@ export async function addItem(
   const store = tx.objectStore(storeName);
   // @ts-ignore
   await store.put(value);
+}
+
+export function deleteDB() {
+  const deleteRequest = indexedDB.deleteDatabase("teamup_chat_record_db");
+  deleteRequest.onsuccess = function (event) {};
+  deleteRequest.onerror = function (event) {};
 }

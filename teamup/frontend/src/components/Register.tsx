@@ -7,7 +7,11 @@ import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import { changeRegisterPupup, saveUserInfo } from "../redux/modules/userSlice";
 import { UserInfo } from "../types/methodTypes";
-import { Validator, stopEventPropagation } from "../utils/tools";
+import {
+  Validator,
+  stopEventPropagation,
+  randomHexColor,
+} from "../utils/tools";
 import { batchSetStorage } from "../utils/localstorage";
 import md5 from "md5";
 
@@ -162,16 +166,26 @@ const Register = (props: Props) => {
     if (validatorResult) {
       dispatch(changeMessage([validatorResult, false]));
     } else {
+      const avator_color = randomHexColor();
       let result = await fecther(
         "register/",
-        { data: { ...userInfo, password: md5(userInfo.password) } },
+        {
+          data: {
+            ...userInfo,
+            password: md5(userInfo.password),
+            avator_color,
+          },
+        },
         "post"
       );
       if (result.code === 200) {
         batchSetStorage({
           access_token: result.access_token,
+          avator_color,
         });
-        dispatch(saveUserInfo([userInfo.username, result.access_token]));
+        dispatch(
+          saveUserInfo([userInfo.username, result.access_token, avator_color])
+        );
         closeRegister();
 
         dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));

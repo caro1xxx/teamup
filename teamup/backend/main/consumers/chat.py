@@ -28,7 +28,6 @@ class Chat(AsyncWebsocketConsumer):
             try:
                 # 解密jwt
                 self.user_info = decodeToken(self.access_token)
-                print(self.user_info)
                 self.room_room_name = 'room_'+self.roomPk
 
                 # 进入房间
@@ -67,7 +66,7 @@ class Chat(AsyncWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message,
-                'username': receiveMessage['username'],
+                'username': self.user_info['username'],
                 'create_time': getCurrentTimestamp()
             }
         )
