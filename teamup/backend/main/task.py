@@ -18,3 +18,8 @@ def sendChatNotifyMessage(topic, message, who):
 
     send_async_email(
         topic, message, settings.EMAIL_HOST_USER, UserFields.email)
+
+
+@shared_task
+def sendDepartureNotify(topic, userList):
+    send_mail(topic, '队长已发车,请尽快支付', settings.EMAIL_HOST_USER, userList)

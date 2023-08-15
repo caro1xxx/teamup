@@ -68,7 +68,7 @@ class Chat(AsyncWebsocketConsumer):
             'create_time': getCurrentTimestamp()
         }
 
-        if receiveMessage['aite'] != 'None' and receiveMessage['aite'] is not None:
+        if receiveMessage.get('aite', None) != 'None' and receiveMessage.get('aite', None) is not None:
             sendChatNotifyMessage.delay(
                 'Teamup车队@消息通知', self.user_info['username']+'@你:'+receiveMessage['message'], receiveMessage['aite'])
             messageBody['aite'] = receiveMessage['aite']

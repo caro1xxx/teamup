@@ -51,6 +51,13 @@ export const TeamWrap = styled.div`
     user-select: none;
     cursor: pointer;
   }
+  .departure {
+    text-align: center;
+    line-height: 39px;
+    color: #ee5b5b;
+    cursor: pointer;
+    user-select: none;
+  }
 `;
 
 export const MsgItemWrap = styled.div<{ $who: number }>`

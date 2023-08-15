@@ -2,6 +2,8 @@ class CommonErrorcode:
     serverError = {'code': 500, 'message': '服务端错误'}
     paramsError = {'code': 403, 'message': '参数错误'}
     illegallyError = {'code': 405, 'message': '非法'}
+    authError = {'code': 410, 'message': 'Unauthorized'}
+    mismatch = {'code': 411, 'message': '匹配失败'}
 
 
 class RegisterResponseCode:
@@ -29,7 +31,14 @@ class RoomResponseCode:
     joinError = {'code': 403, 'message': '加入车队失败'}
     roomOrUserNotFound = {'code': 404, 'message': '车队或用户不存在'}
     quitSuccess = {'code': 200, 'message': '退出车队成功'}
+    quitError = {'code': 411, 'message': '队长禁止退出'}
     fleetDepartureed = {'code': 409, 'message': '车队已发车'}
+    fleetDepartureSuccess = {'code': 200, 'message': '发车成功'}
+    fleetDepartureError = {'code': 403, 'message': '发车失败'}
+    joinErrorMax = {'code': 403, 'message': '当前车队已满员'}
+    joinRepet = {'code': 201, 'message': '重复加入'}
+    quitErrorNotFound = {'code': 404, 'message': '未加入该车队'}
+    quitErrorDepartureed = {'code': 400, 'message': '已发车,无法退出'}
 
 
 class ChatResponseCode:

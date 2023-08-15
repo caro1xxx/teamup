@@ -12,6 +12,7 @@ import PriceIcon from "../../assets/images/price.png";
 type Props = {
   data: TeamInfoProps;
   join: () => Promise<void>;
+  departure: () => Promise<void>;
 };
 
 const ChatDrawerTeam = (props: Props) => {
@@ -45,35 +46,47 @@ const ChatDrawerTeam = (props: Props) => {
           );
         })}
         <div style={{ flex: 1 }}></div>
-        {props.data.isHomeowner ? (
-          <Popconfirm
-            placement="left"
-            title={"确定发车吗?"}
-            description={<DepartureHint />}
-            // onConfirm={confirm}
-            okText="确定"
-            cancelText="取消"
-          >
-            <Button style={{ marginRight: "10px" }} className="btn join">
-              发车
+        {props.data.state === 0 ? (
+          <>
+            {props.data.isHomeowner ? (
+              <Popconfirm
+                placement="left"
+                title={"确定发车吗?"}
+                description={
+                  props.data.surplus === 0 ? (
+                    "发车后,系统将等待全员支付完毕后发送账号密码"
+                  ) : (
+                    <DepartureHint />
+                  )
+                }
+                onConfirm={props.departure}
+                okText="确定"
+                cancelText="取消"
+              >
+                <Button style={{ marginRight: "10px" }} className="btn join">
+                  发车
+                </Button>
+              </Popconfirm>
+            ) : null}
+            <Button
+              className={
+                props.data.isJoin || props.data.surplus === 0
+                  ? "btn_error join"
+                  : "btn join "
+              }
+              loading={isLoading}
+              onClick={joinTeam}
+            >
+              {props.data.surplus === 0 && props.data.isJoin === false
+                ? "满员"
+                : props.data.isJoin
+                ? "退出"
+                : " 加入"}
             </Button>
-          </Popconfirm>
-        ) : null}
-        <Button
-          className={
-            props.data.isJoin || props.data.surplus === 0
-              ? "btn_error join"
-              : "btn join "
-          }
-          loading={isLoading}
-          onClick={joinTeam}
-        >
-          {props.data.surplus === 0 && props.data.isJoin === false
-            ? "满员"
-            : props.data.isJoin
-            ? "退出"
-            : " 加入"}
-        </Button>
+          </>
+        ) : (
+          <div className="departure">已发车,等待全员支付完毕</div>
+        )}
       </TeamWrap>
       <TeamType
         data={{

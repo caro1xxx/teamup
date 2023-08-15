@@ -46,7 +46,7 @@ class register(APIView):
             UserFields = User.objects.filter(username=UserData['username'])
             if UserFields.exists():
                 UserFields.delete()
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
 

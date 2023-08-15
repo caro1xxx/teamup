@@ -68,6 +68,7 @@ const Room = () => {
     level: "",
     type: 1,
     price: 99,
+    state: 0,
     isHomeowner: false,
     max_quorum: 0,
     surplus: 0,
@@ -128,6 +129,7 @@ const Room = () => {
       type: 1,
       price: 99,
       isHomeowner: false,
+      state: 0,
       max_quorum: 0,
       surplus: 0,
       surplusEmtryArray: [{ key: "" }],
@@ -136,6 +138,7 @@ const Room = () => {
     };
     oldValue.isHomeowner = result.data.homeowner === username ? true : false;
     oldValue.level = result.data.level;
+    oldValue.state = result.data.state;
     oldValue.type = result.data.type;
     oldValue.price = result.data.price;
     oldValue.max_quorum = result.data.max_quorum;
@@ -182,7 +185,7 @@ const Room = () => {
     }
     let result = await fecther(
       "team/",
-      { room_id: userToRoomInfo.pk, username: username },
+      { room_id: userToRoomInfo.pk },
       TeamInfo.isJoin ? "delete" : "post"
     );
     if (result.code === 200) {
@@ -321,6 +324,22 @@ const Room = () => {
     );
   };
 
+  // 发车
+  const departure = async () => {
+    if (TeamInfo.state !== 0) return;
+    let result = await fecther(
+      "handler/",
+      { room_id: userToRoomInfo.pk },
+      "post"
+    );
+    if (result.code === 200) {
+      setTeamInfo({ ...TeamInfo, state: 1 });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+  };
+
   // listen router
   useEffect(() => {
     getTypeOfRooms(location.pathname); // eslint-disable-next-line
@@ -352,7 +371,7 @@ const Room = () => {
         onClose={closeRoom}
         width="500px"
       >
-        <ChatDrawerTeam data={TeamInfo} join={joinTeam} />
+        <ChatDrawerTeam data={TeamInfo} join={joinTeam} departure={departure} />
         <ChatHint />
         <ChatDrawerBody message={message} isLogin={isLogin} />
         <ChatMessageInput

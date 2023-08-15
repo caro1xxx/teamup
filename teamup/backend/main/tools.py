@@ -7,6 +7,8 @@ import random
 import re
 import random
 import string
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 def checkIsNotEmpty(data, *args):
@@ -71,3 +73,16 @@ def randomNum():
     characters = string.ascii_uppercase + string.digits
     random_string = ''.join(random.choice(characters) for _ in range(6))
     return random_string
+
+
+def sendMessageToChat(room_name, message):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        room_name,
+        {
+            'type': 'chat_message',
+            'message': message,
+            'username': 'system',
+            'create_time': getCurrentTimestamp()
+        }
+    )

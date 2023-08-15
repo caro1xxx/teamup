@@ -19,6 +19,7 @@ export type RoomItemProps = {
 export type TeamInfoProps = {
   type: number;
   level: string;
+  state: number;
   price: number;
   isHomeowner: boolean;
   max_quorum: number;

@@ -3,16 +3,18 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room
 from main.contants import CommonErrorcode, RoomResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, randomNum, decodeToken
+from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
+from main.task import sendDepartureNotify
 
 
-class room(APIView):
+class Rooms(APIView):
     # get room list
     def get(self, request, *args, **kwargs):
         try:
+
             type = request.GET.get('type', None)
 
             if type is None or type == '':
@@ -39,7 +41,7 @@ class room(APIView):
             return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # create room
@@ -82,6 +84,7 @@ class Team(APIView):
             RoomResponseCode.getSuccess['data'] = {
                 "room_id": room.id,
                 "homeowner": room.creator.username,
+                "state": room.state,
                 "room_name": room.name,
                 "users": user_join_list,
                 "max_quorum": room.type.max_quorum,
@@ -94,19 +97,18 @@ class Team(APIView):
             return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # join team
     def post(self, request, *args, **kwargs):
         try:
             roomId = json.loads(request.body).get('room_id', None)
-            username = json.loads(request.body).get('username', None)
 
             if roomId is None or roomId == '':
                 return JsonResponse(CommonErrorcode.paramsError)
-            if username is None or username == '':
-                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
 
             try:
                 room = Room.objects.get(pk=roomId)
@@ -114,12 +116,17 @@ class Team(APIView):
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
-            if room.state == 1:
+            if room.state != 0:
                 return JsonResponse(RoomResponseCode.fleetDepartureed)
 
             if room.take_seat_quorum >= room.type.max_quorum:
-                RoomResponseCode.joinError['detail'] = '当前车队已满员'
-                return JsonResponse(RoomResponseCode.joinError)
+                return JsonResponse(RoomResponseCode.joinErrorMax)
+
+            users_in_room = room.users.all()
+            user_join_list = [user.username for user in users_in_room]
+
+            if username in user_join_list:
+                return JsonResponse(RoomResponseCode.joinRepet)
 
             room.take_seat_quorum += 1
             room.users.add(user)
@@ -135,18 +142,29 @@ class Team(APIView):
     def delete(self, request, *args, **kwargs):
         try:
             roomId = json.loads(request.body).get('room_id', None)
-            username = json.loads(request.body).get('username', None)
 
             if roomId is None or roomId == '':
                 return JsonResponse(CommonErrorcode.paramsError)
-            if username is None or username == '':
-                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
 
             try:
                 room = Room.objects.get(pk=roomId)
                 user = User.objects.get(username=username)
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            if room.creator.username == username:
+                return JsonResponse(RoomResponseCode.quitError)
+
+            if room.state != 0:
+                return JsonResponse(RoomResponseCode.quitErrorDepartureed)
+
+            users_in_room = room.users.all()
+            user_join_list = [user.username for user in users_in_room]
+
+            if username not in user_join_list:
+                return JsonResponse(RoomResponseCode.quitErrorNotFound)
 
             room.users.remove(user)
 
@@ -191,31 +209,38 @@ class Handler(APIView):
         try:
             roomId = json.loads(request.body).get('room_id', None)
 
-            # payload = decodeToken(token)
+            if roomId is None or roomId == '':
+                return JsonResponse(CommonErrorcode.paramsError)
 
-            # if roomId is None or roomId == '':
-            #     return JsonResponse(CommonErrorcode.paramsError)
-            # if username is None or username == '':
-            #     return JsonResponse(CommonErrorcode.paramsError)
+            username = request.payload_data['username']
 
-            # try:
-            #     room = Room.objects.get(pk=roomId)
-            #     user = User.objects.get(username=username)
-            # except ObjectDoesNotExist:
-            #     return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+            try:
+                room = Room.objects.get(pk=roomId)
+            except ObjectDoesNotExist:
+                return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
-            # if room.state == 1:
-            #     return JsonResponse(RoomResponseCode.fleetDepartureed)
+            if room.creator.username != username:
+                return JsonResponse(CommonErrorcode.illegallyError)
 
-            # if room.take_seat_quorum >= room.type.max_quorum:
-            #     RoomResponseCode.joinError['detail'] = '当前车队已满员'
-            #     return JsonResponse(RoomResponseCode.joinError)
+            if room.state != 0:
+                return JsonResponse(RoomResponseCode.fleetDepartureed)
 
-            # room.take_seat_quorum += 1
-            # room.users.add(user)
-            # room.save()
+            if room.take_seat_quorum == 0:
+                RoomResponseCode.fleetDepartureError['message'] = '发车失败,人数不足'
+                return JsonResponse(RoomResponseCode.fleetDepartureError)
 
-            return JsonResponse(RoomResponseCode.joinSuccess)
+            room.state = 1
+            room.save()
+
+            sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
+
+            users_in_room = room.users.all()
+            users_email = [user.email for user in users_in_room]
+
+            sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
+                                      room.type.name+'车队已发车', users_email)
+
+            return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
 
         except Exception as e:
             # print(str(e))
