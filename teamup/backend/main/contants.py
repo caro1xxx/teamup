@@ -29,6 +29,7 @@ class RoomResponseCode:
     joinError = {'code': 403, 'message': '加入车队失败'}
     roomOrUserNotFound = {'code': 404, 'message': '车队或用户不存在'}
     quitSuccess = {'code': 200, 'message': '退出车队成功'}
+    fleetDepartureed = {'code': 409, 'message': '车队已发车'}
 
 
 class ChatResponseCode:

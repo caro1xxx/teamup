@@ -1,4 +1,6 @@
 from django.db import models
+# daphne backend.asgi:application -b 0.0.0.0 -p 8000
+# python3 -m celery -A backend worker -l info
 
 
 class User(models.Model):
@@ -30,6 +32,7 @@ class Room(models.Model):
     description = models.CharField(max_length=128)
     create_time = models.IntegerField()
     uuid = models.CharField(max_length=6)
+    state = models.IntegerField(verbose_name='发车状态')
     creator = models.ForeignKey(
         User, to_field='username', on_delete=models.CASCADE, related_name='created_user')
     type = models.ForeignKey(

@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room
 from main.contants import CommonErrorcode, RoomResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, randomNum
+from main.tools import customizePaginator, getCurrentTimestamp, randomNum, decodeToken
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -114,6 +114,9 @@ class Team(APIView):
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
+            if room.state == 1:
+                return JsonResponse(RoomResponseCode.fleetDepartureed)
+
             if room.take_seat_quorum >= room.type.max_quorum:
                 RoomResponseCode.joinError['detail'] = '当前车队已满员'
                 return JsonResponse(RoomResponseCode.joinError)
@@ -158,6 +161,7 @@ class Team(APIView):
 
 
 class Handler(APIView):
+    # 聊天框其他功能
     def get(self, request, *args, **kwargs):
         try:
             room_pk = request.GET.get('room_pk', None)
@@ -180,4 +184,39 @@ class Handler(APIView):
 
         except Exception as e:
             print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+    # 车队发车
+    def post(self, request, *args, **kwargs):
+        try:
+            roomId = json.loads(request.body).get('room_id', None)
+
+            # payload = decodeToken(token)
+
+            # if roomId is None or roomId == '':
+            #     return JsonResponse(CommonErrorcode.paramsError)
+            # if username is None or username == '':
+            #     return JsonResponse(CommonErrorcode.paramsError)
+
+            # try:
+            #     room = Room.objects.get(pk=roomId)
+            #     user = User.objects.get(username=username)
+            # except ObjectDoesNotExist:
+            #     return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            # if room.state == 1:
+            #     return JsonResponse(RoomResponseCode.fleetDepartureed)
+
+            # if room.take_seat_quorum >= room.type.max_quorum:
+            #     RoomResponseCode.joinError['detail'] = '当前车队已满员'
+            #     return JsonResponse(RoomResponseCode.joinError)
+
+            # room.take_seat_quorum += 1
+            # room.users.add(user)
+            # room.save()
+
+            return JsonResponse(RoomResponseCode.joinSuccess)
+
+        except Exception as e:
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

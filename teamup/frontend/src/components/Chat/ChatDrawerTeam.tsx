@@ -1,7 +1,7 @@
 import React from "react";
 import { TeamWrap, TeamTypeWrap } from "../../style/chat";
 import { TeamInfoProps } from "../../types/componentsPropsTypes";
-import { Button } from "antd";
+import { Button, Popconfirm } from "antd";
 // assets
 import FleetBackIcon from "../../assets/images/fleet_back.png";
 import "../../style/custome_antd.css";
@@ -45,6 +45,20 @@ const ChatDrawerTeam = (props: Props) => {
           );
         })}
         <div style={{ flex: 1 }}></div>
+        {props.data.isHomeowner ? (
+          <Popconfirm
+            placement="left"
+            title={"确定发车吗?"}
+            description={<DepartureHint />}
+            // onConfirm={confirm}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button style={{ marginRight: "10px" }} className="btn join">
+              发车
+            </Button>
+          </Popconfirm>
+        ) : null}
         <Button
           className={
             props.data.isJoin || props.data.surplus === 0
@@ -108,5 +122,17 @@ const TeamType = (props: {
       </div>
       <div className="hint">如需更改,请@车队队长协商</div>
     </TeamTypeWrap>
+  );
+};
+
+const DepartureHint = () => {
+  return (
+    <div>
+      当前
+      <span style={{ color: "#ee5b5b", fontWeight: "bolder" }}>
+        车队未满,无法享受
+      </span>
+      最低价格.确定继续发车吗?
+    </div>
   );
 };
