@@ -101,7 +101,10 @@ const TeamType = (props: {
           style={{ marginLeft: "2px" }}
           alt="icon"
         />
-        {props.data.price} RMB /人
+        {props.data.price} RMB /人{" "}
+        <span style={{ color: "#05b665", marginLeft: "10px" }}>
+          (价格计算公式:单价 = 总价 / 当前车队入座人数)
+        </span>
       </div>
       <div className="hint">如需更改,请@车队队长协商</div>
     </TeamTypeWrap>

@@ -206,6 +206,7 @@ const Room = () => {
         });
       }
       setTeamInfo({ ...oldValue, isJoin: TeamInfo.isJoin ? false : true });
+      getTeamInfo(userToRoomInfo.pk);
     }
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
@@ -355,6 +356,7 @@ const Room = () => {
         <ChatHint />
         <ChatDrawerBody message={message} isLogin={isLogin} />
         <ChatMessageInput
+          username={username}
           pk={userToRoomInfo.pk}
           send={sendMessage}
           isLogin={isLogin}

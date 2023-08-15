@@ -85,7 +85,7 @@ class Team(APIView):
                 "room_name": room.name,
                 "users": user_join_list,
                 "max_quorum": room.type.max_quorum,
-                "price": room.type.price,
+                "price": room.type.price / len(user_join_list),
                 "level": room.type.level,
                 "type": room.type.type,
                 "surplus": room.type.max_quorum - room.take_seat_quorum,
@@ -175,6 +175,7 @@ class Handler(APIView):
 
             print(user_join_list)
             RoomResponseCode.getSuccess['data'] = user_join_list
+            RoomResponseCode.getSuccess['leader'] = room.creator.username
             return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:

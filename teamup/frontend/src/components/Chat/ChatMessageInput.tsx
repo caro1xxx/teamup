@@ -11,6 +11,7 @@ type Props = {
   send: (value: string, aite: string) => void;
   pk: number;
   isLogin: boolean;
+  username: string;
 };
 
 const { Search } = Input;
@@ -46,13 +47,22 @@ const ChatMessageInput = (props: Props) => {
       });
     } else {
       result.data.forEach((item: string) => {
-        data.push({
-          key: nanoid(),
-          // @ts-ignore
-          label: (
-            <div onClick={() => setcurrentSelectUser(item)}>{"@" + item}</div>
-          ),
-        });
+        if (item !== props.username) {
+          data.push({
+            key: nanoid(),
+            // @ts-ignore
+            label: (
+              <div onClick={() => setcurrentSelectUser(item)}>
+                {"@" + item}
+                {item === result.leader ? (
+                  <span style={{ marginLeft: "10px", color: "#05b665" }}>
+                    队长
+                  </span>
+                ) : null}
+              </div>
+            ),
+          });
+        }
       });
     }
     data.splice(0, 1);
