@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache
 from main.contants import ChatResponseCode
-from channels.layers import get_channel_layer
+from main.task import sendChatNotifyMessage
 from main.tools import decodeToken, getCurrentTimestamp
 import json
 
@@ -61,20 +61,30 @@ class Chat(AsyncWebsocketConsumer):
         receiveMessage = json.loads(text_data)
         message = receiveMessage['message']
 
+        messageBody = {
+            'type': 'chat_message',
+            'message': message,
+            'username': self.user_info['username'],
+            'create_time': getCurrentTimestamp()
+        }
+
+        if receiveMessage['aite'] != 'None' and receiveMessage['aite'] is not None:
+            sendChatNotifyMessage.delay(
+                'Teamup车队@消息通知', self.user_info['username']+'@你:'+receiveMessage['message'], receiveMessage['aite'])
+            messageBody['aite'] = receiveMessage['aite']
+
         await self.channel_layer.group_send(
             self.room_room_name,
-            {
-                'type': 'chat_message',
-                'message': message,
-                'username': self.user_info['username'],
-                'create_time': getCurrentTimestamp()
-            }
+            messageBody
         )
 
     async def chat_message(self, event):
-
-        await self.send(text_data=json.dumps({
+        messageBody = {
             'message': event['message'],
             'username': event['username'],
             'create_time': event['create_time'],
-        }))
+        }
+        if event.get('aite', None) is not None:
+            messageBody['aite'] = event['aite']
+
+        await self.send(text_data=json.dumps(messageBody))

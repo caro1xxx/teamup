@@ -252,7 +252,9 @@ const Room = () => {
     const newItem = {
       user: jsonMessage.username,
       key: nanoid(),
-      message: jsonMessage.message,
+      message: jsonMessage.aite
+        ? `@${jsonMessage.aite}${jsonMessage.message}`
+        : jsonMessage.message,
       create_time: jsonMessage.create_time,
       who:
         jsonMessage.username === "system"
@@ -307,13 +309,15 @@ const Room = () => {
     }
   }, [userToRoomInfo.pk]);
 
-  const sendMessage = (value: string) => {
+  const sendMessage = (value: string, aite: string) => {
     if (!checkVaildate(value)) {
       dispatch(changeMessage([`请有效字符`, false]));
       return;
     }
     if (!websocketRef.current) return;
-    websocketRef.current.send(JSON.stringify({ message: value, username }));
+    websocketRef.current.send(
+      JSON.stringify({ message: value, username, aite })
+    );
   };
 
   // listen router

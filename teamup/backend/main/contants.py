@@ -10,6 +10,8 @@ class RegisterResponseCode:
     emailExists = {'code': 402, 'message': '该邮箱已被注册'}
     emailError = {'code': 402, 'message': '邮箱格式错误'}
     emailCodeSuccess = {'code': 200, 'message': '验证码已发送至邮箱'}
+    emailSendSuccess = {'code': 200, 'message': '@消息已发送至对方邮箱'}
+    emailAiteUserError = {'code': 403, 'message': '@用户错误'}
     codeError = {'code': 402, 'message': '验证码错误'}
 
 

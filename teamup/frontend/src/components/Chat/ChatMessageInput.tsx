@@ -8,7 +8,7 @@ import { fecther } from "../../utils/fecther";
 import type { MenuProps } from "antd";
 import { nanoid } from "nanoid";
 type Props = {
-  send: (value: string) => void;
+  send: (value: string, aite: string) => void;
   pk: number;
   isLogin: boolean;
 };
@@ -18,20 +18,60 @@ const { Search } = Input;
 const ChatMessageInput = (props: Props) => {
   const [inputContent, setInputContent] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [items, setUsers] = React.useState<MenuProps["items"]>([
+    { key: "", label: <div></div> },
+  ]);
+  const [currentSelectUser, setcurrentSelectUser] = React.useState("");
 
   const send = () => {
     if (isLoading) return;
     setIsLoading(true);
-    props.send(inputContent);
+    props.send(inputContent, currentSelectUser ? currentSelectUser : "None");
     setInputContent("");
+    setcurrentSelectUser("");
     setTimeout(() => setIsLoading(false), 500);
   };
 
+  // 获取@列表
+  const getUsers = React.useCallback(async () => {
+    if (items && items[0] && items[0].key !== "") return;
+    let result = await fecther(`handler/?room_pk=${props.pk}`, {}, "get");
+    if (result.code !== 200) return;
+    const data = [{ key: "", label: "" }];
+    if (result.data.length === 0) {
+      data.push({
+        key: nanoid(),
+        // @ts-ignore
+        label: <div>暂无</div>,
+      });
+    } else {
+      result.data.forEach((item: string) => {
+        data.push({
+          key: nanoid(),
+          // @ts-ignore
+          label: (
+            <div onClick={() => setcurrentSelectUser(item)}>{"@" + item}</div>
+          ),
+        });
+      });
+    }
+    data.splice(0, 1);
+    setUsers([...data]);
+  }, [props.pk]);
+
   const MemoInputOptions = React.memo(InputOptions);
+
+  React.useEffect(() => {
+    getUsers();
+  }, [props.pk]);
 
   return (
     <InputWrap>
-      <MemoInputOptions pk={props.pk} />
+      <MemoInputOptions
+        items={items}
+        getUsers={getUsers}
+        currentSelectUser={currentSelectUser}
+      />
       <Search
         value={inputContent}
         onChange={(e) => setInputContent(e.target.value)}
@@ -49,43 +89,24 @@ const ChatMessageInput = (props: Props) => {
 
 export default ChatMessageInput;
 
-const InputOptions = (props: { pk: number }) => {
-  const [items, setUsers] = React.useState<MenuProps["items"]>([
-    { key: "", label: <div></div> },
-  ]);
-  const [currentSelectUser, setcurrentSelectUser] = React.useState("");
-
-  const getUsers = React.useCallback(async () => {
-    if (items && items[0] && items[0].key !== "") return;
-    let result = await fecther(`handler/?room_pk=${props.pk}`, {}, "get");
-    if (result.code !== 200) return;
-    const data = [{ key: "", label: "" }];
-    result.data.forEach((item: string) => {
-      data.push({
-        key: nanoid(),
-        // @ts-ignore
-        label: (
-          <div onClick={() => setcurrentSelectUser(item)}>{"@" + item}</div>
-        ),
-      });
-    });
-    data.splice(0, 1);
-    setUsers([...data]);
-  }, [props.pk]);
-
+const InputOptions = (props: {
+  items: MenuProps["items"];
+  getUsers: () => Promise<void>;
+  currentSelectUser: string;
+}) => {
   return (
     <InputOptionsWrap>
       <Dropdown
         placement="topLeft"
         trigger={["click"]}
         menu={{
-          items,
+          items: props.items,
           selectable: true,
         }}
       >
-        <div className="options_back" onClick={getUsers}>
+        <div className="options_back">
           <img width={20} src={AiteIcon} alt="aite" />
-          {currentSelectUser}
+          {props.currentSelectUser}
         </div>
       </Dropdown>
     </InputOptionsWrap>
