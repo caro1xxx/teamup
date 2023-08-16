@@ -274,3 +274,27 @@ export const UserPayWrap = styled.div<{ $color: string; $state: number }>`
     }
   }
 `;
+
+export const PayCodeWrap = styled.div`
+  background-color: #0f0f10;
+  margin-left: 10px;
+  text-align: center;
+  border-radius: 10px;
+  width: 50px;
+  user-select: none;
+  cursor: pointer;
+  line-height: 30px;
+`;
+
+export const PayCodeBodyWrap = styled.div`
+  .title {
+    display: flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    > img {
+      margin-right: 10px;
+      width: 25px;
+    }
+  }
+`;

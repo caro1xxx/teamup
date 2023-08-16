@@ -356,6 +356,13 @@ const Room = () => {
       "get"
     );
     if (result.code !== 200) return;
+    for (let i = 0; i < result.data.length; i++) {
+      if (result.data[i].user === username) {
+        result.data["selfPayCode"] = result.data[i].qrcode;
+        result.data["expire_time"] = result.data[i].create_time + 60 * 3;
+        break;
+      }
+    }
     dispatchPayState({ type: "init", payload: result.data });
   };
 

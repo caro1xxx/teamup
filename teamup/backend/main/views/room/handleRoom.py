@@ -242,22 +242,23 @@ class Handler(APIView):
                 for user in users_in_room:
                     ordersInsert.append(Order(order_id=generateRandomnumber(),
                                               state=0, price=priceOfItem, qrcode='/wechat/test.png', room=room, user=user, create_time=currentStampTime, qr_expire_time=currentStampTime+60*3))
-                
+
                 OrdersFields = Order.objects.bulk_create(ordersInsert)
 
                 ordersSerialize = []
                 for i in OrdersFields:
-                    ordersSerialize.append({"order_id":i.order_id,"state":i.state,"price":i.price,"qrcode":i.qrcode,"user":i.user.username,"avatorColor":i.user.avator_color})
+                    ordersSerialize.append({"order_id": i.order_id, "state": i.state, "price": i.price,
+                                           "qrcode": i.qrcode, "user": i.user.username, "avatorColor": i.user.avator_color, "create_time": i.user.create_time})
 
                 cache.set('pay_room_' + str(roomId),
-                          json.dumps(ordersSerialize), 60 * 3)
+                          json.dumps(ordersSerialize), 60 * 60 * 1)
 
                 sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
 
                 sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
                                           room.type.name+'车队已发车', users_email)
             except Exception as e:
-                # print(str(e))
+                print(str(e))
                 room.state = 0
                 room.save()
                 return JsonResponse(CommonErrorcode.serverError)
@@ -280,7 +281,18 @@ class PayState(APIView):
 
             username = request.payload_data['username']
 
-            memoryTeamAllPayOrder = cache.get('pay_room_'+str(room_pk), None)
+            try:
+                room = Room.objects.get(pk=room_pk)
+            except ObjectDoesNotExist:
+                return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            users_in_room = room.users.all()
+            users_join_list = [user.username for user in users_in_room]
+            if username not in users_join_list:
+                return JsonResponse(RoomResponseCode.quitErrorNotFound)
+
+            memoryTeamAllPayOrder = cache.get(
+                'pay_room_'+str(room_pk), None)
 
             if memoryTeamAllPayOrder is None:
                 return JsonResponse(RoomResponseCode.notDeparture)

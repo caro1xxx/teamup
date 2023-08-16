@@ -7,6 +7,8 @@ import { Input, Dropdown, Tooltip } from "antd";
 import { fecther } from "../../utils/fecther";
 import type { MenuProps } from "antd";
 import { nanoid } from "nanoid";
+import ChatPayCode from "./ChatPayCode";
+
 type Props = {
   send: (value: string, aite: string) => void;
   pk: number;
@@ -14,6 +16,8 @@ type Props = {
   username: string;
   paystate: {
     isDeparture: boolean;
+    selfPayCode: string;
+    expire_time: number;
     all: {
       order_id: string;
       price: number;
@@ -35,6 +39,7 @@ const ChatMessageInput = (props: Props) => {
   ]);
   const [currentSelectUser, setcurrentSelectUser] = React.useState("");
 
+  // 发送消息
   const send = () => {
     if (isLoading) return;
     setIsLoading(true);
@@ -89,6 +94,8 @@ const ChatMessageInput = (props: Props) => {
   return (
     <InputWrap>
       <MemoInputOptions
+        selfPayCode={props.paystate.selfPayCode}
+        expire_time={props.paystate.expire_time}
         paystate={props.paystate}
         items={items}
         currentSelectUser={currentSelectUser}
@@ -124,6 +131,8 @@ const InputOptions = (props: {
       avatorColor: string;
     }[];
   };
+  selfPayCode: string;
+  expire_time: number;
 }) => {
   return (
     <InputOptionsWrap>
@@ -141,7 +150,13 @@ const InputOptions = (props: {
         </div>
       </Dropdown>
       {props.paystate.isDeparture ? (
-        <UserPayList data={props.paystate.all} />
+        <>
+          <UserPayList data={props.paystate.all} />
+          <ChatPayCode
+            qrcode={props.selfPayCode}
+            expire_time={props.expire_time}
+          />
+        </>
       ) : (
         <></>
       )}
