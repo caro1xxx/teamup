@@ -210,3 +210,67 @@ export const InputOptionsWrap = styled.div`
     background-color: #525252;
   }
 `;
+
+export const UserPayWrap = styled.div<{ $color: string; $state: number }>`
+  background-color: ${(props) =>
+    props.$state === 0 ? "#303030" : props.$color};
+  width: 20px;
+  cursor: pointer;
+  height: 20px;
+  border-radius: 15px;
+  margin: 5px 5px;
+  text-align: center;
+  line-height: 20px;
+  .loading,
+  .loading > div {
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .loading {
+    display: block;
+    font-size: 0;
+    color: #aaa;
+  }
+
+  .loading.la-dark {
+    color: #fff;
+  }
+
+  .loading > div {
+    display: inline-block;
+    float: none;
+    background-color: currentColor;
+    border: 0 solid currentColor;
+  }
+
+  .loading {
+    width: 18px;
+    height: 20px;
+    margin-top: 3px;
+  }
+
+  .loading > div {
+    width: 3px;
+    height: 3px;
+    margin: 1px;
+    border-radius: 100%;
+    animation: ball-beat 0.7s -0.15s infinite linear;
+  }
+
+  .loading > div:nth-child(2n-1) {
+    animation-delay: -0.5s;
+  }
+
+  @keyframes ball-beat {
+    50% {
+      opacity: 0.2;
+      transform: scale(0.75);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`;

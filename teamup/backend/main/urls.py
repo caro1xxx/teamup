@@ -12,4 +12,5 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/room/$', handleRoom.Rooms.as_view()),
     re_path(r'^api/v1/teamup/team/$', handleRoom.Team.as_view()),
     re_path(r'^api/v1/teamup/handler/$', handleRoom.Handler.as_view()),
+    re_path(r'^api/v1/teamup/paystate/$', handleRoom.PayState.as_view()),
 ]

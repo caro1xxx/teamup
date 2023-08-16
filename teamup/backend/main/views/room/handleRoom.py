@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import User, Room
-from main.contants import CommonErrorcode, RoomResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat
+from main.models import User, Room, Order
+from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode
+from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat, generateRandomnumber
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -201,7 +201,7 @@ class Handler(APIView):
             return JsonResponse(RoomResponseCode.getSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # 车队发车
@@ -232,15 +232,62 @@ class Handler(APIView):
             room.state = 1
             room.save()
 
-            sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
+            try:
+                users_in_room = room.users.all()
+                users_email = [user.email for user in users_in_room]
+                priceOfItem = room.type.price / room.take_seat_quorum
+                currentStampTime = getCurrentTimestamp()
 
-            users_in_room = room.users.all()
-            users_email = [user.email for user in users_in_room]
+                ordersInsert = []
+                for user in users_in_room:
+                    ordersInsert.append(Order(order_id=generateRandomnumber(),
+                                              state=0, price=priceOfItem, qrcode='/wechat/test.png', room=room, user=user, create_time=currentStampTime, qr_expire_time=currentStampTime+60*3))
+                
+                OrdersFields = Order.objects.bulk_create(ordersInsert)
 
-            sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
-                                      room.type.name+'车队已发车', users_email)
+                ordersSerialize = []
+                for i in OrdersFields:
+                    ordersSerialize.append({"order_id":i.order_id,"state":i.state,"price":i.price,"qrcode":i.qrcode,"user":i.user.username,"avatorColor":i.user.avator_color})
+
+                cache.set('pay_room_' + str(roomId),
+                          json.dumps(ordersSerialize), 60 * 3)
+
+                sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
+
+                sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
+                                          room.type.name+'车队已发车', users_email)
+            except Exception as e:
+                # print(str(e))
+                room.state = 0
+                room.save()
+                return JsonResponse(CommonErrorcode.serverError)
 
             return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
+
+        except Exception as e:
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+
+class PayState(APIView):
+    # 获取车队成功支付状态以及自己的付款码
+    def get(self, request, *args, **kwargs):
+        try:
+            room_pk = request.GET.get('room_pk', None)
+
+            if room_pk == '' or room_pk is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
+
+            memoryTeamAllPayOrder = cache.get('pay_room_'+str(room_pk), None)
+
+            if memoryTeamAllPayOrder is None:
+                return JsonResponse(RoomResponseCode.notDeparture)
+
+            PayStateResponseCode.teamAllPayOrder['data'] = json.loads(
+                memoryTeamAllPayOrder)
+            return JsonResponse(PayStateResponseCode.teamAllPayOrder)
 
         except Exception as e:
             # print(str(e))

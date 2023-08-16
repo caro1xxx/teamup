@@ -86,3 +86,9 @@ def sendMessageToChat(room_name, message):
             'create_time': getCurrentTimestamp()
         }
     )
+
+
+def generateRandomnumber(length=32):
+    characters = string.ascii_letters + string.digits
+    order_number = ''.join(random.choice(characters) for _ in range(length))
+    return order_number

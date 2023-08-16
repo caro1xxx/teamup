@@ -49,3 +49,16 @@ class Room(models.Model):
         if self.take_seat_quorum > self.type.max_quorum:
             raise ValueError("当前车队已满员")
         super().save(*args, **kwargs)
+
+
+class Order(models.Model):
+    order_id = models.CharField(max_length=32)
+    state = models.IntegerField(verbose_name='0未支付,1支付成功,2二维码到期', default=0)
+    price = models.FloatField()
+    qrcode = models.CharField(max_length=128)
+    room = models.ForeignKey(
+        Room, on_delete=models.SET_NULL, null=True, related_name='orders')
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='users')
+    create_time = models.IntegerField()
+    qr_expire_time = models.IntegerField()

@@ -1,9 +1,9 @@
 import React from "react";
-import { InputWrap, InputOptionsWrap } from "../../style/chat";
+import { InputWrap, InputOptionsWrap, UserPayWrap } from "../../style/chat";
 import { MessageOutlined } from "@ant-design/icons";
 import "../../style/custome_antd.css";
 import AiteIcon from "../../assets/images/aite.png";
-import { Input, Dropdown } from "antd";
+import { Input, Dropdown, Tooltip } from "antd";
 import { fecther } from "../../utils/fecther";
 import type { MenuProps } from "antd";
 import { nanoid } from "nanoid";
@@ -12,6 +12,17 @@ type Props = {
   pk: number;
   isLogin: boolean;
   username: string;
+  paystate: {
+    isDeparture: boolean;
+    all: {
+      order_id: string;
+      price: number;
+      qrcode: string;
+      state: number;
+      user: string;
+      avatorColor: string;
+    }[];
+  };
 };
 
 const { Search } = Input;
@@ -78,8 +89,8 @@ const ChatMessageInput = (props: Props) => {
   return (
     <InputWrap>
       <MemoInputOptions
+        paystate={props.paystate}
         items={items}
-        getUsers={getUsers}
         currentSelectUser={currentSelectUser}
       />
       <Search
@@ -101,8 +112,18 @@ export default ChatMessageInput;
 
 const InputOptions = (props: {
   items: MenuProps["items"];
-  getUsers: () => Promise<void>;
   currentSelectUser: string;
+  paystate: {
+    isDeparture: boolean;
+    all: {
+      order_id: string;
+      price: number;
+      qrcode: string;
+      state: number;
+      user: string;
+      avatorColor: string;
+    }[];
+  };
 }) => {
   return (
     <InputOptionsWrap>
@@ -119,6 +140,63 @@ const InputOptions = (props: {
           {props.currentSelectUser}
         </div>
       </Dropdown>
+      {props.paystate.isDeparture ? (
+        <UserPayList data={props.paystate.all} />
+      ) : (
+        <></>
+      )}
     </InputOptionsWrap>
+  );
+};
+
+type UserPayProps = {
+  data: {
+    order_id: string;
+    price: number;
+    qrcode: string;
+    state: number;
+    user: string;
+    avatorColor: string;
+  }[];
+};
+
+const UserPayList = (props: UserPayProps) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        backgroundColor: "#0f0f10",
+        marginLeft: "10px",
+        borderRadius: "10px",
+      }}
+    >
+      {props.data.map((item) => {
+        return (
+          <UserPayWrap
+            $state={item.state}
+            $color={item.avatorColor}
+            key={item.order_id}
+          >
+            <Tooltip
+              title={
+                item.state === 0
+                  ? `等待${item.user}支付`
+                  : `${item.user}支付完毕`
+              }
+            >
+              {item.state === 0 ? (
+                <div className="loading">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                </div>
+              ) : (
+                item.user.charAt(0)
+              )}
+            </Tooltip>
+          </UserPayWrap>
+        );
+      })}
+    </div>
   );
 };

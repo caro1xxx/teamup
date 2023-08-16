@@ -26,7 +26,11 @@ import {
 } from "../utils/tools";
 import { Skeleton, Drawer } from "antd";
 import { getStorage, setStorage } from "../utils/localstorage";
-import { messageReducer } from "../utils/reducers";
+import {
+  messageReducer,
+  payStateReducer,
+  payStateInitialState,
+} from "../utils/reducers";
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 
 // types
@@ -45,8 +49,6 @@ const Room = () => {
   const location = useLocation();
   const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
   const username = useAppSelector((state) => state.user.username) as string;
-  const msg = useAppSelector((state) => state.chat.message) as string;
-  const flag = useAppSelector((state) => state.chat.flag) as number;
   const access_token = useAppSelector(
     (state) => state.user.access_token
   ) as string;
@@ -88,6 +90,10 @@ const Room = () => {
   const [message, dispatchMessage] = React.useReducer(messageReducer, []);
   const websocketRef = React.useRef<WebSocket | null>(null);
   const dbIdx = React.useRef(1);
+  const [allPayState, dispatchPayState] = React.useReducer(
+    payStateReducer,
+    payStateInitialState
+  );
 
   /*request */
   const getTypeOfRooms = async (type: string) => {
@@ -297,7 +303,7 @@ const Room = () => {
     // moveChatBottom();
   };
 
-  const connectRoom = React.useCallback(() => {
+  const connectRoom = React.useCallback(async () => {
     if (!websocketRef.current) {
       dispatchMessage({ type: "clear" });
       websocketRef.current = new WebSocket(
@@ -310,6 +316,7 @@ const Room = () => {
           receptionMessage(event.data);
         };
       };
+      await getAllPayState();
     }
   }, [userToRoomInfo.pk]);
 
@@ -338,6 +345,18 @@ const Room = () => {
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
     );
+    await getAllPayState();
+  };
+
+  // 获取全员支付状态
+  const getAllPayState = async () => {
+    let result = await fecther(
+      `paystate/?room_pk=${userToRoomInfo.pk}`,
+      {},
+      "get"
+    );
+    if (result.code !== 200) return;
+    dispatchPayState({ type: "init", payload: result.data });
   };
 
   // listen router
@@ -351,6 +370,7 @@ const Room = () => {
     if (websocketRef.current === null && userToRoomInfo.pk !== 0) {
       connectRoom();
     }
+
     return () => {};
   }, [userToRoomInfo.pk]);
 
@@ -375,6 +395,7 @@ const Room = () => {
         <ChatHint />
         <ChatDrawerBody message={message} isLogin={isLogin} />
         <ChatMessageInput
+          paystate={allPayState}
           username={username}
           pk={userToRoomInfo.pk}
           send={sendMessage}

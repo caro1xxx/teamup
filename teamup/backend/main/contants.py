@@ -39,9 +39,14 @@ class RoomResponseCode:
     joinRepet = {'code': 201, 'message': '重复加入'}
     quitErrorNotFound = {'code': 404, 'message': '未加入该车队'}
     quitErrorDepartureed = {'code': 400, 'message': '已发车,无法退出'}
+    notDeparture = {'code': 412, 'message': '未发车'}
 
 
 class ChatResponseCode:
     connectSuccess = {'code': 200, 'message': '连接成功'}
     chatNoFound = {'code': 404, 'message': '房间不存在'}
     forwardMessageSuccess = {'code': 200, 'message': '转发成功'}
+
+
+class PayStateResponseCode:
+    teamAllPayOrder = {'code': 200, 'message': '获取队伍支付状态成功'}
