@@ -30,7 +30,7 @@ class Pay(APIView):
             for i in serializeMemoryTeamAllPayOrder:
                 if i["order_id"] == orderId:
                     if i["state"] != 0:
-                        return JsonResponse(PayResponseCode.PayResponseCode)
+                        return JsonResponse(PayResponseCode.duplicatePay)
                     i["state"] = 1
                     cache.set('pay_room_'+str(roomId),
                               json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)

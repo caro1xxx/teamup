@@ -1,4 +1,5 @@
 from django.db import models
+from main.tools import getCurrentTimestamp
 # daphne backend.asgi:application -b 0.0.0.0 -p 8000
 # python3 -m celery -A backend worker -l info
 
@@ -62,3 +63,44 @@ class Order(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name='users')
     create_time = models.IntegerField()
     qr_expire_time = models.IntegerField()
+
+
+class Group(models.Model):
+    type = models.CharField(max_length=32)
+    sum = models.IntegerField(default=0)
+    distribute = models.IntegerField(default=0)
+
+    # 获取当前组剩余未使用的账号数
+    @property
+    def remaining(self):
+        return self.sum - self.distribute
+
+
+class Account(models.Model):
+    username = models.CharField(max_length=32)
+    password = models.CharField(max_length=10)
+    email = models.CharField(max_length=64, unique=True)
+    create_time = models.IntegerField()
+    expire_time = models.IntegerField()
+    distribute_user = models.OneToOneField(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name='distributeUser'
+    )
+
+    related_group = models.ForeignKey(
+        Group, null=True, blank=True, on_delete=models.SET_NULL, related_name='group'
+    )
+
+    # 获取当前账号是否被分配
+    @property
+    def isDistribute(self):
+        return self.distribute_user is not None
+
+    # 获取当前账号的组pk
+    @property
+    def getGroupPk(self):
+        return self.related_group.pk
+
+    def save(self, *args, **kwargs):
+        if not self.id:  # 如果是新创建的记录
+            self.create_time = getCurrentTimestamp()
+        super(Account, self).save(*args, **kwargs)
