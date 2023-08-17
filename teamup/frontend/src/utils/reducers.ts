@@ -16,6 +16,7 @@ export const payStateReducer = (state: any, action: any) => {
         isDeparture: true,
         selfPayCode: action.payload.selfPayCode,
         expire_time: action.payload.expire_time,
+        payState: action.payload.payState,
         price: action.payload.price,
         all: [...state.all, action.payload],
       };
@@ -24,6 +25,7 @@ export const payStateReducer = (state: any, action: any) => {
         isDeparture: true,
         selfPayCode: action.payload.selfPayCode,
         expire_time: action.payload.expire_time,
+        payState: action.payload.payState,
         price: action.payload.price,
         all: [...action.payload],
       };
@@ -32,6 +34,7 @@ export const payStateReducer = (state: any, action: any) => {
         isDeparture: state.isDeparture,
         selfPayCode: state.selfPayCode,
         expire_time: action.payload.expire_time,
+        payState: state.payState,
         price: state.price,
         all: [...state.all],
       };
@@ -44,6 +47,7 @@ export const payStateInitialState = {
   isDeparture: false,
   selfPayCode: "",
   expire_time: 0,
+  payState: 0,
   price: 0,
   all: [
     {

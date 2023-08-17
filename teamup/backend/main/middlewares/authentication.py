@@ -23,6 +23,7 @@ class CheckAccessToken(MiddlewareMixin):
                 pass
 
             if requestMethods == 'PUT':
+                allowPath = ['paynotify']
                 pass
 
             if requestMethods == 'DELETE':

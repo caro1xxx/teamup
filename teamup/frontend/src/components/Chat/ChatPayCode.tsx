@@ -2,11 +2,14 @@ import React from "react";
 import { Tooltip, Input, QRCode } from "antd";
 import { PayCodeWrap, PayCodeBodyWrap } from "../../style/chat";
 import WechatPayIcon from "../../assets/images/wechat.png";
+import LoadingPayIcon from "../../assets/images/loadingpay.png";
+import SuccessIcon from "../../assets/images/success.png";
 type Props = {
   qrcode: string;
   expire_time: number;
   price: number;
   isOpenQr: boolean;
+  payState: number;
   flushQr: () => void;
 };
 
@@ -57,18 +60,32 @@ const ChatPayCode = (props: Props) => {
     <Tooltip
       autoAdjustOverflow
       title={
-        <PayCodeBody
-          flushQr={props.flushQr}
-          qrcode={props.qrcode}
-          expire_time={props.expire_time}
-          price={props.price}
-          qrstate={qrState}
-        />
+        props.payState === 0 ? (
+          <PayCodeBody
+            flushQr={props.flushQr}
+            qrcode={props.qrcode}
+            expire_time={props.expire_time}
+            price={props.price}
+            qrstate={qrState}
+          />
+        ) : (
+          "支付成功"
+        )
       }
       onOpenChange={(open) => captureChangeQr(open)}
       trigger={["click"]}
     >
-      <PayCodeWrap id="paycode">付款</PayCodeWrap>
+      <PayCodeWrap id="paycode">
+        {props.payState === 0 ? (
+          <div>
+            付款 <img src={LoadingPayIcon} alt="loading" />
+          </div>
+        ) : (
+          <div>
+            已付款 <img src={SuccessIcon} alt="success" />
+          </div>
+        )}
+      </PayCodeWrap>
     </Tooltip>
   );
 };

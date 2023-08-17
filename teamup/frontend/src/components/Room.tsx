@@ -378,7 +378,7 @@ const Room = () => {
         result.data["selfPayCode"] = result.data[i].qrcode;
         result.data["expire_time"] = result.data[i].create_time + 60 * 3;
         result.data["price"] = result.data[i].price;
-        result.data["state"] = result.data[i].state;
+        result.data["payState"] = result.data[i].state;
         break;
       }
     }
@@ -498,6 +498,7 @@ const Room = () => {
                   price={allPayState.price}
                   qrcode={allPayState.selfPayCode}
                   expire_time={allPayState.expire_time}
+                  payState={allPayState.payState}
                 />
               </>
             ) : null}
