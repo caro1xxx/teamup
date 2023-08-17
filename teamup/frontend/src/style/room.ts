@@ -9,6 +9,17 @@ export const Wrap = styled.div`
   grid-row-gap: 20px;
 `;
 
+export const BottomOptions = styled.div`
+  position: absolute;
+  bottom: 10px;
+  height: 75px;
+  width: 450px;
+  .options {
+    margin-top: 5px;
+    display: flex;
+  }
+`;
+
 export const ItemWrap = styled.div`
   cursor: pointer;
   user-select: none;

@@ -108,10 +108,6 @@ export const MsgItemWrap = styled.div<{ $who: number }>`
 `;
 
 export const InputWrap = styled.div`
-  position: absolute;
-  bottom: 0px;
-  height: 90px;
-  width: 450px;
   .cutomer .ant-input-search-button {
     background-color: #05b665;
     color: #fff;
@@ -190,26 +186,13 @@ export const TeamTypeWrap = styled.div`
   }
 `;
 
-export const InputOptionsWrap = styled.div`
-  margin: 10px 0px 5px 0px;
-  height: 30px;
-  display: flex;
+// export const InputOptionsWrap = styled.div`
+//   margin: 10px 0px 5px 0px;
+//   height: 30px;
+//   display: flex;
 
-  .options_back {
-    padding: 0px 5px;
-
-    cursor: pointer;
-    display: inline-flex;
-    vertical-align: top;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    background-color: #0f0f10;
-  }
-  .options_back:hover {
-    background-color: #525252;
-  }
-`;
+//
+// `;
 
 export const UserPayWrap = styled.div<{ $color: string; $state: number }>`
   background-color: ${(props) =>
@@ -276,6 +259,7 @@ export const UserPayWrap = styled.div<{ $color: string; $state: number }>`
 `;
 
 export const PayCodeWrap = styled.div`
+ height: 30px;
   background-color: #0f0f10;
   margin-left: 10px;
   text-align: center;
@@ -296,5 +280,41 @@ export const PayCodeBodyWrap = styled.div`
       margin-right: 10px;
       width: 25px;
     }
+  }
+  .detail {
+    font-size: 10px;
+    margin: 0px 10px;
+  }
+  .price {
+    display: flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    .value {
+      flex: 1;
+      text-align: end;
+    }
+  }
+  .hint {
+    color: #ea4335;
+
+    text-align: center;
+  }
+`;
+
+export const InputOptionsWrap = styled.div`
+  height: 35px;
+  .options_back {
+    padding: 5px 5px;
+    cursor: pointer;
+    display: inline-flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #0f0f10;
+  }
+  .options_back:hover {
+    background-color: #525252;
   }
 `;

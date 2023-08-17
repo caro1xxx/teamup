@@ -50,3 +50,5 @@ class ChatResponseCode:
 
 class PayStateResponseCode:
     teamAllPayOrder = {'code': 200, 'message': '获取队伍支付状态成功'}
+    flushSuccess = {'code': 200, 'message': '二维码刷新成功'}
+    flushError = {'code': 413, 'message': '刷新失败,用户不在该车队'}

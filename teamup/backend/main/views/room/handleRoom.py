@@ -248,7 +248,7 @@ class Handler(APIView):
                 ordersSerialize = []
                 for i in OrdersFields:
                     ordersSerialize.append({"order_id": i.order_id, "state": i.state, "price": i.price,
-                                           "qrcode": i.qrcode, "user": i.user.username, "avatorColor": i.user.avator_color, "create_time": i.user.create_time})
+                                           "qrcode": i.qrcode, "user": i.user.username, "avatorColor": i.user.avator_color, "create_time": i.create_time})
 
                 cache.set('pay_room_' + str(roomId),
                           json.dumps(ordersSerialize), 60 * 60 * 1)
@@ -271,7 +271,7 @@ class Handler(APIView):
 
 
 class PayState(APIView):
-    # 获取车队成功支付状态以及自己的付款码
+    # 获取车队支付状态以及自己的付款码
     def get(self, request, *args, **kwargs):
         try:
             room_pk = request.GET.get('room_pk', None)
@@ -300,6 +300,37 @@ class PayState(APIView):
             PayStateResponseCode.teamAllPayOrder['data'] = json.loads(
                 memoryTeamAllPayOrder)
             return JsonResponse(PayStateResponseCode.teamAllPayOrder)
+
+        except Exception as e:
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+    # 刷新二维码
+    def put(self, request, *args, **kwargs):
+        try:
+            roomId = json.loads(request.body).get('room_id', None)
+
+            if roomId is None or roomId == '':
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
+
+            memoryTeamAllPayOrder = cache.get(
+                'pay_room_'+str(roomId), None)
+
+            if memoryTeamAllPayOrder is None:
+                return JsonResponse(RoomResponseCode.notDeparture)
+
+            serializeMemoryTeamAllPayOrder = json.loads(memoryTeamAllPayOrder)
+
+            for i in serializeMemoryTeamAllPayOrder:
+                if i["user"] == username:
+                    i["create_time"] = getCurrentTimestamp()
+                    cache.set('pay_room_'+str(roomId),
+                              json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)
+                    return JsonResponse(PayStateResponseCode.flushSuccess)
+
+            return JsonResponse(PayStateResponseCode.flushError)
 
         except Exception as e:
             # print(str(e))

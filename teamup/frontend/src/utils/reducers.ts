@@ -16,15 +16,24 @@ export const payStateReducer = (state: any, action: any) => {
         isDeparture: true,
         selfPayCode: action.payload.selfPayCode,
         expire_time: action.payload.expire_time,
+        price: action.payload.price,
         all: [...state.all, action.payload],
       };
     case "init":
-      console.log(action.payload.selfPayCode);
       return {
         isDeparture: true,
         selfPayCode: action.payload.selfPayCode,
         expire_time: action.payload.expire_time,
+        price: action.payload.price,
         all: [...action.payload],
+      };
+    case "flushQr":
+      return {
+        isDeparture: state.isDeparture,
+        selfPayCode: state.selfPayCode,
+        expire_time: action.payload.expire_time,
+        price: state.price,
+        all: [...state.all],
       };
     default:
       return state;
@@ -35,6 +44,7 @@ export const payStateInitialState = {
   isDeparture: false,
   selfPayCode: "",
   expire_time: 0,
+  price: 0,
   all: [
     {
       order_id: "",

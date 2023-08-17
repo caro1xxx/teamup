@@ -1,11 +1,14 @@
 import React, { useEffect } from "react";
-import { Wrap, ItemWrap } from "../style/room";
+import { Wrap, ItemWrap, BottomOptions } from "../style/room";
 import PeopleItem from "./PeopleItem";
 import ChatDrawerTitle from "./Chat/ChatDrawerTitle";
 import ChatDrawerTeam from "./Chat/ChatDrawerTeam";
 import ChatHint from "./Chat/ChatHint";
 import ChatDrawerBody from "./Chat/ChatDrawerBody";
 import ChatMessageInput from "./Chat/ChatMessageInput";
+import ChatInputOptions from "./Chat/ChatInputOptions";
+import ChatUserPayState from "./Chat/ChatUserPayState";
+import ChatPayCode from "./Chat/ChatPayCode";
 
 // assets
 import ShareIcon from "../assets/images/share.png";
@@ -34,6 +37,7 @@ import {
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 
 // types
+import type { MenuProps } from "antd";
 import { RoomInfo } from "../types/paramsTypes";
 import {
   RoomItemProps,
@@ -52,6 +56,7 @@ const Room = () => {
   const access_token = useAppSelector(
     (state) => state.user.access_token
   ) as string;
+  const MemoInputOptions = React.memo(ChatInputOptions);
 
   /*state */
   const [RoomList, setRoomList] = React.useState([
@@ -94,6 +99,11 @@ const Room = () => {
     payStateReducer,
     payStateInitialState
   );
+  const isOpenQrRef = React.useRef(false);
+  const [currentSelectUser, setcurrentSelectUser] = React.useState("");
+  const [items, setUsers] = React.useState<MenuProps["items"]>([
+    { key: "", label: <div></div> },
+  ]);
 
   /*request */
   const getTypeOfRooms = async (type: string) => {
@@ -176,6 +186,7 @@ const Room = () => {
       websocketRef.current.close();
       websocketRef.current = null;
     }
+    isOpenQrRef.current = false;
     setUserToRoomInfo({ ...userToRoomInfo!, isDrawer: false });
   };
 
@@ -320,15 +331,20 @@ const Room = () => {
     }
   }, [userToRoomInfo.pk]);
 
-  const sendMessage = (value: string, aite: string) => {
+  const sendMessage = (value: string) => {
     if (!checkVaildate(value)) {
       dispatch(changeMessage([`请有效字符`, false]));
       return;
     }
     if (!websocketRef.current) return;
     websocketRef.current.send(
-      JSON.stringify({ message: value, username, aite })
+      JSON.stringify({
+        message: value,
+        username,
+        aite: currentSelectUser ? currentSelectUser : "None",
+      })
     );
+    selectAiteUser("");
   };
 
   // 发车
@@ -346,6 +362,7 @@ const Room = () => {
       changeMessage([result.message, result.code === 200 ? true : false])
     );
     await getAllPayState();
+    isOpenQrRef.current = true;
   };
 
   // 获取全员支付状态
@@ -360,10 +377,74 @@ const Room = () => {
       if (result.data[i].user === username) {
         result.data["selfPayCode"] = result.data[i].qrcode;
         result.data["expire_time"] = result.data[i].create_time + 60 * 3;
+        result.data["price"] = result.data[i].price;
+        result.data["state"] = result.data[i].state;
         break;
       }
     }
     dispatchPayState({ type: "init", payload: result.data });
+  };
+
+  // 刷新二维码
+  const flushQr = async () => {
+    let result = await fecther(
+      "paystate/",
+      { room_id: userToRoomInfo.pk },
+      "put"
+    );
+    if (result.code !== 200) return;
+    // fetch
+    dispatchPayState({
+      type: "flushQr",
+      payload: {
+        expire_time: parseInt(new Date().getTime() / 1000 + "") + 3 * 60,
+      },
+    });
+  };
+
+  // @选择用户
+  const selectAiteUser = (user: string) => {
+    setcurrentSelectUser(user);
+  };
+
+  // 获取@列表
+  const getUsers = async () => {
+    if (items && items[0] && items[0].key !== "") return;
+    let result = await fecther(
+      `handler/?room_pk=${userToRoomInfo.pk}`,
+      {},
+      "get"
+    );
+    if (result.code !== 200) return;
+    const data = [{ key: "", label: "" }];
+    if (result.data.length === 0) {
+      data.push({
+        key: nanoid(),
+        // @ts-ignore
+        label: <div>暂无</div>,
+      });
+    } else {
+      result.data.forEach((item: string) => {
+        if (item !== username) {
+          data.push({
+            key: nanoid(),
+            // @ts-ignore
+            label: (
+              <div onClick={() => selectAiteUser(item)}>
+                {"@" + item}
+                {item === result.leader ? (
+                  <span style={{ marginLeft: "10px", color: "#05b665" }}>
+                    队长
+                  </span>
+                ) : null}
+              </div>
+            ),
+          });
+        }
+      });
+    }
+    data.splice(0, 1);
+    setUsers([...data]);
   };
 
   // listen router
@@ -376,6 +457,7 @@ const Room = () => {
     if (!checkIslogin()) return;
     if (websocketRef.current === null && userToRoomInfo.pk !== 0) {
       connectRoom();
+      getUsers();
     }
 
     return () => {};
@@ -401,13 +483,27 @@ const Room = () => {
         <ChatDrawerTeam data={TeamInfo} join={joinTeam} departure={departure} />
         <ChatHint />
         <ChatDrawerBody message={message} isLogin={isLogin} />
-        <ChatMessageInput
-          paystate={allPayState}
-          username={username}
-          pk={userToRoomInfo.pk}
-          send={sendMessage}
-          isLogin={isLogin}
-        />
+        <BottomOptions>
+          <div className="options">
+            <MemoInputOptions
+              users={items}
+              currentSelectUser={currentSelectUser}
+            />
+            {isLogin ? (
+              <>
+                <ChatUserPayState data={allPayState.all} />
+                <ChatPayCode
+                  flushQr={flushQr}
+                  isOpenQr={isOpenQrRef.current}
+                  price={allPayState.price}
+                  qrcode={allPayState.selfPayCode}
+                  expire_time={allPayState.expire_time}
+                />
+              </>
+            ) : null}
+          </div>
+          <ChatMessageInput send={sendMessage} isLogin={isLogin} />
+        </BottomOptions>
       </Drawer>
       {isLoading ? (
         <>
