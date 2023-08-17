@@ -26,6 +26,7 @@ import {
   generatorEmtryArray,
   textPhase,
   checkVaildate,
+  checkIsAllUserPayed,
 } from "../utils/tools";
 import { Skeleton, Drawer } from "antd";
 import { getStorage, setStorage } from "../utils/localstorage";
@@ -260,7 +261,6 @@ const Room = () => {
           who: 0,
         },
       });
-      // moveChatBottom();
     }
   }, [userToRoomInfo.pk]);
 
@@ -300,7 +300,13 @@ const Room = () => {
     dispatchMessage({ type: "push", payload: newItem });
 
     // 不保存system发送的消息
-    if (jsonMessage.username === "system") return;
+    if (jsonMessage.username === "system") {
+      if (jsonMessage.message.includes("已付款")) {
+        const payedUsername = jsonMessage.message.split("已付款")[0];
+        listenWsToPaySuccess(payedUsername);
+      }
+      return;
+    }
     // 添加到数据库
     addItem(
       "teamup_chat_record_db",
@@ -311,7 +317,6 @@ const Room = () => {
         id: dbIdx.current++,
       }
     );
-    // moveChatBottom();
   };
 
   const connectRoom = React.useCallback(async () => {
@@ -373,6 +378,7 @@ const Room = () => {
       "get"
     );
     if (result.code !== 200) return;
+    // let isAllPay = await checkIsAllUserPayed(result.data)
     for (let i = 0; i < result.data.length; i++) {
       if (result.data[i].user === username) {
         result.data["selfPayCode"] = result.data[i].qrcode;
@@ -445,6 +451,15 @@ const Room = () => {
     }
     data.splice(0, 1);
     setUsers([...data]);
+  };
+
+  // 接收来自websocket的已付款消息
+  const listenWsToPaySuccess = (user: string) => {
+    if (user === "") return;
+    dispatchPayState({
+      type: "changePayState",
+      payload: { successUser: user, username: username },
+    });
   };
 
   // listen router

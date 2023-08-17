@@ -38,6 +38,25 @@ export const payStateReducer = (state: any, action: any) => {
         price: state.price,
         all: [...state.all],
       };
+    case "changePayState":
+      let newValue = { ...state };
+      for (let i = 0; i < newValue.all.length; i++) {
+        if (newValue.all[i].user === action.payload.successUser) {
+          newValue.all[i].state = 1;
+          if (newValue.all[i].user === action.payload.username) {
+            newValue.payState = 1;
+          }
+          break;
+        }
+      }
+      return {
+        isDeparture: state.isDeparture,
+        selfPayCode: state.selfPayCode,
+        expire_time: state.expire_time,
+        payState: newValue.payState,
+        price: state.price,
+        all: [...newValue.all],
+      };
     default:
       return state;
   }

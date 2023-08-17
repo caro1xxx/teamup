@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, PayResponseCode
+from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
 import json
+from main.tools import sendMessageToChat
 from django.core.cache import cache
 
 
@@ -32,6 +33,7 @@ class Pay(APIView):
                     i["state"] = 1
                     cache.set('pay_room_'+str(roomId),
                               json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)
+                    sendMessageToChat('room_'+str(roomId), i['user']+'已付款')
                     return JsonResponse(PayResponseCode.paySuccess)
 
             return JsonResponse(PayResponseCode.payError)
