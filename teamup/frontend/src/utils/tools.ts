@@ -110,12 +110,3 @@ export const checkVaildate = (value: string) => {
   if (value === "" || value === " " || !value) return false;
   return true;
 };
-
-export const checkIsAllUserPayed = async (users: any) => {
-  for await (const i of users) {
-    if (users[i].state !== 0) {
-      return false;
-    }
-  }
-  return true;
-};

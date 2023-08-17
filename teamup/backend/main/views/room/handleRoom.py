@@ -52,7 +52,7 @@ class Rooms(APIView):
             roomFields = Room.objects.create(
                 name=createDate['name'], description=createDate['description'], create_time=getCurrentTimestamp(
                 ),
-                creator_id=createDate['create_user_id'], type_id=createDate['create_type_id'], take_seat_quorum=0, uuid=randomNum())
+                creator_id=createDate['create_user_id'], type_id=createDate['create_type_id'], take_seat_quorum=0, uuid=randomNum(), state=0)
 
             cache.set('room_' + str(roomFields.pk),
                       json.dumps({}), 60 * 60 * 24 * 3)
@@ -195,7 +195,6 @@ class Handler(APIView):
             users_in_room = room.users.all()
             user_join_list = [user.username for user in users_in_room]
 
-            print(user_join_list)
             RoomResponseCode.getSuccess['data'] = user_join_list
             RoomResponseCode.getSuccess['leader'] = room.creator.username
             return JsonResponse(RoomResponseCode.getSuccess)

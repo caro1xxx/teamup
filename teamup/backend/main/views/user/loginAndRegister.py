@@ -77,7 +77,6 @@ class login(APIView):
     def get(self, request, *args, **kwargs):
         try:
             token = request.GET.get('access_token', None)
-
             if token is None or token == '':
                 return JsonResponse(CommonErrorcode.paramsError)
             payload = decodeToken(token)

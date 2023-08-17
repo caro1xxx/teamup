@@ -26,7 +26,6 @@ import {
   generatorEmtryArray,
   textPhase,
   checkVaildate,
-  checkIsAllUserPayed,
 } from "../utils/tools";
 import { Skeleton, Drawer } from "antd";
 import { getStorage, setStorage } from "../utils/localstorage";
@@ -304,6 +303,10 @@ const Room = () => {
       if (jsonMessage.message.includes("已付款")) {
         const payedUsername = jsonMessage.message.split("已付款")[0];
         listenWsToPaySuccess(payedUsername);
+      } else if (jsonMessage.message === "全员付款完毕") {
+        listenWsToAllPayed();
+      } else if (jsonMessage.message.includes("已发车")) {
+        listenWsToDeparture();
       }
       return;
     }
@@ -453,13 +456,23 @@ const Room = () => {
     setUsers([...data]);
   };
 
-  // 接收来自websocket的已付款消息
+  // 接收来自websocket的  已付款消息
   const listenWsToPaySuccess = (user: string) => {
     if (user === "") return;
     dispatchPayState({
       type: "changePayState",
       payload: { successUser: user, username: username },
     });
+  };
+
+  // 接收来自websocket的 全体支付完毕
+  const listenWsToAllPayed = () => {
+    getTeamInfo(userToRoomInfo.pk);
+  };
+
+  // 接收来自websocket的 已发车
+  const listenWsToDeparture = () => {
+    getAllPayState();
   };
 
   // listen router
@@ -504,7 +517,7 @@ const Room = () => {
               users={items}
               currentSelectUser={currentSelectUser}
             />
-            {isLogin ? (
+            {isLogin && allPayState.isDeparture ? (
               <>
                 <ChatUserPayState data={allPayState.all} />
                 <ChatPayCode

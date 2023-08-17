@@ -4,6 +4,7 @@ from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
 import json
 from main.tools import sendMessageToChat
 from django.core.cache import cache
+from main.task import checkAllUserPayed
 
 
 class Pay(APIView):
@@ -34,6 +35,8 @@ class Pay(APIView):
                     cache.set('pay_room_'+str(roomId),
                               json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)
                     sendMessageToChat('room_'+str(roomId), i['user']+'已付款')
+                    checkAllUserPayed.delay(
+                        serializeMemoryTeamAllPayOrder, roomId)
                     return JsonResponse(PayResponseCode.paySuccess)
 
             return JsonResponse(PayResponseCode.payError)

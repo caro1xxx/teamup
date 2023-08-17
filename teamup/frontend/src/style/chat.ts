@@ -58,6 +58,12 @@ export const TeamWrap = styled.div`
     cursor: pointer;
     user-select: none;
   }
+  .payed {
+    text-align: center;
+    color: #05b665;
+    cursor: pointer;
+    user-select: none;
+  }
 `;
 
 export const MsgItemWrap = styled.div<{ $who: number }>`
