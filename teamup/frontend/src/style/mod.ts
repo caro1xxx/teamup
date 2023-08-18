@@ -33,7 +33,21 @@ export const CreateRoomWrap = styled.div`
     margin-bottom: 20px;
   }
   .link {
-    color: #05b665;
+    display: flex;
+    .copy {
+      flex: 1;
+      display: flex;
+      text-align: center;
+      color: #0d6efd;
+      cursor: pointer;
+      user-select: none;
+      vertical-align: top;
+      justify-content: center;
+      align-items: center;
+    }
+    .copy:hover {
+      color: #5a9bfe;
+    }
   }
   .create {
     margin-top: 20px;

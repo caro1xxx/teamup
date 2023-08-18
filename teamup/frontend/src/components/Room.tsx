@@ -57,6 +57,11 @@ const Room = () => {
     (state) => state.user.access_token
   ) as string;
   const MemoInputOptions = React.memo(ChatInputOptions);
+  const createRoomFlag = useAppSelector((state) => state.room.flag) as number;
+  const createRoomData = useAppSelector((state) => state.room.newCreate) as any;
+  const orderby = useAppSelector((state) => state.room.orderBy) as
+    | string
+    | null;
 
   /*state */
   const [RoomList, setRoomList] = React.useState([
@@ -106,8 +111,12 @@ const Room = () => {
   ]);
 
   /*request */
-  const getTypeOfRooms = async (type: string) => {
-    let result = await fecther(`room/?type=${type.split("/")[1]}`, {}, "get");
+  const getTypeOfRooms = async (type: string, orderby?: string | null) => {
+    let result = await fecther(
+      `room/?type=${type.split("/")[1]}&order_by=${orderby ? orderby : ""}`,
+      {},
+      "get"
+    );
     if (result.code !== 200) dispatch(changeMessage([result.message, false]));
     else {
       setIsLoading(true);
@@ -498,6 +507,35 @@ const Room = () => {
     return () => {};
   }, [userToRoomInfo.pk]);
 
+  // listen new room
+  useEffect(() => {
+    if (createRoomFlag === 0) return;
+    let newValue = [...RoomList];
+    newValue.unshift({
+      pk: createRoomData.pk,
+      roomName: createRoomData.name,
+      key: nanoid(),
+      roomId: createRoomData.uuid,
+      online: 28,
+      teammate: [
+        {
+          avatorColor: createRoomData.users[0].avator_color,
+          username: createRoomData.users[0].user,
+          key: nanoid(),
+        },
+      ],
+      surplus: createRoomData.surplus,
+      description: textPhase(createRoomData.description),
+    });
+    setRoomList(newValue);
+  }, [createRoomFlag]);
+
+  // order by search
+  useEffect(() => {
+    if (!orderby) return;
+    getTypeOfRooms(location.pathname, orderby);
+  }, [orderby]);
+
   return (
     <Wrap>
       <Drawer
@@ -561,8 +599,18 @@ const Room = () => {
 export default Room;
 
 const Item = (props: RoomItemProps) => {
+  const heightline = useAppSelector(
+    (state) => state.room.heightLinePk
+  ) as number;
+
   return (
     <ItemWrap
+      style={{
+        animation:
+          props.room.pk === heightline
+            ? "newLoadinghighlight 1s ease-in-out"
+            : "",
+      }}
       onClick={() =>
         props.open({
           roomName: props.room.roomName,

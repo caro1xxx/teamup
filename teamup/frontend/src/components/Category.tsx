@@ -1,13 +1,16 @@
 import React from "react";
-import DescendingIcon from "../assets/images/descending.png";
-import AscendingIcon from "../assets/images/ascending.png";
 import TestIcon from "../assets/images/test.png";
 import { CategoryWrap } from "../style/other";
 import { Input, Modal } from "antd";
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import CreateRoom from "./Mod/CreateRoom";
 import { fecther } from "../utils/fecther";
 import { changeMessage } from "../redux/modules/notifySlice";
+import {
+  saveNewCreateRoom,
+  changeRoomOrderBy,
+} from "../redux/modules/roomSlice";
+import { nanoid } from "nanoid";
 
 type Props = {};
 
@@ -16,6 +19,27 @@ const { Search } = Input;
 const Category = (props: Props) => {
   const [createRoomModel, setCreateRoomModel] = React.useState<boolean>(false);
   const [loadingDelay, setLoadingDelay] = React.useState<boolean>(false);
+  const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
+  const [OderByState, setOrderByState] = React.useState([
+    {
+      icon: require("../assets/images/descending.png"),
+      key: nanoid(),
+      label: "asce",
+      select: false,
+    },
+    {
+      icon: require("../assets/images/ascending.png"),
+      key: nanoid(),
+      label: "desc",
+      select: false,
+    },
+    {
+      icon: require("../assets/images/self.png"),
+      key: nanoid(),
+      label: "self",
+      select: false,
+    },
+  ]);
   const dispatch = useAppDispatch();
 
   const createRoom = async (data: {
@@ -30,6 +54,7 @@ const Category = (props: Props) => {
     setLoadingDelay(true);
     let result = await fecther("room/", { data: { ...data } }, "post");
     if (result.code === 200) {
+      dispatch(saveNewCreateRoom([{ ...result.data }]));
       setCreateRoomModel(false);
     }
     dispatch(
@@ -40,24 +65,52 @@ const Category = (props: Props) => {
     }, 1000);
   };
 
+  const selectOrderBy = (label: string) => {
+    dispatch(changeRoomOrderBy(label));
+    let newValue = [...OderByState];
+    newValue.forEach((item) => {
+      if (item.label === label) {
+        item.select = !item.select;
+      } else {
+        item.select = false;
+      }
+    });
+    setOrderByState(newValue);
+  };
+
   return (
     <>
       <CategoryWrap>
-        <div className="btn">
-          <img src={AscendingIcon} alt="asce" />
-        </div>
-        <div className="btn">
-          <img src={DescendingIcon} alt="desc" />
-        </div>
-        <div className="create">
-          <div className="create_btn" onClick={() => setCreateRoomModel(true)}>
-            创建车队
+        {OderByState.map((item, index) => {
+          return (
+            <div
+              className="btn"
+              style={{ backgroundColor: item.select ? "#05b665" : "#232323" }}
+            >
+              <img
+                src={item.icon}
+                alt={item.label}
+                onClick={() => selectOrderBy(item.label)}
+              />
+            </div>
+          );
+        })}
+
+        {isLogin ? (
+          <div className="create">
+            <div
+              className="create_btn"
+              onClick={() => setCreateRoomModel(true)}
+            >
+              创建车队
+            </div>
+            <div className="test">
+              <img src={TestIcon} alt="test" />
+              <div>内测</div>
+            </div>
           </div>
-          <div className="test">
-            <img src={TestIcon} alt="test" />
-            <div>内测</div>
-          </div>
-        </div>
+        ) : null}
+
         <div style={{ flex: 1 }}></div>
         <div className="search">
           <Search

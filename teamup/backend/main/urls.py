@@ -14,6 +14,9 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/team/$', handleRoom.Team.as_view()),
     re_path(r'^api/v1/teamup/handler/$', handleRoom.Handler.as_view()),
     re_path(r'^api/v1/teamup/paystate/$', handleRoom.PayState.as_view()),
+    re_path(r'^api/v1/teamup/typeprice/$', handleRoom.TypeInfo.as_view()),
 
+
+    # pay
     re_path(r'^api/v1/teamup/paynotify/$', dealings.Pay.as_view()),
 ]

@@ -5,7 +5,9 @@ import { generateRandomString } from "../../utils/tools";
 import { Validator } from "../../utils/tools";
 import { useAppDispatch } from "../../redux/hooks";
 import { changeMessage } from "../../redux/modules/notifySlice";
-
+import { fecther } from "../../utils/fecther";
+import CopyIcon from "../../assets/images/copy.png";
+import ClipboardJS from "clipboard";
 type Props = {
   create: (data: {
     name: string;
@@ -42,7 +44,8 @@ const CreateRoom = (props: Props) => {
     mailType: 1,
     time: 30,
   });
-
+  const [TypeOPrice, setTypeOfPrice] = React.useState(0);
+  const [isCopy, setIsCopy] = React.useState(false);
   const dispatch = useAppDispatch();
 
   const checkAfterCreate = () => {
@@ -60,6 +63,34 @@ const CreateRoom = (props: Props) => {
       props.create({ ...data });
     }
   };
+
+  // 获取当前类型价格
+  const getTypeOfPrice = React.useCallback(async () => {
+    let data = { ...roomInfoRef.current };
+    let result = await fecther(
+      `typeprice/?type=${data.type}&time=${data.time}&mail_type=${data.mailType}`,
+      {},
+      "get"
+    );
+    if (result.code !== 200) return;
+    setTypeOfPrice(result.price);
+  }, [
+    roomInfoRef.current.mailType,
+    roomInfoRef.current.time,
+    roomInfoRef.current.type,
+  ]);
+
+  React.useEffect(() => {
+    getTypeOfPrice();
+    const clipboard = new ClipboardJS(".copy");
+    clipboard.on("success", (e) => {
+      setIsCopy(true);
+    });
+
+    return () => {
+      clipboard.destroy(); // 清理 clipboard 实例
+    };
+  }, []);
 
   return (
     <CreateRoomWrap>
@@ -82,7 +113,10 @@ const CreateRoom = (props: Props) => {
             defaultValue="netflix"
             style={{ width: "100%" }}
             options={type}
-            onChange={(option) => (roomInfoRef.current.type = option)}
+            onChange={(option) => {
+              roomInfoRef.current.type = option;
+              getTypeOfPrice();
+            }}
           />
         </div>
         <div className="time">
@@ -90,7 +124,10 @@ const CreateRoom = (props: Props) => {
             defaultValue="30"
             style={{ width: "100%" }}
             options={time}
-            onChange={(option) => (roomInfoRef.current.time = parseInt(option))}
+            onChange={(option) => {
+              roomInfoRef.current.time = parseInt(option);
+              getTypeOfPrice();
+            }}
           />
         </div>
         <div className="account">
@@ -98,13 +135,14 @@ const CreateRoom = (props: Props) => {
             defaultValue="1"
             style={{ width: "100%" }}
             options={mailType}
-            onChange={(option) =>
-              (roomInfoRef.current.mailType = parseInt(option))
-            }
+            onChange={(option) => {
+              roomInfoRef.current.mailType = parseInt(option);
+              getTypeOfPrice();
+            }}
           />
         </div>
         <div className="price">
-          <Input value={"18.8元/人"} disabled placeholder="最低价格" />
+          <Input value={`${TypeOPrice}元/人`} disabled placeholder="最低价格" />
         </div>
       </div>
       <div className="detail">
@@ -116,10 +154,23 @@ const CreateRoom = (props: Props) => {
           maxLength={64}
         />
       </div>
-      <Link className="link" href="https://ant.design" target="_blank">
-        https://www.teamup.com/shareroom?id={roomInfoRef.current.uuid}{" "}
-        (车队分享链接)
-      </Link>
+      <div className="link">
+        <Link
+          style={{ color: "#05b665" }}
+          href="https://ant.design"
+          target="_blank"
+        >
+          https://www.teamup.com/shareroom?id={roomInfoRef.current.uuid}
+          (车队分享链接)
+        </Link>
+
+        <div
+          className="copy"
+          data-clipboard-text={`https://www.teamup.com/shareroom?id=${roomInfoRef.current.uuid}`}
+        >
+          {isCopy ? <img width={15} src={CopyIcon} alt="copy" /> : "复制"}
+        </div>
+      </div>
       <Button
         loading={props.delay}
         className="create"

@@ -2,27 +2,46 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType
-from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat, generateRandomnumber, checkIsNotEmpty
+from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode
+from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from main.task import sendDepartureNotify
-from main.config import ROOM_LIFECYCLE
+from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE
 
 
 class Rooms(APIView):
     # get room list
     def get(self, request, *args, **kwargs):
         try:
-
             type = request.GET.get('type', None)
+            orderby = request.GET.get('order_by', None)
 
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
-            rooms = Room.objects.filter(type__name=type).order_by('pk')
-            pageInatoredRooms, RoomResponseCode.getSuccess['page_count'] = customizePaginator(
+            roomResponse = RoomResponseCode()
+            rooms = []
+            if orderby == 'self':
+                authorization_header = request.META.get(
+                    'HTTP_AUTHORIZATION', None)
+
+                if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
+                    return JsonResponse(CommonErrorcode.authError)
+
+                payload = decodeToken(
+                    authorization_header.replace('Bearer ', ''))
+                if payload['username'] is None or payload['username'] == '':
+                    return JsonResponse(CommonErrorcode.authError)
+
+                rooms = Room.objects.filter(
+                    creator_id=payload['username']).all()
+            else:
+                rooms = Room.objects.filter(type__name=type).order_by(
+                    '-take_seat_quorum' if orderby is None else "create_time" if orderby == 'asce'else "-create_time")
+
+            pageInatoredRooms, roomResponse.getSuccess['page_count'] = customizePaginator(
                 rooms, 12, request.GET.get('page_num', 1))
 
             roomAndRoomUser = []
@@ -38,8 +57,8 @@ class Rooms(APIView):
                                         "surplus": room.type.max_quorum - room.take_seat_quorum,
                                         "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], })
 
-            RoomResponseCode.getSuccess['data'] = roomAndRoomUser
-            return JsonResponse(RoomResponseCode.getSuccess)
+            roomResponse.getSuccess['data'] = roomAndRoomUser
+            return JsonResponse(roomResponse.getSuccess)
 
         except Exception as e:
             print(str(e))
@@ -80,7 +99,18 @@ class Rooms(APIView):
             # create room to redis
             cache.set('room_' + str(roomFields.pk),
                       json.dumps({}), ROOM_LIFECYCLE)
-            return JsonResponse(RoomResponseCode.createdSuccess)
+
+            roomResponse = RoomResponseCode()
+            roomResponse.createdSuccess["data"] = {"name": roomFields.name,  "description": roomFields.description,
+                                                   "pk": roomFields.pk,
+                                                   "create_time": roomFields.create_time,
+                                                   "creator": roomFields.creator.username,
+                                                   "uuid": roomFields.uuid,
+                                                   "type": roomFields.type.name,
+                                                   "take_seat_quorum": roomFields.take_seat_quorum,
+                                                   "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
+                                                   "users": [{"user": user.username, "avator_color": user.avator_color}], }
+            return JsonResponse(roomResponse.createdSuccess)
 
         except Exception as e:
             # print(str(e))
@@ -289,7 +319,7 @@ class Handler(APIView):
             return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
 
@@ -355,6 +385,30 @@ class PayState(APIView):
 
             return JsonResponse(PayStateResponseCode.flushError)
 
+        except Exception as e:
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+
+class TypeInfo(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            type = request.GET.get('type', None)
+            time = request.GET.get('time', None)
+            mailType = request.GET.get('mail_type', None)
+
+            if type is None or time is None or mailType is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            typeFields = RoomType.objects.filter(
+                name=type, level__contains=time, type=mailType).first()
+
+            if typeFields is None:
+                return JsonResponse(TypeInfoResponseCode.typeNotFound)
+
+            res = {'code': 200, 'message': "获取成功",
+                   'price': typeFields.price / typeFields.max_quorum}
+            return JsonResponse(res)
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

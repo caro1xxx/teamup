@@ -58,3 +58,7 @@ class PayResponseCode:
     duplicatePay = {'code': 201, 'message': '订单已被支付'}
     paySuccess = {'code': 200, 'message': '支付成功'}
     payError = {'code': 415, 'message': '支付失败'}
+
+
+class TypeInfoResponseCode:
+    typeNotFound = {'code': 404, 'message': "该类型不存在"}

@@ -27,6 +27,7 @@ export const ItemWrap = styled.div`
   border-radius: 5px;
   position: relative;
   height: 320px;
+
   .options {
     position: absolute;
     bottom: 30px;
@@ -73,6 +74,17 @@ export const ItemWrap = styled.div`
     position: relative;
     .loading_avator {
       margin-right: 10px;
+    }
+  }
+
+  @keyframes newLoadinghighlight {
+    from {
+      background-color: #05b665;
+      opacity: 0.5;
+    }
+    to {
+      background-color: #232323;
+      opacity: 1;
     }
   }
 `;
