@@ -1,6 +1,5 @@
 import django
 django.setup()
-
 from main.tools import sendMessageToChat
 from django.core.mail import send_mail
 from celery import shared_task
@@ -78,6 +77,12 @@ def generatorAccount(roomId, users):
                 value.save()
                 mainNotifys.append(
                     {"email": allUsersFields[index].email, "account": value.username, "password": value.password})
+
+            eqGroup[0].distribute = eqGroup[0].distribute + usersCount
+            eqGroup[0].save()
+
+            roomFieldsType.state = 3
+            roomFieldsType.save()
 
             for item in mainNotifys:
                 send_mail(

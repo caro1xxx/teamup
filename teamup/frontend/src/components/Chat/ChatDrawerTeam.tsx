@@ -86,9 +86,13 @@ const ChatDrawerTeam = (props: Props) => {
           </>
         ) : props.data.state === 1 ? (
           <div className="departure">已发车,等待全员支付完毕</div>
-        ) : (
+        ) : props.data.state === 2 ? (
           <div className="payed">
             正在生成账号(账号生成完毕后将同时发送至站内消息和您的邮箱)
+          </div>
+        ) : (
+          <div className="payed" style={{ lineHeight: "39px" }}>
+            账号已发送至站内消息和邮箱
           </div>
         )}
       </TeamWrap>

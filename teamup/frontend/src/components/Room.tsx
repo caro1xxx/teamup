@@ -307,6 +307,8 @@ const Room = () => {
         listenWsToAllPayed();
       } else if (jsonMessage.message.includes("已发车")) {
         listenWsToDeparture();
+      } else if (jsonMessage.message.includes("账号分配成功")) {
+        listenWsToAccount();
       }
       return;
     }
@@ -473,6 +475,11 @@ const Room = () => {
   // 接收来自websocket的 已发车
   const listenWsToDeparture = () => {
     getAllPayState();
+  };
+
+  // 接收来自websocket的 账号已发送
+  const listenWsToAccount = () => {
+    getTeamInfo(userToRoomInfo.pk);
   };
 
   // listen router
