@@ -7,6 +7,7 @@ from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCo
 from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
 from django.core.cache import cache
 import json
+from main.config import REGISTER_CODE_LIFECYCLE
 
 
 from main.task import send_async_email
@@ -63,7 +64,7 @@ class sendEmailCode(APIView):
             EmailCode = GenertorCode()
             send_async_email.delay(
                 'Teamup注册验证码', EmailCode, settings.EMAIL_HOST_USER, email)
-            cache.set('code_' + email, EmailCode, 300)
+            cache.set('code_' + email, EmailCode, REGISTER_CODE_LIFECYCLE)
 
             return JsonResponse(RegisterResponseCode.emailCodeSuccess)
 

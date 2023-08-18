@@ -5,6 +5,7 @@ import json
 from main.tools import sendMessageToChat
 from django.core.cache import cache
 from main.task import checkAllUserPayed
+from main.config import ORDER_LIFEYCLE
 
 
 class Pay(APIView):
@@ -33,7 +34,7 @@ class Pay(APIView):
                         return JsonResponse(PayResponseCode.duplicatePay)
                     i["state"] = 1
                     cache.set('pay_room_'+str(roomId),
-                              json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)
+                              json.dumps(serializeMemoryTeamAllPayOrder), ORDER_LIFEYCLE)
                     sendMessageToChat('room_'+str(roomId), i['user']+'已付款')
                     checkAllUserPayed.delay(
                         serializeMemoryTeamAllPayOrder, roomId)

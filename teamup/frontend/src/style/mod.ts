@@ -3,14 +3,13 @@ import styled from "styled-components";
 export const CreateRoomWrap = styled.div`
   .title {
     display: flex;
-    div {
-      width: 48%;
-    }
     div:first-of-type {
       margin-right: 2%;
+      width: 60%;
     }
     div:nth-child(2) {
       margin-left: 2%;
+      width: 36%;
     }
     margin-bottom: 20px;
   }
@@ -37,8 +36,7 @@ export const CreateRoomWrap = styled.div`
     color: #05b665;
   }
   .create {
-    margin-top: 40px;
-    line-height: 40px;
+    margin-top: 20px;
     text-align: center;
     font-size: 17px;
     height: 40px;

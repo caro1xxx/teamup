@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import User, Room, Order
+from main.models import User, Room, Order, RoomType
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat, generateRandomnumber
+from main.tools import customizePaginator, getCurrentTimestamp, randomNum, sendMessageToChat, generateRandomnumber, checkIsNotEmpty
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from main.task import sendDepartureNotify
+from main.config import ROOM_LIFECYCLE
 
 
 class Rooms(APIView):
@@ -49,13 +50,36 @@ class Rooms(APIView):
         try:
             createDate = json.loads(request.body).get('data', None)
 
-            roomFields = Room.objects.create(
-                name=createDate['name'], description=createDate['description'], create_time=getCurrentTimestamp(
-                ),
-                creator_id=createDate['create_user_id'], type_id=createDate['create_type_id'], take_seat_quorum=0, uuid=randomNum(), state=0)
+            if not checkIsNotEmpty(createDate):
+                return JsonResponse(CommonErrorcode.paramsError)
 
+            username = request.payload_data['username']
+            parmasList = ['name', 'description',
+                          'type', 'uuid', 'mailType', 'time']
+            for i in parmasList:
+                insertI = createDate.get(i, None)
+                if insertI is None or insertI == '':
+                    return JsonResponse(CommonErrorcode.paramsError)
+
+            typeFields = RoomType.objects.filter(
+                name=createDate['type'], level__contains=createDate['time'], type=createDate["mailType"]).first()
+
+            if typeFields is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            roomFields = Room.objects.create(
+                name=createDate['name'], description=createDate['description'], create_time=getCurrentTimestamp(), uuid=createDate['uuid'], state=0, creator_id=username, type_id=typeFields.pk, take_seat_quorum=0)
+
+            user = User.objects.get(username=username)
+
+            # auto join team
+            roomFields.take_seat_quorum += 1
+            roomFields.users.add(user)
+            roomFields.save()
+
+            # create room to redis
             cache.set('room_' + str(roomFields.pk),
-                      json.dumps({}), 60 * 60 * 24 * 3)
+                      json.dumps({}), ROOM_LIFECYCLE)
             return JsonResponse(RoomResponseCode.createdSuccess)
 
         except Exception as e:
@@ -250,7 +274,7 @@ class Handler(APIView):
                                            "qrcode": i.qrcode, "user": i.user.username, "avatorColor": i.user.avator_color, "create_time": i.create_time})
 
                 cache.set('pay_room_' + str(roomId),
-                          json.dumps(ordersSerialize), 60 * 60 * 1)
+                          json.dumps(ordersSerialize), ORDER_LIFEYCLE)
 
                 sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
 
@@ -326,7 +350,7 @@ class PayState(APIView):
                 if i["user"] == username:
                     i["create_time"] = getCurrentTimestamp()
                     cache.set('pay_room_'+str(roomId),
-                              json.dumps(serializeMemoryTeamAllPayOrder), 60 * 60 * 1)
+                              json.dumps(serializeMemoryTeamAllPayOrder), ORDER_LIFEYCLE)
                     return JsonResponse(PayStateResponseCode.flushSuccess)
 
             return JsonResponse(PayStateResponseCode.flushError)
