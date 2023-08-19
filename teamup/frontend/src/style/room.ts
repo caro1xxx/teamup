@@ -7,6 +7,18 @@ export const Wrap = styled.div`
   grid-template-rows: repeat(2, 1fr);
   grid-column-gap: 20px;
   grid-row-gap: 20px;
+  position: relative;
+  .empty {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 300px;
+    display: flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+  }
 `;
 
 export const BottomOptions = styled.div`

@@ -17,29 +17,33 @@ class Rooms(APIView):
         try:
             type = request.GET.get('type', None)
             orderby = request.GET.get('order_by', None)
+            search = request.GET.get('search', None)
 
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
             roomResponse = RoomResponseCode()
             rooms = []
-            if orderby == 'self':
-                authorization_header = request.META.get(
-                    'HTTP_AUTHORIZATION', None)
+            if search == 'None':
+                if orderby == 'self':
+                    authorization_header = request.META.get(
+                        'HTTP_AUTHORIZATION', None)
 
-                if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
-                    return JsonResponse(CommonErrorcode.authError)
+                    if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
+                        return JsonResponse(CommonErrorcode.authError)
 
-                payload = decodeToken(
-                    authorization_header.replace('Bearer ', ''))
-                if payload['username'] is None or payload['username'] == '':
-                    return JsonResponse(CommonErrorcode.authError)
+                    payload = decodeToken(
+                        authorization_header.replace('Bearer ', ''))
+                    if payload['username'] is None or payload['username'] == '':
+                        return JsonResponse(CommonErrorcode.authError)
 
-                rooms = Room.objects.filter(
-                    creator_id=payload['username']).all()
+                    rooms = Room.objects.filter(
+                        creator_id=payload['username']).all()
+                else:
+                    rooms = Room.objects.filter(type__name=type).order_by(
+                        '-take_seat_quorum' if orderby is None else "create_time" if orderby == 'asce'else "-create_time")
             else:
-                rooms = Room.objects.filter(type__name=type).order_by(
-                    '-take_seat_quorum' if orderby is None else "create_time" if orderby == 'asce'else "-create_time")
+                rooms = Room.objects.filter(name__contains=search).all()
 
             pageInatoredRooms, roomResponse.getSuccess['page_count'] = customizePaginator(
                 rooms, 12, request.GET.get('page_num', 1))

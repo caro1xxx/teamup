@@ -17,6 +17,7 @@ interface roomState {
     uuid: string;
   } | null;
   orderBy: string | null;
+  search: string | null;
 }
 
 const initialState: roomState = {
@@ -24,6 +25,7 @@ const initialState: roomState = {
   newCreate: null,
   heightLinePk: 0,
   orderBy: null,
+  search: null,
 };
 
 export const roomSlice = createSlice({
@@ -38,10 +40,14 @@ export const roomSlice = createSlice({
     changeRoomOrderBy: (state, payload) => {
       state.orderBy = payload.payload;
     },
+    changeSearchValue: (state, payload) => {
+      state.search = payload.payload;
+    },
   },
 });
 
-export const { saveNewCreateRoom, changeRoomOrderBy } = roomSlice.actions;
+export const { saveNewCreateRoom, changeRoomOrderBy, changeSearchValue } =
+  roomSlice.actions;
 
 export const selectMessage = (state: RootState) => state.chat.message;
 

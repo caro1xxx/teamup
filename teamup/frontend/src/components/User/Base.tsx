@@ -54,13 +54,13 @@ const Info = (props: Props) => {
           {parseStampTime(props.detailInfo.create_time)}
         </div>
       </div>
-      <div className="row_data">
+      {/* <div className="row_data">
         <img
           src={props.detailInfo.premium ? VipIcon : VipFalseIcon}
           alt="vip"
         />
-      </div>
-      <Button block danger onClick={logOut}>
+      </div> */}
+      <Button block danger onClick={logOut} style={{ marginTop: "10px" }}>
         退出登录
       </Button>
     </Content>

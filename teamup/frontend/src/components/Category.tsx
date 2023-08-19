@@ -9,6 +9,7 @@ import { changeMessage } from "../redux/modules/notifySlice";
 import {
   saveNewCreateRoom,
   changeRoomOrderBy,
+  changeSearchValue,
 } from "../redux/modules/roomSlice";
 import { nanoid } from "nanoid";
 
@@ -78,21 +79,31 @@ const Category = (props: Props) => {
     setOrderByState(newValue);
   };
 
+  const searchRoom = (value: string) => {
+    dispatch(changeSearchValue(value));
+  };
+
   return (
     <>
       <CategoryWrap>
         {OderByState.map((item, index) => {
           return (
-            <div
-              className="btn"
-              style={{ backgroundColor: item.select ? "#05b665" : "#232323" }}
-            >
-              <img
-                src={item.icon}
-                alt={item.label}
-                onClick={() => selectOrderBy(item.label)}
-              />
-            </div>
+            <>
+              {isLogin || item.label !== "self" ? (
+                <div
+                  className="btn"
+                  style={{
+                    backgroundColor: item.select ? "#05b665" : "#232323",
+                  }}
+                >
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    onClick={() => selectOrderBy(item.label)}
+                  />
+                </div>
+              ) : null}
+            </>
           );
         })}
 
@@ -115,8 +126,9 @@ const Category = (props: Props) => {
         <div className="search">
           <Search
             className="cutomer"
-            placeholder="input search text"
+            placeholder="车队编号或车队名称"
             enterButton
+            onSearch={(value) => searchRoom(value)}
           />
         </div>
       </CategoryWrap>

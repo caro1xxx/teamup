@@ -27,7 +27,7 @@ import {
   textPhase,
   checkVaildate,
 } from "../utils/tools";
-import { Skeleton, Drawer } from "antd";
+import { Skeleton, Drawer, Empty } from "antd";
 import { getStorage, setStorage } from "../utils/localstorage";
 import {
   messageReducer,
@@ -44,6 +44,7 @@ import {
   TeamInfoProps,
   UserToRoomInfoProps,
 } from "../types/componentsPropsTypes";
+import { changeSearchValue } from "../redux/modules/roomSlice";
 
 const loadingEmtryArray = generatorEmtryArray(randomNumber());
 
@@ -62,6 +63,7 @@ const Room = () => {
   const orderby = useAppSelector((state) => state.room.orderBy) as
     | string
     | null;
+  const search = useAppSelector((state) => state.room.search) as string | null;
 
   /*state */
   const [RoomList, setRoomList] = React.useState([
@@ -111,9 +113,15 @@ const Room = () => {
   ]);
 
   /*request */
-  const getTypeOfRooms = async (type: string, orderby?: string | null) => {
+  const getTypeOfRooms = async (
+    type: string,
+    orderby?: string | null,
+    searchValue?: string | null
+  ) => {
     let result = await fecther(
-      `room/?type=${type.split("/")[1]}&order_by=${orderby ? orderby : ""}`,
+      `room/?type=${type.split("/")[1]}&order_by=${
+        orderby ? orderby : "None"
+      }&search=${searchValue ? searchValue : "None"}`,
       {},
       "get"
     );
@@ -530,11 +538,18 @@ const Room = () => {
     setRoomList(newValue);
   }, [createRoomFlag]);
 
-  // order by search
+  // order by room
   useEffect(() => {
     if (!orderby) return;
-    getTypeOfRooms(location.pathname, orderby);
+    getTypeOfRooms(location.pathname, orderby, "");
   }, [orderby]);
+
+  // search by room
+  useEffect(() => {
+    if (!search) return;
+    getTypeOfRooms(location.pathname, "", search);
+    dispatch(changeSearchValue(null));
+  }, [search]);
 
   return (
     <Wrap>
@@ -587,9 +602,20 @@ const Room = () => {
         </>
       ) : (
         <>
-          {RoomList.map((item, index) => {
-            return <Item room={item} key={item.key} open={openRoom} />;
-          })}
+          {RoomList.length === 0 ? (
+            <div className="empty">
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="没有找到车队哦 *_*"
+              />
+            </div>
+          ) : (
+            <>
+              {RoomList.map((item, index) => {
+                return <Item room={item} key={item.key} open={openRoom} />;
+              })}
+            </>
+          )}
         </>
       )}
     </Wrap>
