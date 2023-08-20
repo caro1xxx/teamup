@@ -40,6 +40,7 @@ class RoomResponseCode:
     quitErrorNotFound = {'code': 404, 'message': '未加入该车队'}
     quitErrorDepartureed = {'code': 400, 'message': '已发车,无法退出'}
     notDeparture = {'code': 412, 'message': '未发车'}
+    favoriteSuccess = {"code": 200, "message": "操作成功"}
 
 
 class ChatResponseCode:

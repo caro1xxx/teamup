@@ -49,17 +49,38 @@ class Rooms(APIView):
                 rooms, 12, request.GET.get('page_num', 1))
 
             roomAndRoomUser = []
-            for room in pageInatoredRooms:
-                users_in_room = room.users.all()
-                roomAndRoomUser.append({"name": room.name,  "description": room.description,
-                                        "pk": room.pk,
-                                        "create_time": room.create_time,
-                                        "creator": room.creator.username,
-                                        "uuid": room.uuid,
-                                        "type": room.type.name,
-                                        "take_seat_quorum": room.take_seat_quorum,
-                                        "surplus": room.type.max_quorum - room.take_seat_quorum,
-                                        "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], })
+
+            # 用户未登录
+            authorization_header = request.META.get(
+                'HTTP_AUTHORIZATION', None)
+            if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
+                for room in pageInatoredRooms:
+                    users_in_room = room.users.all()
+                    roomAndRoomUser.append({"name": room.name,  "description": room.description,
+                                            "pk": room.pk,
+                                            "create_time": room.create_time,
+                                            "creator": room.creator.username,
+                                            "uuid": room.uuid,
+                                            "type": room.type.name,
+                                            "take_seat_quorum": room.take_seat_quorum,
+                                            "surplus": room.type.max_quorum - room.take_seat_quorum,
+                                            "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], })
+            # 已登录的用户 那么获取用户收藏
+            else:
+                payload = decodeToken(
+                    authorization_header.replace('Bearer ', ''))
+                for room in pageInatoredRooms:
+                    users_in_room = room.users.all()
+                    roomAndRoomUser.append({"name": room.name,  "description": room.description,
+                                            "pk": room.pk,
+                                            "create_time": room.create_time,
+                                            "creator": room.creator.username,
+                                            "uuid": room.uuid,
+                                            "type": room.type.name,
+                                            "take_seat_quorum": room.take_seat_quorum,
+                                            "surplus": room.type.max_quorum - room.take_seat_quorum,
+                                            "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room],
+                                            "favorited": 1 if room.users_favorited.filter(username=payload["username"]).exists() else 0})
 
             roomResponse.getSuccess['data'] = roomAndRoomUser
             return JsonResponse(roomResponse.getSuccess)
@@ -325,6 +346,30 @@ class Handler(APIView):
         except Exception as e:
             print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
+
+    # favorite
+    def put(self, request, *args, **kwargs):
+        roomPk = json.loads(request.body).get('room_pk', None)
+        type = json.loads(request.body).get('type', None)
+
+        if roomPk is None or roomPk == '' or type is None or type == '':
+            return JsonResponse(CommonErrorcode.paramsError)
+
+        username = request.payload_data['username']
+
+        try:
+            room = Room.objects.get(pk=roomPk)
+            users = User.objects.get(username=username)
+        except ObjectDoesNotExist:
+            return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+        if type == 0:
+            room.users_favorited.remove(users)
+        else:
+            room.users_favorited.add(users)
+        room.save()
+
+        return JsonResponse(RoomResponseCode.favoriteSuccess)
 
 
 class PayState(APIView):

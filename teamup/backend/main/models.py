@@ -42,6 +42,8 @@ class Room(models.Model):
         default=0, verbose_name="记录当前车队人数")
     users = models.ManyToManyField(
         User, related_name='rooms_joined', verbose_name="记录当前车队包含的用户")
+    users_favorited = models.ManyToManyField(
+        User, related_name='favorite_rooms', blank=True)
 
     def __str__(self):
         return self.name

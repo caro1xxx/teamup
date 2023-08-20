@@ -88,7 +88,7 @@ const Category = (props: Props) => {
       <CategoryWrap>
         {OderByState.map((item, index) => {
           return (
-            <>
+            <div key={item.key}>
               {isLogin || item.label !== "self" ? (
                 <div
                   className="btn"
@@ -103,7 +103,7 @@ const Category = (props: Props) => {
                   />
                 </div>
               ) : null}
-            </>
+            </div>
           );
         })}
 

@@ -14,6 +14,7 @@ import ChatPayCode from "./Chat/ChatPayCode";
 import ShareIcon from "../assets/images/share.png";
 import WarningIcon from "../assets/images/warning.png";
 import FavoriteIcon from "../assets/images/favorite.png";
+import UnFavoriteIcon from "../assets/images/unfavorite.png";
 
 // tools
 import { nanoid } from "nanoid";
@@ -35,6 +36,7 @@ import {
   payStateInitialState,
 } from "../utils/reducers";
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
+import ClipboardJS from "clipboard";
 
 // types
 import type { MenuProps } from "antd";
@@ -76,6 +78,7 @@ const Room = () => {
       surplus: 0,
       description: "",
       pk: 0,
+      favorited: 0,
     },
   ]);
   const [TeamInfo, setTeamInfo] = React.useState<TeamInfoProps>({
@@ -139,6 +142,7 @@ const Room = () => {
           teammate: [],
           surplus: item.surplus,
           description: textPhase(item.description),
+          favorited: item.favorited ? 1 : 0,
         });
         item.users.forEach((item: any) => {
           roomList[index].teammate.push({
@@ -499,6 +503,27 @@ const Room = () => {
     getTeamInfo(userToRoomInfo.pk);
   };
 
+  // 收藏
+  const favoriteRoom = async (roomPk: number, type: number) => {
+    if (!isLogin) {
+      dispatch(changeMessage(["请先登录或注册", false]));
+      return;
+    }
+    let result = await fecther("handler/", { room_pk: roomPk, type }, "put");
+    if (result.code === 200) {
+      let newValue = [...RoomList];
+      newValue.forEach((item) => {
+        if (item.pk === roomPk) {
+          item.favorited = item.favorited === 1 ? 0 : 1;
+        }
+      });
+      setRoomList(newValue);
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+  };
+
   // listen router
   useEffect(() => {
     getTypeOfRooms(location.pathname); // eslint-disable-next-line
@@ -534,6 +559,7 @@ const Room = () => {
       ],
       surplus: createRoomData.surplus,
       description: textPhase(createRoomData.description),
+      favorited: 0,
     });
     setRoomList(newValue);
   }, [createRoomFlag]);
@@ -612,7 +638,14 @@ const Room = () => {
           ) : (
             <>
               {RoomList.map((item, index) => {
-                return <Item room={item} key={item.key} open={openRoom} />;
+                return (
+                  <Item
+                    room={item}
+                    key={item.key}
+                    open={openRoom}
+                    favorite={favoriteRoom}
+                  />
+                );
               })}
             </>
           )}
@@ -629,6 +662,13 @@ const Item = (props: RoomItemProps) => {
     (state) => state.room.heightLinePk
   ) as number;
 
+  React.useEffect(() => {
+    const clipboard = new ClipboardJS(".shareicon");
+    return () => {
+      clipboard.destroy();
+    };
+  }, []);
+
   return (
     <ItemWrap
       style={{
@@ -637,30 +677,63 @@ const Item = (props: RoomItemProps) => {
             ? "newLoadinghighlight 1s ease-in-out"
             : "",
       }}
-      onClick={() =>
-        props.open({
-          roomName: props.room.roomName,
-          key: props.room.key,
-          roomId: props.room.roomId,
-          pk: props.room.pk,
-        })
-      }
     >
-      <div className="title">
+      <div
+        className="title"
+        onClick={() =>
+          props.open({
+            roomName: props.room.roomName,
+            key: props.room.key,
+            roomId: props.room.roomId,
+            pk: props.room.pk,
+          })
+        }
+      >
         <div>{props.room.roomName}</div>
         <div className="roomid">#{props.room.roomId}</div>
       </div>
       <div className="options">
-        <img src={ShareIcon} alt="share" />
-        <img src={WarningIcon} alt="warning" />
-        <img src={FavoriteIcon} alt="favorite" />
+        <img
+          src={ShareIcon}
+          alt="share"
+          className="shareicon"
+          data-clipboard-text={`https://${window.location.hostname}/shareroom?id=${props.room.roomId}`}
+        />
+        {/* <img src={WarningIcon} alt="warning" /> */}
+        <img
+          onClick={() =>
+            props.favorite(props.room.pk, props.room.favorited === 1 ? 0 : 1)
+          }
+          src={props.room.favorited ? FavoriteIcon : UnFavoriteIcon}
+          alt="favorite"
+        />
         <div>{props.room.online}人在线</div>
       </div>
 
-      <div className="description">
+      <div
+        className="description"
+        onClick={() =>
+          props.open({
+            roomName: props.room.roomName,
+            key: props.room.key,
+            roomId: props.room.roomId,
+            pk: props.room.pk,
+          })
+        }
+      >
         <div>{props.room.description}</div>
       </div>
-      <div className="people_list">
+      <div
+        className="people_list"
+        onClick={() =>
+          props.open({
+            roomName: props.room.roomName,
+            key: props.room.key,
+            roomId: props.room.roomId,
+            pk: props.room.pk,
+          })
+        }
+      >
         {props.room.teammate.map((item, index) => {
           return (
             <PeopleItem
