@@ -1,7 +1,7 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.cache import cache
 from main.contants import ChatResponseCode
-from main.task import sendChatNotifyMessage
+from main.task import sendChatNotifyMessage, forwardingRoomMessage
 from main.tools import decodeToken, getCurrentTimestamp
 import json
 
@@ -72,6 +72,8 @@ class Chat(AsyncWebsocketConsumer):
             sendChatNotifyMessage.delay(
                 'Teamup车队@消息通知', self.user_info['username']+'@你:'+receiveMessage['message'], receiveMessage['aite'])
             messageBody['aite'] = receiveMessage['aite']
+            forwardingRoomMessage.delay(
+                receiveMessage['message'], self.roomPk, receiveMessage['aite'], self.user_info['username'])
 
         await self.channel_layer.group_send(
             self.room_room_name,

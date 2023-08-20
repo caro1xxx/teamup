@@ -1,7 +1,9 @@
 import { nanoid } from "nanoid";
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { calculateTimeDifference } from "../../utils/tools";
+import { fecther } from "../../utils/fecther";
+import { InfoState } from "../../types/componentsPropsTypes";
 type Props = {};
 
 const BodyWrap = styled.div`
@@ -75,26 +77,30 @@ const Wrap = styled.div`
 `;
 
 const Info = (props: Props) => {
-  const [message] = useState([
-    {
-      content: "https://react.dev/reference/react/useState",
-      key: nanoid(),
-      sendTime: 1691682984,
-      read: false,
-      send: "Jack",
-    },
-    {
-      content: "https://react.dev/reference/react/useState",
-      key: nanoid(),
-      read: true,
-      sendTime: 1691682984,
-      send: "Jack",
-    },
-  ]);
+  const [message, setMessage] = React.useState<InfoState[] | []>([]);
+
+  const getMessage = async () => {
+    let result = await fecther("notify/", {}, "get");
+    if (result.code !== 200) return;
+    let msg: any[] = [];
+    result.data.forEach((item: any) => {
+      msg.push({
+        content: item.fields.content,
+        sendTime: item.fields.create_time,
+        send: item.fields.send_user[0].username,
+        key: nanoid(),
+      });
+    });
+    setMessage(msg);
+  };
+
+  React.useEffect(() => {
+    getMessage();
+  }, []);
 
   return (
     <BodyWrap>
-      {message.map((item) => {
+      {message.map((item: InfoState) => {
         return (
           <Wrap key={item.key}>
             <div className="avator">{item.send.charAt(0)}</div>
@@ -103,9 +109,6 @@ const Info = (props: Props) => {
               <div className="message">{item.content}</div>
             </div>
             <div className="state">
-              <div className={item.read ? "read_true" : "read_false"}>
-                <div></div>
-              </div>
               <div className="time">
                 {calculateTimeDifference(item.sendTime)}之前
               </div>

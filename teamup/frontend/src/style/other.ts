@@ -76,3 +76,28 @@ export const CategoryWrap = styled.div`
     }
   }
 `;
+
+export const FavoriteWarp = styled.div`
+  .wrap {
+    cursor: pointer;
+    user-select: none;
+    background-color: #464646a4;
+    border-radius: 5px;
+    padding: 10px 10px;
+    margin-bottom: 10px;
+    .title {
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .tag {
+      font-size: 10px;
+      display: flex;
+      vertical-align: top;
+      justify-content: start;
+      align-items: center;
+      .hint {
+        flex: 1;
+      }
+    }
+  }
+`;

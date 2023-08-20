@@ -4,6 +4,7 @@ class CommonErrorcode:
     illegallyError = {'code': 405, 'message': '非法'}
     authError = {'code': 410, 'message': 'Unauthorized'}
     mismatch = {'code': 411, 'message': '匹配失败'}
+    success = {'code': 200, 'message': '获取成功'}
 
 
 class RegisterResponseCode:

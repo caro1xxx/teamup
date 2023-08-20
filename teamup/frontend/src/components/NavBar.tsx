@@ -6,6 +6,9 @@ import { Popover, Segmented } from "antd";
 import UserIcon from "../assets/images/user.png";
 import Base from "./User/Base";
 import Info from "./User/Info";
+import Favorite from "./User/Favorite";
+import Order from "./User/Order";
+import Settings from "./User/Settings";
 import {
   changeRegisterPupup,
   changeLoginPupup,
@@ -240,7 +243,17 @@ const BottomContent = () => {
         value={currentBarValue}
         onChange={setCurrentBarValue}
       />
-      {currentBarValue === "基础" ? <Base detailInfo={detailInfo} /> : <Info />}
+      {currentBarValue === "基础" ? (
+        <Base detailInfo={detailInfo} />
+      ) : currentBarValue === "消息" ? (
+        <Info />
+      ) : currentBarValue === "订单" ? (
+        <Order />
+      ) : currentBarValue === "收藏" ? (
+        <Favorite />
+      ) : (
+        <Settings />
+      )}
     </Account>
   );
 };

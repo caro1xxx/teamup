@@ -38,3 +38,20 @@ export type UserToRoomInfoProps = {
   pk: number;
   key: string;
 };
+
+export type InfoState = {
+  content: string;
+  key: string;
+  sendTime: number;
+  send: string;
+};
+
+export type FavoriteState = {
+  roomName: string;
+  key: string;
+  surplus: number;
+  pk: number;
+  roomId: string;
+  type: string;
+  state: number;
+};

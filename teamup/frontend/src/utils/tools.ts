@@ -74,7 +74,7 @@ export const parseStampTime = (stamp: number) => {
 };
 
 export const calculateTimeDifference = (stamp: number) => {
-  const diffStamp = new Date().getTime() / 1000 - stamp;
+  const diffStamp = parseInt(new Date().getTime() / 1000 - stamp + "");
   const diffTime =
     diffStamp > 60
       ? diffStamp > 3600

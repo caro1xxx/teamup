@@ -1,10 +1,10 @@
 import django
 django.setup()
-from main.tools import sendMessageToChat
 from django.core.mail import send_mail
 from celery import shared_task
 from backend import settings
 from main import models
+from main.tools import sendMessageToChat, getCurrentTimestamp
 
 
 @shared_task
@@ -91,3 +91,18 @@ def generatorAccount(roomId, users):
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
     else:
         sendMessageToChat('room_'+str(roomId), '账号不足')
+
+
+@shared_task
+def forwardingRoomMessage(content, roomPk, receive_username, send_username):
+
+    from_room = models.Room.objects.get(pk=roomPk)
+    receive_user = models.User.objects.get(username=receive_username)
+    send_user = models.User.objects.get(username=send_username)
+
+    messageFields = models.Message.objects.create(
+        content=content, create_time=getCurrentTimestamp())
+    messageFields.from_room.add(from_room)
+    messageFields.receive_user.add(receive_user)
+    messageFields.send_user.add(send_user)
+    messageFields.save()

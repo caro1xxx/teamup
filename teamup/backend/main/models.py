@@ -106,3 +106,14 @@ class Account(models.Model):
         if not self.id:  # 如果是新创建的记录
             self.create_time = getCurrentTimestamp()
         super(Account, self).save(*args, **kwargs)
+
+
+class Message(models.Model):
+    send_user = models.ManyToManyField(
+        User, related_name='send')
+    from_room = models.ManyToManyField(
+        Room, related_name='from_who_room')
+    receive_user = models.ManyToManyField(
+        User, related_name='receive')
+    content = models.TextField()
+    create_time = models.IntegerField()
