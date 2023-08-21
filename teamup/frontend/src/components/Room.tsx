@@ -13,9 +13,9 @@ import SelfMail from "./Mod/SelfMail";
 
 // assets
 import ShareIcon from "../assets/images/share.png";
-import WarningIcon from "../assets/images/warning.png";
 import FavoriteIcon from "../assets/images/favorite.png";
 import UnFavoriteIcon from "../assets/images/unfavorite.png";
+import LoadingMoreIcon from "../assets/images/loadingmore.png";
 
 // tools
 import { nanoid } from "nanoid";
@@ -29,7 +29,8 @@ import {
   textPhase,
   checkVaildate,
 } from "../utils/tools";
-import { Skeleton, Drawer, Empty, Modal } from "antd";
+import { Skeleton, Drawer, Empty, Modal, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import { getStorage, setStorage } from "../utils/localstorage";
 import {
   messageReducer,
@@ -38,6 +39,7 @@ import {
 } from "../utils/reducers";
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 import ClipboardJS from "clipboard";
+import { LoadingMore } from "../style/other";
 
 // types
 import type { MenuProps } from "antd";
@@ -118,24 +120,30 @@ const Room = () => {
   ]);
   const [emailModel, setMailModel] = React.useState(false);
   const beforeSaveUserOpenRoom = React.useRef<RoomInfo | null>();
+  const currentPageNumRef = React.useRef(1);
+  const sumPageNum = React.useRef(1);
+  const [loadingMoreState, setLoadingMoreState] = React.useState(0);
 
   /*request */
   const getTypeOfRooms = async (
     type: string,
     orderby?: string | null,
-    searchValue?: string | null
+    searchValue?: string | null,
+    clear?: boolean | null
   ) => {
     let result = await fecther(
       `room/?type=${type.split("/")[1]}&order_by=${
         orderby ? orderby : "None"
-      }&search=${searchValue ? searchValue : "None"}`,
+      }&search=${searchValue ? searchValue : "None"}&page_num=${
+        currentPageNumRef.current
+      }`,
       {},
       "get"
     );
     if (result.code !== 200) dispatch(changeMessage([result.message, false]));
     else {
-      setIsLoading(true);
       let roomList: any = [];
+      sumPageNum.current = result.page_count;
       result.data.forEach((item: any, index: number) => {
         roomList.push({
           pk: item.pk,
@@ -157,9 +165,20 @@ const Room = () => {
           });
         });
       });
-      setRoomList(roomList);
-      setTimeout(() => setIsLoading(false), 1000);
+      if (currentPageNumRef.current == sumPageNum.current) {
+        setLoadingMoreState(2);
+      } else {
+        setLoadingMoreState(0);
+      }
+      if (clear) {
+        setRoomList(roomList);
+      } else {
+        setRoomList([...RoomList, ...roomList]);
+      }
     }
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   };
 
   // 获取车队信息
@@ -545,15 +564,25 @@ const Room = () => {
     );
   };
 
+  // 进入自备邮箱房间 前执行操作
   const afterSaveUserMailOpenRoom = () => {
     setMailModel(false);
     if (!beforeSaveUserOpenRoom.current) return;
     openRoom(beforeSaveUserOpenRoom.current);
   };
 
+  // 加载更多
+  const loadingMoreRooms = () => {
+    if (currentPageNumRef.current >= sumPageNum.current || isLoading) return;
+    currentPageNumRef.current += 1;
+    setLoadingMoreState(1);
+    getTypeOfRooms(location.pathname, "", "", false);
+  };
+
   // listen router
   useEffect(() => {
-    getTypeOfRooms(location.pathname); // eslint-disable-next-line
+    setIsLoading(true);
+    getTypeOfRooms(location.pathname, "", "", true); // eslint-disable-next-line
   }, [location.pathname]);
 
   // ws
@@ -595,101 +624,129 @@ const Room = () => {
   // order by room
   useEffect(() => {
     if (!orderby) return;
-    getTypeOfRooms(location.pathname, orderby, "");
+    setIsLoading(true);
+    getTypeOfRooms(location.pathname, orderby, "", true);
   }, [orderby]);
 
   // search by room
   useEffect(() => {
     if (!search) return;
-    getTypeOfRooms(location.pathname, "", search);
+    setIsLoading(true);
+    getTypeOfRooms(location.pathname, "", search, true);
     dispatch(changeSearchValue(null));
   }, [search]);
 
   return (
-    <Wrap>
-      <Drawer
-        style={{ position: "relative" }}
-        title={
-          userToRoomInfo && (
-            <ChatDrawerTitle
-              roomName={userToRoomInfo.roomName}
-              roomId={userToRoomInfo.roomId}
-            />
-          )
-        }
-        placement="right"
-        open={userToRoomInfo && userToRoomInfo.isDrawer}
-        onClose={closeRoom}
-        width="500px"
-      >
-        <ChatDrawerTeam data={TeamInfo} join={joinTeam} departure={departure} />
-        <ChatHint />
-        <ChatDrawerBody message={message} isLogin={isLogin} />
-        <BottomOptions>
-          <div className="options">
-            <MemoInputOptions
-              users={items}
-              currentSelectUser={currentSelectUser}
-            />
-            {isLogin && allPayState.isDeparture ? (
-              <>
-                <ChatUserPayState data={allPayState.all} />
-                <ChatPayCode
-                  flushQr={flushQr}
-                  isOpenQr={isOpenQrRef.current}
-                  price={allPayState.price}
-                  qrcode={allPayState.selfPayCode}
-                  expire_time={allPayState.expire_time}
-                  payState={allPayState.payState}
-                />
-              </>
-            ) : null}
-          </div>
-          <ChatMessageInput send={sendMessage} isLogin={isLogin} />
-        </BottomOptions>
-      </Drawer>
-      {isLoading ? (
-        <>
-          {loadingEmtryArray?.map((item) => {
-            return <LoadingItem key={item.key} />;
-          })}
-        </>
-      ) : (
-        <>
-          {RoomList.length === 0 ? (
-            <div className="empty">
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="没有找到车队哦 *_*"
+    <>
+      <Wrap>
+        <Drawer
+          style={{ position: "relative" }}
+          title={
+            userToRoomInfo && (
+              <ChatDrawerTitle
+                roomName={userToRoomInfo.roomName}
+                roomId={userToRoomInfo.roomId}
               />
-            </div>
-          ) : (
-            <>
-              {RoomList.map((item, index) => {
-                return (
-                  <Item
-                    room={item}
-                    key={item.key}
-                    open={openRoom}
-                    favorite={favoriteRoom}
+            )
+          }
+          placement="right"
+          open={userToRoomInfo && userToRoomInfo.isDrawer}
+          onClose={closeRoom}
+          width="500px"
+        >
+          <ChatDrawerTeam
+            data={TeamInfo}
+            join={joinTeam}
+            departure={departure}
+          />
+          <ChatHint />
+          <ChatDrawerBody message={message} isLogin={isLogin} />
+          <BottomOptions>
+            <div className="options">
+              <MemoInputOptions
+                users={items}
+                currentSelectUser={currentSelectUser}
+              />
+              {isLogin && allPayState.isDeparture ? (
+                <>
+                  <ChatUserPayState data={allPayState.all} />
+                  <ChatPayCode
+                    flushQr={flushQr}
+                    isOpenQr={isOpenQrRef.current}
+                    price={allPayState.price}
+                    qrcode={allPayState.selfPayCode}
+                    expire_time={allPayState.expire_time}
+                    payState={allPayState.payState}
                   />
-                );
-              })}
+                </>
+              ) : null}
+            </div>
+            <ChatMessageInput send={sendMessage} isLogin={isLogin} />
+          </BottomOptions>
+        </Drawer>
+        {isLoading ? (
+          <>
+            {loadingEmtryArray?.map((item) => {
+              return <LoadingItem key={item.key} />;
+            })}
+          </>
+        ) : (
+          <>
+            <>
+              {RoomList.length === 0 ? (
+                <div className="empty">
+                  <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="没有找到车队哦 *_*"
+                  />
+                </div>
+              ) : (
+                <>
+                  {RoomList.map((item, index) => {
+                    return (
+                      <Item
+                        room={item}
+                        key={item.key}
+                        open={openRoom}
+                        favorite={favoriteRoom}
+                      />
+                    );
+                  })}
+                </>
+              )}
             </>
-          )}
+          </>
+        )}
+
+        <Modal
+          title="该车队类型为「自备邮箱」,填写完毕后进入车队"
+          centered
+          open={emailModel}
+          onCancel={() => setMailModel(false)}
+          footer={[]}
+          width={420}
+        >
+          <SelfMail open={afterSaveUserMailOpenRoom} />
+        </Modal>
+      </Wrap>
+
+      {isLoading ? null : (
+        <>
+          {loadingMoreState !== 2 ? (
+            <LoadingMore>
+              {loadingMoreState === 0 ? (
+                <div className="btnbody" onClick={loadingMoreRooms}>
+                  加载更多车队{" "}
+                  <img width={20} src={LoadingMoreIcon} alt="more" />
+                </div>
+              ) : (
+                <Spin indicator={antIcon} />
+              )}
+            </LoadingMore>
+          ) : null}
         </>
       )}
-      <Modal
-        title="该车队类型为「自备邮箱」,填写完毕后进入车队"
-        centered
-        open={emailModel}
-        onCancel={() => setMailModel(false)}
-        footer={[]}
-        width={420}
-      >
-        <SelfMail open={afterSaveUserMailOpenRoom} />
-      </Modal>
-    </Wrap>
+    </>
   );
 };
 
@@ -806,3 +863,7 @@ const LoadingItem = () => {
     </ItemWrap>
   );
 };
+
+const antIcon = (
+  <LoadingOutlined style={{ fontSize: 30, color: "#05b665" }} spin />
+);

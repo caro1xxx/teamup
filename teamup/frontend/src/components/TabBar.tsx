@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import styled from "styled-components";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
@@ -131,12 +131,11 @@ const TabBar = (props: Props) => {
     <Wrap>
       {barList.map((item, index) => {
         return (
-          <>
+          <Fragment key={item.key}>
             {item.isDev ? (
               <Tooltip placement="top" title={"敬请期待"}>
                 <Link
                   className="item"
-                  key={item.key}
                   onClick={() => selectBar(index)}
                   to={"/netflix"}
                 >
@@ -161,7 +160,7 @@ const TabBar = (props: Props) => {
                 />
               </Link>
             )}
-          </>
+          </Fragment>
         );
       })}
     </Wrap>

@@ -101,3 +101,31 @@ export const FavoriteWarp = styled.div`
     }
   }
 `;
+export const LoadingMore = styled.div`
+  text-align: center;
+  margin-top: 30px;
+  display: flex;
+  vertical-align: top;
+  justify-content: center;
+  align-items: center;
+
+  .btnbody {
+    background-color: #05b665;
+  }
+  > div {
+    cursor: pointer;
+    user-select: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    display: inline-flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    img {
+      margin-left: 5px;
+    }
+  }
+  .btnbody:hover {
+    background-color: #2a9263ac;
+  }
+`;

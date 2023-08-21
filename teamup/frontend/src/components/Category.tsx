@@ -95,12 +95,9 @@ const Category = (props: Props) => {
                   style={{
                     backgroundColor: item.select ? "#05b665" : "#232323",
                   }}
+                  onClick={() => selectOrderBy(item.label)}
                 >
-                  <img
-                    src={item.icon}
-                    alt={item.label}
-                    onClick={() => selectOrderBy(item.label)}
-                  />
+                  <img src={item.icon} alt={item.label} />
                 </div>
               ) : null}
             </div>

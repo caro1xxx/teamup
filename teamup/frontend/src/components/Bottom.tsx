@@ -31,7 +31,14 @@ const Bottom = (props: Props) => {
           <div className="content">无障碍访问</div>
         </div>
       </Wrap>
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "20px",
+          cursor: "pointer",
+          color: "#8b8b8b",
+        }}
+      >
         Teamup 2020-2023
       </div>
     </>

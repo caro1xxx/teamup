@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from main.task import sendDepartureNotify
 from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE
+import time
 
 
 class Rooms(APIView):
@@ -18,6 +19,8 @@ class Rooms(APIView):
             type = request.GET.get('type', None)
             orderby = request.GET.get('order_by', None)
             search = request.GET.get('search', None)
+
+            time.sleep(3)
 
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
