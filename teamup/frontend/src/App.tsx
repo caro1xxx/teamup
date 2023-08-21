@@ -5,6 +5,7 @@ import Introduce from "./components/Introduce";
 import TabBar from "./components/TabBar";
 import Room from "./components/Room";
 import Category from "./components/Category";
+import Bottom from "./components/Bottom";
 import {
   getStorage,
   setStorage,
@@ -118,6 +119,7 @@ const App = (props: Props) => {
           </Routes>
           <Category />
           <MemoizedRoom />
+          <Bottom />
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}

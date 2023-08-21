@@ -587,7 +587,7 @@ const Room = () => {
       surplus: createRoomData.surplus,
       description: textPhase(createRoomData.description),
       favorited: 0,
-      stateType: createRoomData,
+      stateType: createRoomData.stateType,
     });
     setRoomList(newValue);
   }, [createRoomFlag]);

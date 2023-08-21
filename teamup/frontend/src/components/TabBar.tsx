@@ -2,6 +2,9 @@ import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Tooltip } from "antd";
+import { useAppDispatch } from "../redux/hooks";
+import { changeMessage } from "../redux/modules/notifySlice";
 
 type Props = {};
 
@@ -44,49 +47,61 @@ const TabBar = (props: Props) => {
       image: require("../assets/images/logo/netflix.png"),
       key: nanoid(),
       select: true,
+      isDev: false,
     },
     {
       path: "/disney",
       image: require("../assets/images/logo/disney.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
     {
       path: "/hulu",
       image: require("../assets/images/logo/hulu.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
     {
       path: "/spotify",
       image: require("../assets/images/logo/spotify.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
     {
       path: "/nintendo",
       image: require("../assets/images/logo/nintendo.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
     {
       path: "/youtube",
       image: require("../assets/images/logo/youtube.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
     {
       path: "/pornhub",
       image: require("../assets/images/logo/pornhub.png"),
       key: nanoid(),
       select: false,
+      isDev: true,
     },
   ]);
   const location = useLocation();
   const navigate = useNavigate();
+  const dispath = useAppDispatch();
 
   // select bar
   const selectBar = (idx: number) => {
+    if (barList[idx].isDev) {
+      dispath(changeMessage(["程序员通宵开发中", false]));
+      return;
+    }
     let oldValue = [...barList];
     oldValue.map((item) => (item.select = false));
     oldValue[idx].select = true;
@@ -116,18 +131,37 @@ const TabBar = (props: Props) => {
     <Wrap>
       {barList.map((item, index) => {
         return (
-          <Link
-            className="item"
-            key={item.key}
-            onClick={() => selectBar(index)}
-            to={item.path}
-          >
-            <img
-              src={item.image}
-              className={item.select ? "select" : ""}
-              alt="logo"
-            />
-          </Link>
+          <>
+            {item.isDev ? (
+              <Tooltip placement="top" title={"敬请期待"}>
+                <Link
+                  className="item"
+                  key={item.key}
+                  onClick={() => selectBar(index)}
+                  to={"/netflix"}
+                >
+                  <img
+                    src={item.image}
+                    className={item.select ? "select" : ""}
+                    alt="logo"
+                  />
+                </Link>
+              </Tooltip>
+            ) : (
+              <Link
+                className="item"
+                key={item.key}
+                onClick={() => selectBar(index)}
+                to={item.path}
+              >
+                <img
+                  src={item.image}
+                  className={item.select ? "select" : ""}
+                  alt="logo"
+                />
+              </Link>
+            )}
+          </>
         );
       })}
     </Wrap>

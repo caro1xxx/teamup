@@ -86,7 +86,7 @@ export const calculateTimeDifference = (stamp: number) => {
   return diffTime;
 };
 
-export const randomNumber = () => Math.floor(Math.random() * 5) + 6;
+export const randomNumber = () => Math.floor(Math.random() * (10 - 5 + 1)) + 5;
 
 export const generatorEmtryArray = (num: number) => {
   if (num === 0) return [];
