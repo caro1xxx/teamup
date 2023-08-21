@@ -6,6 +6,7 @@ class CommonErrorcode:
     mismatch = {'code': 411, 'message': '匹配失败'}
     success = {'code': 200, 'message': '获取成功'}
     typeError = {'code': 415, 'message': '类型不存在'}
+    used = {'code': 416, 'message': '账号已被使用'}
 
 
 class RegisterResponseCode:

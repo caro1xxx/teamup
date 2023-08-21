@@ -39,7 +39,7 @@ const Bottom = (props: Props) => {
           color: "#8b8b8b",
         }}
       >
-        Teamup 2020-2023
+        Teamup 2023
       </div>
     </>
   );

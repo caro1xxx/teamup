@@ -94,11 +94,11 @@ const User = styled.div`
   }
 `;
 const OptionLis = [
-  { title: "首页", key: nanoid() },
-  { title: "大厅", key: nanoid() },
+  { title: "车站", key: nanoid() },
+  { title: "活动", key: nanoid() },
   { title: "帮助", key: nanoid() },
   { title: "联系", key: nanoid() },
-  { title: "日志", key: nanoid() },
+  { title: "更新日志", key: nanoid() },
 ];
 
 const NavBar = (props: Props) => {

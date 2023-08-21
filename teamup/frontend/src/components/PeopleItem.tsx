@@ -36,9 +36,7 @@ const PeopleItem = (props: Props) => {
       <Wrap $color={props.people.avatorColor} $index={props.index}>
         <div>{props.people.username.charAt(0)}</div>
       </Wrap>
-      <Raming>
-        {props.surplus === 0 ? null : `剩余座位:${props.surplus}`}
-      </Raming>
+      <Raming>{props.surplus === 0 ? null : `还差${props.surplus}人`}</Raming>
     </>
   );
 };

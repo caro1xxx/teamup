@@ -81,5 +81,5 @@ class Mail(APIView):
 
             return JsonResponse(CommonErrorcode.success)
         except Exception as e:
-            print(str(e))
-            return JsonResponse(CommonErrorcode.serverError)
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.used)

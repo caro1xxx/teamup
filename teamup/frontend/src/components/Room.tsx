@@ -220,25 +220,26 @@ const Room = () => {
   /**methods */
   // 打开房间
   const openRoom = (roomInfo: RoomInfo) => {
-    if (localStorage.getItem("selfMail") === null) {
-      for (let i = 0; i < RoomList.length; i++) {
-        if (RoomList[i].pk === roomInfo.pk) {
-          if (RoomList[i].stateType === 2) {
-            if (!isLogin) {
-              dispatch(changeMessage(["该车队类型「自备邮箱」,请登录", false]));
-            } else {
-              beforeSaveUserOpenRoom.current = roomInfo;
-              setMailModel(true);
-            }
-            return;
+    for (let i = 0; i < RoomList.length; i++) {
+      if (RoomList[i].pk === roomInfo.pk) {
+        if (RoomList[i].stateType === 2) {
+          if (!isLogin) {
+            dispatch(changeMessage(["该车队类型「自备邮箱」,请登录", false]));
+          } else if (localStorage.getItem("selfMail") === null) {
+            beforeSaveUserOpenRoom.current = roomInfo;
+            setMailModel(true);
+          } else {
+            getTeamInfo(roomInfo.pk);
+            const data = { ...roomInfo, isDrawer: true };
+            setUserToRoomInfo(data);
           }
+          return;
         }
       }
-    } else {
-      getTeamInfo(roomInfo.pk);
-      const data = { ...roomInfo, isDrawer: true };
-      setUserToRoomInfo(data);
     }
+    getTeamInfo(roomInfo.pk);
+    const data = { ...roomInfo, isDrawer: true };
+    setUserToRoomInfo(data);
   };
 
   // 关闭房间
