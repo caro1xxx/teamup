@@ -16,6 +16,8 @@ import ShareIcon from "../assets/images/share.png";
 import FavoriteIcon from "../assets/images/favorite.png";
 import UnFavoriteIcon from "../assets/images/unfavorite.png";
 import LoadingMoreIcon from "../assets/images/loadingmore.png";
+import MsgIcon from "../assets/images/msg.png";
+import PeploeIcon from "../assets/images/peploe.png";
 
 // tools
 import { nanoid } from "nanoid";
@@ -29,7 +31,7 @@ import {
   textPhase,
   checkVaildate,
 } from "../utils/tools";
-import { Skeleton, Drawer, Empty, Modal, Spin } from "antd";
+import { Skeleton, Drawer, Empty, Modal, Spin, Badge } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { getStorage, setStorage } from "../utils/localstorage";
 import {
@@ -795,7 +797,6 @@ const Item = (props: RoomItemProps) => {
           className="shareicon"
           data-clipboard-text={`https://${window.location.hostname}/shareroom?id=${props.room.roomId}`}
         />
-        {/* <img src={WarningIcon} alt="warning" /> */}
         <img
           onClick={() =>
             props.favorite(props.room.pk, props.room.favorited === 1 ? 0 : 1)
@@ -803,7 +804,22 @@ const Item = (props: RoomItemProps) => {
           src={props.room.favorited ? FavoriteIcon : UnFavoriteIcon}
           alt="favorite"
         />
-        <div>{props.room.online}人在线</div>
+        <div
+          style={{
+            display: "flex",
+            verticalAlign: "top",
+            justifyContent: "center",
+            alignItems: "center",
+            marginRight: "10px",
+          }}
+        >
+          <img src={PeploeIcon} alt="pe" style={{ marginRight: "2px" }} />
+          {props.room.online}
+        </div>
+
+        <Badge count={99} size="small" overflowCount={99}>
+          <img src={MsgIcon} alt="msg" />
+        </Badge>
       </div>
 
       <div

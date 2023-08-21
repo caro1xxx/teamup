@@ -95,9 +95,9 @@ const User = styled.div`
 `;
 const OptionLis = [
   { title: "车站", key: nanoid() },
+  { title: "官方小店", key: nanoid() },
   { title: "活动", key: nanoid() },
   { title: "帮助", key: nanoid() },
-  { title: "联系", key: nanoid() },
   { title: "更新日志", key: nanoid() },
 ];
 
