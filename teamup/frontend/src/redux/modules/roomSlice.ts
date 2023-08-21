@@ -15,6 +15,7 @@ interface roomState {
     type: string;
     users: { user: string; avator_color: string }[];
     uuid: string;
+    stateType: number;
   } | null;
   orderBy: string | null;
   search: string | null;

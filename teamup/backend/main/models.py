@@ -19,7 +19,7 @@ class User(models.Model):
 
 class RoomType(models.Model):
     name = models.CharField(max_length=32)
-    level = models.CharField(max_length=128, verbose_name='天数', unique=True)
+    level = models.CharField(max_length=128, verbose_name='天数')
     price = models.FloatField(verbose_name="总价")
     type = models.IntegerField(verbose_name='平台账号或者自备账号')
     max_quorum = models.IntegerField()
@@ -117,3 +117,10 @@ class Message(models.Model):
         User, related_name='receive')
     content = models.TextField()
     create_time = models.IntegerField()
+
+
+class UserMail(models.Model):
+    email = models.CharField(max_length=128, unique=True)
+    password = models.CharField(max_length=32)
+    user = models.ForeignKey(
+        User, to_field='username', null=True, on_delete=models.SET_NULL, related_name='mail_user')

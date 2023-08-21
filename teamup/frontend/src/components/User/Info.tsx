@@ -2,9 +2,11 @@ import { nanoid } from "nanoid";
 import React from "react";
 import styled from "styled-components";
 import { calculateTimeDifference } from "../../utils/tools";
-import { fecther } from "../../utils/fecther";
 import { InfoState } from "../../types/componentsPropsTypes";
-type Props = {};
+
+type Props = {
+  message: InfoState[];
+};
 
 const BodyWrap = styled.div`
   max-height: 200px;
@@ -77,30 +79,9 @@ const Wrap = styled.div`
 `;
 
 const Info = (props: Props) => {
-  const [message, setMessage] = React.useState<InfoState[] | []>([]);
-
-  const getMessage = async () => {
-    let result = await fecther("notify/", {}, "get");
-    if (result.code !== 200) return;
-    let msg: any[] = [];
-    result.data.forEach((item: any) => {
-      msg.push({
-        content: item.fields.content,
-        sendTime: item.fields.create_time,
-        send: item.fields.send_user[0].username,
-        key: nanoid(),
-      });
-    });
-    setMessage(msg);
-  };
-
-  React.useEffect(() => {
-    getMessage();
-  }, []);
-
   return (
     <BodyWrap>
-      {message.map((item: InfoState) => {
+      {props.message.map((item: InfoState) => {
         return (
           <Wrap key={item.key}>
             <div className="avator">{item.send.charAt(0)}</div>

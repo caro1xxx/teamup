@@ -17,6 +17,7 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/typeprice/$', handleRoom.TypeInfo.as_view()),
     re_path(r'^api/v1/teamup/notify/$', property.Notify.as_view()),
     re_path(r'^api/v1/teamup/favorites/$', property.Favorite.as_view()),
+    re_path(r'^api/v1/teamup/usermail/$', property.Mail.as_view()),
 
 
     # pay

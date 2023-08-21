@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import Message, Room, User
+from main.models import Message, Room, UserMail, User
 from main.contants import CommonErrorcode
 from django.core import serializers
 import json
@@ -53,4 +53,33 @@ class Favorite(APIView):
 
             return response
         except Exception as e:
+            return JsonResponse(CommonErrorcode.serverError)
+
+
+class Mail(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            mail = request.GET.get('mail', None)
+            pwd = request.GET.get('pwd', None)
+
+            if mail is None or mail == '' or pwd is None or pwd == '':
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
+
+            UserFields = User.objects.filter(username=username).first()
+
+            mailUserFields = UserMail.objects.filter(
+                user__username=username).first()
+            if mailUserFields is None:
+                UserMail.objects.create(
+                    email=mail, password=pwd, user=UserFields)
+            else:
+                mailUserFields.email = mail
+                mailUserFields.password = pwd
+                mailUserFields.save()
+
+            return JsonResponse(CommonErrorcode.success)
+        except Exception as e:
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

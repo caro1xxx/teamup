@@ -64,7 +64,7 @@ class Rooms(APIView):
                                             "type": room.type.name,
                                             "take_seat_quorum": room.take_seat_quorum,
                                             "surplus": room.type.max_quorum - room.take_seat_quorum,
-                                            "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], })
+                                            "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], "stateType": room.type.type})
             # 已登录的用户 那么获取用户收藏
             else:
                 payload = decodeToken(
@@ -80,7 +80,7 @@ class Rooms(APIView):
                                             "take_seat_quorum": room.take_seat_quorum,
                                             "surplus": room.type.max_quorum - room.take_seat_quorum,
                                             "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room],
-                                            "favorited": 1 if room.users_favorited.filter(username=payload["username"]).exists() else 0})
+                                            "favorited": 1 if room.users_favorited.filter(username=payload["username"]).exists() else 0, "stateType": room.type.type})
 
             roomResponse.getSuccess['data'] = roomAndRoomUser
             return JsonResponse(roomResponse.getSuccess)
@@ -109,7 +109,7 @@ class Rooms(APIView):
                 name=createDate['type'], level__contains=createDate['time'], type=createDate["mailType"]).first()
 
             if typeFields is None:
-                return JsonResponse(CommonErrorcode.paramsError)
+                return JsonResponse(CommonErrorcode.typeError)
 
             roomFields = Room.objects.create(
                 name=createDate['name'], description=createDate['description'], create_time=getCurrentTimestamp(), uuid=createDate['uuid'], state=0, creator_id=username, type_id=typeFields.pk, take_seat_quorum=0)
@@ -134,7 +134,7 @@ class Rooms(APIView):
                                                    "type": roomFields.type.name,
                                                    "take_seat_quorum": roomFields.take_seat_quorum,
                                                    "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
-                                                   "users": [{"user": user.username, "avator_color": user.avator_color}], }
+                                                   "users": [{"user": user.username, "avator_color": user.avator_color}], "stateType": roomFields.type.type}
             return JsonResponse(roomResponse.createdSuccess)
 
         except Exception as e:

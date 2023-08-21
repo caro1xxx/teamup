@@ -5,6 +5,7 @@ class CommonErrorcode:
     authError = {'code': 410, 'message': 'Unauthorized'}
     mismatch = {'code': 411, 'message': '匹配失败'}
     success = {'code': 200, 'message': '获取成功'}
+    typeError = {'code': 415, 'message': '类型不存在'}
 
 
 class RegisterResponseCode:

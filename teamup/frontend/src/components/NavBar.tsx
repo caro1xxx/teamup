@@ -13,7 +13,8 @@ import {
   changeRegisterPupup,
   changeLoginPupup,
 } from "../redux/modules/userSlice";
-
+import { InfoState, FavoriteState } from "../types/componentsPropsTypes";
+import { fecther } from "../utils/fecther";
 type Props = {};
 
 const Wrap = styled.div`
@@ -233,8 +234,40 @@ const BottomContent = () => {
   const [currentBarValue, setCurrentBarValue] = useState<string | number>(
     "基础"
   );
-
+  const [message, setMessage] = React.useState<InfoState[] | []>([]);
   const detailInfo = useAppSelector((state) => state.user.detailInfo);
+  const [FavoriteList, setFavoriteList] = React.useState<FavoriteState[] | []>(
+    []
+  );
+  const getMessage = async () => {
+    let result = await fecther("notify/", {}, "get");
+    if (result.code !== 200) return;
+    let msg: any[] = [];
+    result.data.forEach((item: any) => {
+      msg.push({
+        content: item.fields.content,
+        sendTime: item.fields.create_time,
+        send: item.fields.send_user[0].username,
+        key: nanoid(),
+      });
+    });
+    setMessage(msg);
+  };
+
+  const getFavorite = async () => {
+    let result = await fecther("favorites/", {}, "get");
+    if (result.code !== 200) return;
+    let data: FavoriteState[] = [];
+    result.data.forEach((item: FavoriteState) => {
+      data.push({ ...item, key: nanoid() });
+    });
+    setFavoriteList(data);
+  };
+
+  React.useEffect(() => {
+    getMessage();
+    getFavorite();
+  }, []);
 
   return (
     <Account>
@@ -246,11 +279,11 @@ const BottomContent = () => {
       {currentBarValue === "基础" ? (
         <Base detailInfo={detailInfo} />
       ) : currentBarValue === "消息" ? (
-        <Info />
+        <Info message={message} />
       ) : currentBarValue === "订单" ? (
         <Order />
       ) : currentBarValue === "收藏" ? (
-        <Favorite />
+        <Favorite favoriteList={FavoriteList} />
       ) : (
         <Settings />
       )}

@@ -61,3 +61,25 @@ export const CreateRoomWrap = styled.div`
     user-select: none;
   }
 `;
+
+export const SelfWrap = styled.div`
+  padding-top: 10px;
+  > div {
+    margin: 10px 0px;
+  }
+  .hint {
+    font-size: 10px;
+    color: #05b665;
+  }
+  .create {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 17px;
+    height: 40px;
+    width: 100%;
+    background-color: #05b665;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+  }
+`;

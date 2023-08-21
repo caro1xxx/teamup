@@ -9,6 +9,7 @@ import ChatMessageInput from "./Chat/ChatMessageInput";
 import ChatInputOptions from "./Chat/ChatInputOptions";
 import ChatUserPayState from "./Chat/ChatUserPayState";
 import ChatPayCode from "./Chat/ChatPayCode";
+import SelfMail from "./Mod/SelfMail";
 
 // assets
 import ShareIcon from "../assets/images/share.png";
@@ -28,7 +29,7 @@ import {
   textPhase,
   checkVaildate,
 } from "../utils/tools";
-import { Skeleton, Drawer, Empty } from "antd";
+import { Skeleton, Drawer, Empty, Modal } from "antd";
 import { getStorage, setStorage } from "../utils/localstorage";
 import {
   messageReducer,
@@ -79,6 +80,7 @@ const Room = () => {
       description: "",
       pk: 0,
       favorited: 0,
+      stateType: 1,
     },
   ]);
   const [TeamInfo, setTeamInfo] = React.useState<TeamInfoProps>({
@@ -114,6 +116,8 @@ const Room = () => {
   const [items, setUsers] = React.useState<MenuProps["items"]>([
     { key: "", label: <div></div> },
   ]);
+  const [emailModel, setMailModel] = React.useState(false);
+  const beforeSaveUserOpenRoom = React.useRef<RoomInfo | null>();
 
   /*request */
   const getTypeOfRooms = async (
@@ -143,6 +147,7 @@ const Room = () => {
           surplus: item.surplus,
           description: textPhase(item.description),
           favorited: item.favorited ? 1 : 0,
+          stateType: item.stateType,
         });
         item.users.forEach((item: any) => {
           roomList[index].teammate.push({
@@ -196,9 +201,25 @@ const Room = () => {
   /**methods */
   // 打开房间
   const openRoom = (roomInfo: RoomInfo) => {
-    const data = { ...roomInfo, isDrawer: true };
-    getTeamInfo(roomInfo.pk);
-    setUserToRoomInfo(data);
+    if (localStorage.getItem("selfMail") === null) {
+      for (let i = 0; i < RoomList.length; i++) {
+        if (RoomList[i].pk === roomInfo.pk) {
+          if (RoomList[i].stateType === 2) {
+            if (!isLogin) {
+              dispatch(changeMessage(["该车队类型「自备邮箱」,请登录", false]));
+            } else {
+              beforeSaveUserOpenRoom.current = roomInfo;
+              setMailModel(true);
+            }
+            return;
+          }
+        }
+      }
+    } else {
+      getTeamInfo(roomInfo.pk);
+      const data = { ...roomInfo, isDrawer: true };
+      setUserToRoomInfo(data);
+    }
   };
 
   // 关闭房间
@@ -524,6 +545,12 @@ const Room = () => {
     );
   };
 
+  const afterSaveUserMailOpenRoom = () => {
+    setMailModel(false);
+    if (!beforeSaveUserOpenRoom.current) return;
+    openRoom(beforeSaveUserOpenRoom.current);
+  };
+
   // listen router
   useEffect(() => {
     getTypeOfRooms(location.pathname); // eslint-disable-next-line
@@ -560,6 +587,7 @@ const Room = () => {
       surplus: createRoomData.surplus,
       description: textPhase(createRoomData.description),
       favorited: 0,
+      stateType: createRoomData,
     });
     setRoomList(newValue);
   }, [createRoomFlag]);
@@ -651,6 +679,16 @@ const Room = () => {
           )}
         </>
       )}
+      <Modal
+        title="该车队类型为「自备邮箱」,填写完毕后进入车队"
+        centered
+        open={emailModel}
+        onCancel={() => setMailModel(false)}
+        footer={[]}
+        width={420}
+      >
+        <SelfMail open={afterSaveUserMailOpenRoom} />
+      </Modal>
     </Wrap>
   );
 };
