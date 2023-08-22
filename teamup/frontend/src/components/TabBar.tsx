@@ -43,49 +43,49 @@ const Wrap = styled.div`
 const TabBar = (props: Props) => {
   const [barList, setBarList] = useState([
     {
-      path: "/netflix",
+      path: "/home/netflix",
       image: require("../assets/images/logo/netflix.png"),
       key: nanoid(),
       select: true,
       isDev: false,
     },
     {
-      path: "/disney",
+      path: "/home/disney",
       image: require("../assets/images/logo/disney.png"),
       key: nanoid(),
       select: false,
       isDev: true,
     },
     {
-      path: "/hulu",
+      path: "/home/hulu",
       image: require("../assets/images/logo/hulu.png"),
       key: nanoid(),
       select: false,
       isDev: true,
     },
     {
-      path: "/spotify",
+      path: "/home/spotify",
       image: require("../assets/images/logo/spotify.png"),
       key: nanoid(),
       select: false,
       isDev: true,
     },
     {
-      path: "/nintendo",
+      path: "/home/nintendo",
       image: require("../assets/images/logo/nintendo.png"),
       key: nanoid(),
       select: false,
       isDev: true,
     },
     {
-      path: "/youtube",
+      path: "/home/youtube",
       image: require("../assets/images/logo/youtube.png"),
       key: nanoid(),
       select: false,
       isDev: true,
     },
     {
-      path: "/pornhub",
+      path: "/home/pornhub",
       image: require("../assets/images/logo/pornhub.png"),
       key: nanoid(),
       select: false,
@@ -122,7 +122,6 @@ const TabBar = (props: Props) => {
     });
     if (!flag) {
       oldValue[0].select = true;
-      navigate("/netflix"); // eslint-disable-next-line
     }
     setBarList(oldValue); // eslint-disable-next-line
   }, []);
@@ -137,7 +136,7 @@ const TabBar = (props: Props) => {
                 <Link
                   className="item"
                   onClick={() => selectBar(index)}
-                  to={"/netflix"}
+                  to={"/home/netflix"}
                 >
                   <img
                     src={item.image}

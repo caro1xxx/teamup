@@ -24,7 +24,7 @@ const Store = (props: Props) => {
     <Wrap>
       <img width={25} src={StoreIcon} alt="store" />
       <div>
-        官方店铺,<span>无需组队</span>拼车即可<span>享受组队价</span>
+        官方店铺,<span>无需组队</span>拼车即可<span>享受组队最低价</span>
         👉点我直达👈
       </div>
     </Wrap>

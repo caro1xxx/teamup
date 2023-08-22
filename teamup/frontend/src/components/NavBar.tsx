@@ -9,6 +9,7 @@ import Info from "./User/Info";
 import Favorite from "./User/Favorite";
 import Order from "./User/Order";
 import Settings from "./User/Settings";
+import { Link } from "react-router-dom";
 import {
   changeRegisterPupup,
   changeLoginPupup,
@@ -58,10 +59,12 @@ const Options = styled.div`
   align-items: center;
   color: #cccccccc;
   font-family: "Helvetica";
-  div {
+  .link_item {
     user-select: none;
     cursor: pointer;
     margin: 0px 20px;
+    text-decoration: none;
+    color: #cccccccc;
   }
 `;
 const User = styled.div`
@@ -94,11 +97,11 @@ const User = styled.div`
   }
 `;
 const OptionLis = [
-  { title: "车站", key: nanoid() },
-  { title: "官方小店", key: nanoid() },
-  { title: "活动", key: nanoid() },
-  { title: "帮助", key: nanoid() },
-  { title: "更新日志", key: nanoid() },
+  { title: "车站", key: nanoid(), path: "/home/netflix" },
+  { title: "官方小店", key: nanoid(), path: "/store" },
+  { title: "活动", key: nanoid(), path: "/discount" },
+  { title: "帮助", key: nanoid(), path: "/support" },
+  { title: "更新日志", key: nanoid(), path: "/logs" },
 ];
 
 const NavBar = (props: Props) => {
@@ -128,7 +131,11 @@ const NavBar = (props: Props) => {
       </Logo>
       <Options>
         {OptionLis.map((item) => {
-          return <div key={item.key}>{item.title}</div>;
+          return (
+            <Link className="link_item" key={item.key} to={item.path}>
+              {item.title}
+            </Link>
+          );
         })}
       </Options>
       <User>

@@ -134,7 +134,7 @@ const Room = () => {
     clear?: boolean | null
   ) => {
     let result = await fecther(
-      `room/?type=${type.split("/")[1]}&order_by=${
+      `room/?type=${type.split("/")[2]}&order_by=${
         orderby ? orderby : "None"
       }&search=${searchValue ? searchValue : "None"}&page_num=${
         currentPageNumRef.current

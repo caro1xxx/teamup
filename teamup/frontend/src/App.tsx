@@ -1,12 +1,7 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import NavBar from "./components/NavBar";
-import Introduce from "./components/Introduce";
-import TabBar from "./components/TabBar";
-import Room from "./components/Room";
-import Category from "./components/Category";
 import Bottom from "./components/Bottom";
-import Store from "./components/Store";
 import {
   getStorage,
   setStorage,
@@ -21,6 +16,8 @@ import {
 } from "./redux/modules/userSlice";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import Station from "./pages/Station";
+import Store from "./pages/Store";
 
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 
@@ -29,8 +26,6 @@ import { fecther } from "./utils/fecther";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 type Props = {};
-
-const MemoizedRoom = React.memo(Room);
 
 const Wrap = styled.div`
   width: 1200px;
@@ -107,23 +102,13 @@ const App = (props: Props) => {
       >
         <Wrap>
           <NavBar />
-          <Store />
-          <Introduce />
           <Routes>
-            <Route path="/" element={<TabBar />} />
-            <Route path="/netflix" element={<TabBar />} />
-            <Route path="/disney" element={<TabBar />} />
-            <Route path="/hulu" element={<TabBar />} />
-            <Route path="/spotify" element={<TabBar />} />
-            <Route path="/nintendo" element={<TabBar />} />
-            <Route path="/youtube" element={<TabBar />} />
-            <Route path="/pornhub" element={<TabBar />} />
+            <Route path="/" element={<Station />} />
+            <Route path="/home/*" element={<Station />} />
+            <Route path="/store" element={<Store />} />
           </Routes>
-          <Category />
-          <MemoizedRoom />
           <Bottom />
         </Wrap>
-
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}
       </ConfigProvider>

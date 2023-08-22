@@ -42,6 +42,7 @@ class Favorite(APIView):
             CommonCode.success['data'] = []
             for i in allRooms:
                 for n in i.users_favorited.all():
+                    print(n)
                     if n.username == username:
                         CommonCode.success['data'].append(
                             {"roomName": i.name, "surplus": i.type.max_quorum - i.take_seat_quorum, "pk": i.pk, "roomId": i.uuid, "type": i.type.name, "state": i.state})
