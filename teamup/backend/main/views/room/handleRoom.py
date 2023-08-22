@@ -315,18 +315,22 @@ class Handler(APIView):
                 users_email = [user.email for user in users_in_room]
                 priceOfItem = room.type.price / room.take_seat_quorum
                 currentStampTime = getCurrentTimestamp()
+                order_id = generateRandomnumber()
 
                 ordersInsert = []
+                insertMysqlOrder = []
                 for user in users_in_room:
-                    ordersInsert.append(Order(order_id=generateRandomnumber(),
-                                              state=0, price=priceOfItem, qrcode='/wechat/test.png', room=room, user=user, create_time=currentStampTime, qr_expire_time=currentStampTime+60*3))
+                    insertMysqlOrder.append(
+                        Order(order_id=order_id, room=room, user=user))
+                    ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "hello",
+                                        "room": room.pk, "user": user.username, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
 
-                OrdersFields = Order.objects.bulk_create(ordersInsert)
+                Order.objects.bulk_create(insertMysqlOrder)
 
                 ordersSerialize = []
-                for i in OrdersFields:
-                    ordersSerialize.append({"order_id": i.order_id, "state": i.state, "price": i.price,
-                                           "qrcode": i.qrcode, "user": i.user.username, "avatorColor": i.user.avator_color, "create_time": i.create_time})
+                for i in ordersInsert:
+                    ordersSerialize.append({"order_id": i["order_id"], "state": i["state"], "price": i["price"],
+                                           "qrcode": i["qrcode"], "user": i["user"], "avatorColor": i["avatorColor"], "create_time": i["create_time"]})
 
                 cache.set('pay_room_' + str(roomId),
                           json.dumps(ordersSerialize), ORDER_LIFEYCLE)
@@ -336,7 +340,7 @@ class Handler(APIView):
                 sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
                                           room.type.name+'车队已发车', users_email)
             except Exception as e:
-                print(str(e))
+                # print(str(e))
                 room.state = 0
                 room.save()
                 return JsonResponse(CommonErrorcode.serverError)
@@ -344,7 +348,7 @@ class Handler(APIView):
             return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # favorite

@@ -56,15 +56,14 @@ class Room(models.Model):
 
 class Order(models.Model):
     order_id = models.CharField(max_length=32)
-    state = models.IntegerField(verbose_name='0未支付,1支付成功,2二维码到期', default=0)
-    price = models.FloatField()
-    qrcode = models.CharField(max_length=128)
+    price = models.FloatField(default=0.00)
+    payed_qrcode = models.TextField(default='')
+    state = models.IntegerField(default=0)
     room = models.ForeignKey(
-        Room, on_delete=models.SET_NULL, null=True, related_name='orders')
+        Room, on_delete=models.SET_NULL, null=True, related_name='orders', default=None)
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='users')
-    create_time = models.IntegerField()
-    qr_expire_time = models.IntegerField()
+        User, on_delete=models.SET_NULL, null=True, related_name='users', default=None)
+    payed_time = models.IntegerField(default=0)
 
 
 class Group(models.Model):

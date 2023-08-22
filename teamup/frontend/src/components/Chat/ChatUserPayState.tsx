@@ -1,6 +1,6 @@
 import React from "react";
-import { InputWrap, InputOptionsWrap, UserPayWrap } from "../../style/chat";
-import { Input, Dropdown, Tooltip } from "antd";
+import { UserPayWrap } from "../../style/chat";
+import { Tooltip } from "antd";
 type Props = {
   data: {
     order_id: string;

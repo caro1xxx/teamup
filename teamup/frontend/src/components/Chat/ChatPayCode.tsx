@@ -110,9 +110,7 @@ const PayCodeBody = (props: PayCodeBodyProps) => {
         <div>微信扫码支付</div>
       </div>
       <QRCode
-        value={
-          "wxp://f2f1aDnZfHbT-ConY738bUhnvy18nVnLhX-l3VW66HnN1vq-Tqo5iLqdrCrVF6moZR9w"
-        }
+        value={props.qrcode}
         status={props.qrstate ? "active" : "expired"}
         color="#05b665"
         bordered={false}

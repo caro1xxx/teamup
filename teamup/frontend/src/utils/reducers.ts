@@ -31,11 +31,11 @@ export const payStateReducer = (state: any, action: any) => {
       };
     case "flushQr":
       return {
-        isDeparture: false,
-        selfPayCode: "",
-        expire_time: 0,
-        payState: 0,
-        price: 0,
+        isDeparture: true,
+        selfPayCode: state.selfPayCode,
+        expire_time: action.payload.expire_time,
+        payState: state.payState,
+        price: state.price,
         all: [...state.all],
       };
     case "changePayState":
