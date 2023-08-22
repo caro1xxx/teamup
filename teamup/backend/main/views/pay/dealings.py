@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
+from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode, PayStateResponseCode
 import json
 from main.tools import sendMessageToChat, getCurrentTimestamp
 from django.core.cache import cache
@@ -10,6 +10,7 @@ from main.models import Order
 
 
 class Pay(APIView):
+
     # 支付回调
     def put(self, request, *args, **kwargs):
         try:
@@ -50,5 +51,5 @@ class Pay(APIView):
             return JsonResponse(PayResponseCode.payError)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

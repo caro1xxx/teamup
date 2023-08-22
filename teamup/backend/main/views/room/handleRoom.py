@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken
+from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -282,7 +282,7 @@ class Handler(APIView):
             # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
-    # 车队发车
+    # 车队发车 + 创建房间内成员订单
     def post(self, request, *args, **kwargs):
         try:
             roomId = json.loads(request.body).get('room_id', None)
@@ -316,12 +316,13 @@ class Handler(APIView):
                 priceOfItem = room.type.price / room.take_seat_quorum
                 currentStampTime = getCurrentTimestamp()
                 order_id = generateRandomnumber()
+                discount = discountPrice(priceOfItem)
 
                 ordersInsert = []
                 insertMysqlOrder = []
                 for user in users_in_room:
                     insertMysqlOrder.append(
-                        Order(order_id=order_id, room=room, user=user))
+                        Order(order_id=order_id, room=room, user=user, price=priceOfItem, discount_price=discount, type=room.type.name, time=999))
                     ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "hello",
                                         "room": room.pk, "user": user.username, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
 

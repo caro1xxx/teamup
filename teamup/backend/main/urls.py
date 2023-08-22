@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import re_path
 from main.views.user import loginAndRegister, property
 from main.views.room import handleRoom
-from main.views.pay import dealings
+from main.views.pay import dealings, account
 
 urlpatterns = [
     # re_path('admin/', admin.site.urls),
@@ -22,4 +22,5 @@ urlpatterns = [
 
     # pay
     re_path(r'^api/v1/teamup/paynotify/$', dealings.Pay.as_view()),
+    re_path(r'^api/v1/teamup/accountorder/$', account.OrderHandle.as_view()),
 ]

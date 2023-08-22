@@ -3,10 +3,16 @@ import { StoreWrap } from "../style/pages";
 import { nanoid } from "nanoid";
 import { Modal } from "antd";
 import BuyAccount from "../components/Mod/BuyAccount";
+import { fecther } from "../utils/fecther";
+import { useAppSelector } from "../redux/hooks";
+import { generateRandomString } from "../utils/tools";
+import { useAppDispatch } from "../redux/hooks";
+import { changeMessage } from "../redux/modules/notifySlice";
 type Props = {};
 
 const Store = (props: Props) => {
-  const [serviceList, setServiceList] = React.useState([
+  const dispatch = useAppDispatch();
+  const [serviceList] = React.useState([
     {
       icon: require("../assets/images/logo/netflix.png"),
       key: nanoid(),
@@ -71,11 +77,104 @@ const Store = (props: Props) => {
       ],
     },
   ]);
+  const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
   const [createRoomModel, setCreateRoomModel] = React.useState(false);
+  const [OrderInfo, setOrderInfo] = React.useState({
+    order_id: "",
+    user: "",
+    create_time: 0,
+    price: 0,
+    discountPrice: 0,
+    type: "",
+    time: 0,
+    qrcode: "",
+    qrstate: false,
+    expire_time: 0,
+  });
+  const timerRef = React.useRef();
 
   const buy = async (type: string, time: number) => {
+    let result = await fecther(
+      "accountorder/",
+      { time, type, flag: isLogin ? "None" : generateRandomString(5) },
+      "post"
+    );
+    if (result.code !== 200) {
+      dispatch(changeMessage(["商品已下架", false]));
+      return;
+    }
+    setOrderInfo({
+      ...result.order,
+      expire_time: result.order.create_time + 60 * 3,
+      qrstate: true,
+    });
     setCreateRoomModel(true);
   };
+
+  // 检查二维码是否到期
+  const captureChangeQr = () => {
+    if (!createRoomModel) {
+      if (timerRef === null || !OrderInfo.qrstate) return;
+      // @ts-ignore
+      clearInterval(timerRef.current);
+    } else {
+      if (!OrderInfo.qrstate) return;
+      if (
+        OrderInfo.qrstate ===
+        OrderInfo.expire_time > new Date().getTime() / 1000
+      ) {
+      } else {
+        setOrderInfo({
+          ...OrderInfo,
+          qrstate: OrderInfo.expire_time > new Date().getTime() / 1000,
+        });
+      }
+      // @ts-ignore
+      timerRef.current = setInterval(() => {
+        if (
+          OrderInfo.qrstate ===
+          OrderInfo.expire_time > new Date().getTime() / 1000
+        )
+          return;
+        setOrderInfo({
+          ...OrderInfo,
+          qrstate: OrderInfo.expire_time > new Date().getTime() / 1000,
+        });
+        // @ts-ignore
+        clearInterval(timerRef.current);
+      }, 1000);
+    }
+  };
+
+  // 刷新code
+  const flush = async () => {
+    let result = await fecther(
+      "accountorder/",
+      { order_id: OrderInfo.order_id },
+      "put"
+    );
+    if (result.code == 200) {
+      let newValue = { ...OrderInfo };
+      newValue.create_time = parseInt(new Date().getTime() / 1000 + "");
+      newValue.expire_time = newValue.create_time + 60 * 3;
+      newValue.qrstate = true;
+      setOrderInfo(newValue);
+    } else {
+      dispatch(changeMessage(["刷新二维码失败", false]));
+    }
+  };
+
+  // @ts-ignore
+  React.useEffect(() => {
+    if (!createRoomModel) {
+      // @ts-ignore
+      timerRef.current = null;
+    } else {
+      captureChangeQr();
+    }
+    //@ts-ignore
+    return () => (timerRef.current = null);
+  }, [createRoomModel]);
 
   return (
     <>
@@ -123,14 +222,20 @@ const Store = (props: Props) => {
         <div style={{ textAlign: "center" }}>敬请期待更多Plan</div>
       </StoreWrap>
       <Modal
-        title="付款"
+        title="付款 - 微信支付"
         centered
         open={createRoomModel}
         onCancel={() => setCreateRoomModel(false)}
         footer={[]}
-        width={300}
+        width={350}
       >
-        <BuyAccount />
+        <BuyAccount
+          flush={flush}
+          qrcode={OrderInfo.qrcode}
+          qrstate={OrderInfo.qrstate}
+          price={OrderInfo.price}
+          discountPrice={OrderInfo.discountPrice}
+        />
       </Modal>
     </>
   );

@@ -17,6 +17,7 @@ class User(models.Model):
         return {'username': self.username}
 
 
+# 房间类型 + 房间账号类型
 class RoomType(models.Model):
     name = models.CharField(max_length=32)
     level = models.CharField(max_length=128, verbose_name='天数')
@@ -26,6 +27,13 @@ class RoomType(models.Model):
 
     def natural_key(self):
         return {'typename': self.name}
+
+
+# 账号类型
+class AccountType(models.Model):
+    type = models.CharField(max_length=32)
+    time = models.IntegerField()
+    price = models.FloatField(verbose_name='单价')
 
 
 class Room(models.Model):
@@ -56,13 +64,18 @@ class Room(models.Model):
 
 class Order(models.Model):
     order_id = models.CharField(max_length=32)
-    price = models.FloatField(default=0.00)
+    price = models.FloatField()
+    discount_price = models.FloatField()
     payed_qrcode = models.TextField(default='')
     state = models.IntegerField(default=0)
+    type = models.CharField(max_length=32)
+    time = models.IntegerField()
     room = models.ForeignKey(
         Room, on_delete=models.SET_NULL, null=True, related_name='orders', default=None)
     user = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='users', default=None)
+    userFlag = models.CharField(
+        max_length=5, verbose_name="在用户未登录的情况下创建订单的标示", default='')
     payed_time = models.IntegerField(default=0)
 
 

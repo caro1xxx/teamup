@@ -66,6 +66,9 @@ const Options = styled.div`
     text-decoration: none;
     color: #cccccccc;
   }
+  .link_item:hover {
+    color: #fff;
+  }
 `;
 const User = styled.div`
   flex: 1;

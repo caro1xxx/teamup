@@ -9,6 +9,7 @@ import random
 import string
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.http import JsonResponse
 
 
 def checkIsNotEmpty(data, *args):
@@ -92,3 +93,17 @@ def generateRandomnumber(length=32):
     characters = string.ascii_letters + string.digits
     order_number = ''.join(random.choice(characters) for _ in range(length))
     return order_number
+
+
+def discountPrice(real_price):
+    return round(random.uniform(real_price-1, real_price), 2)
+
+
+def fromAuthGetUsername(request):
+    authorization_header = request.META.get(
+        'HTTP_AUTHORIZATION', None)
+    if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
+        return JsonResponse({"code": 401, "message": "refuse"})
+    payload = decodeToken(
+        authorization_header.replace('Bearer ', ''))
+    return payload['username']
