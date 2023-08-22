@@ -84,6 +84,7 @@ def sendMessageToChat(room_name, message):
             'type': 'chat_message',
             'message': message,
             'username': 'system',
+            'auth': 'temaup_payment_notify_key',
             'create_time': getCurrentTimestamp()
         }
     )

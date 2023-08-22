@@ -1,10 +1,10 @@
 import django
 django.setup()
-from django.core.mail import send_mail
-from celery import shared_task
-from backend import settings
-from main import models
 from main.tools import sendMessageToChat, getCurrentTimestamp
+from main import models
+from backend import settings
+from celery import shared_task
+from django.core.mail import send_mail
 
 
 @shared_task
@@ -32,7 +32,7 @@ def checkAllUserPayed(memoryallUser, roomId):
         if i["state"] == 0:
             return
     models.Room.objects.filter(pk=roomId).update(state=2)
-    sendMessageToChat('room_'+str(roomId), '全员付款完毕')
+    sendMessageToChat('room_'+roomId, '全员付款完毕')
     generatorAccount(roomId, memoryallUser)
 
 

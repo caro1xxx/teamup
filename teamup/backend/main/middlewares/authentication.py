@@ -16,7 +16,8 @@ class CheckAccessToken(MiddlewareMixin):
             allowPath = []
 
             if requestMethods == 'GET':
-                allowPath = ['login', 'sendcode', 'room', 'team', 'handler']
+                allowPath = ['login', 'sendcode', 'room',
+                             'team', 'handler', 'connect_paynofity_sse']
 
             if requestMethods == 'POST':
                 allowPath = ['login', 'register', 'accountorder']

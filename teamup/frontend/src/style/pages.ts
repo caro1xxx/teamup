@@ -53,7 +53,7 @@ export const StoreWrap = styled.div`
             width: 100%;
             margin-top: 20px;
             text-align: center;
-            line-height: 30px;
+            border: none;
           }
           .buy:hover {
             background-color: #2a9263ac;
@@ -62,7 +62,6 @@ export const StoreWrap = styled.div`
             width: 100%;
             margin-top: 20px;
             text-align: center;
-            line-height: 30px;
           }
         }
       }

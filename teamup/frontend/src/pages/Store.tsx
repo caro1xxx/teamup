@@ -1,18 +1,20 @@
 import React from "react";
 import { StoreWrap } from "../style/pages";
 import { nanoid } from "nanoid";
-import { Modal } from "antd";
+import { Modal, Button } from "antd";
 import BuyAccount from "../components/Mod/BuyAccount";
 import { fecther } from "../utils/fecther";
 import { useAppSelector } from "../redux/hooks";
 import { generateRandomString } from "../utils/tools";
 import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
+import "../style/custome_antd.css";
+
 type Props = {};
 
 const Store = (props: Props) => {
   const dispatch = useAppDispatch();
-  const [serviceList] = React.useState([
+  const [serviceList, setServiceList] = React.useState([
     {
       icon: require("../assets/images/logo/netflix.png"),
       key: nanoid(),
@@ -31,11 +33,12 @@ const Store = (props: Props) => {
             { title: "5秒出货 无需等待", key: nanoid() },
           ],
           money: 16,
+          loading: false,
         },
         {
           time: 90,
           key: nanoid(),
-          level: "登堂入室",
+          level: "初出茅庐",
           image: require("../assets/images/90.png"),
           includes: [
             { title: "Netflix标准会员 90天", key: nanoid() },
@@ -45,11 +48,12 @@ const Store = (props: Props) => {
             { title: "5秒出货 无需等待", key: nanoid() },
           ],
           money: 40,
+          loading: false,
         },
         {
           time: 180,
           key: nanoid(),
-          level: "初出茅庐",
+          level: "登堂入室",
           image: require("../assets/images/180.png"),
           includes: [
             { title: "Netflix标准会员 180天", key: nanoid() },
@@ -59,6 +63,7 @@ const Store = (props: Props) => {
             { title: "5秒出货 无需等待", key: nanoid() },
           ],
           money: 70,
+          loading: false,
         },
         {
           time: 365,
@@ -73,6 +78,7 @@ const Store = (props: Props) => {
             { title: "5秒出货 无需等待", key: nanoid() },
           ],
           money: 100,
+          loading: false,
         },
       ],
     },
@@ -93,12 +99,17 @@ const Store = (props: Props) => {
   });
   const timerRef = React.useRef();
 
-  const buy = async (type: string, time: number) => {
+  const buy = async (type: string, time: number, idx: number, didx: number) => {
+    let newValue = [...serviceList];
+    serviceList[idx].plan[didx].loading = true;
+    setServiceList(newValue);
     let result = await fecther(
       "accountorder/",
       { time, type, flag: isLogin ? "None" : generateRandomString(5) },
       "post"
     );
+    serviceList[idx].plan[didx].loading = false;
+    setServiceList(newValue);
     if (result.code !== 200) {
       dispatch(changeMessage(["商品已下架", false]));
       return;
@@ -181,12 +192,12 @@ const Store = (props: Props) => {
       <StoreWrap>
         <div className="title">🎉无需组队,选择你喜欢的计划后即可享受服务</div>
         <div className="plan">
-          {serviceList.map((item) => {
+          {serviceList.map((item, index) => {
             return (
               <div key={item.key}>
                 <img className="logo" src={item.icon} alt="logo" />
                 <div className="render_item">
-                  {item.plan.map((childitem, index) => {
+                  {item.plan.map((childitem, indexdeep) => {
                     return (
                       <div className="item" key={childitem.key}>
                         <div className="plantitle">{childitem.level}</div>
@@ -204,12 +215,15 @@ const Store = (props: Props) => {
                               </div>
                             );
                           })}
-                          <div
-                            className="buy"
-                            onClick={() => buy(item.type, childitem.time)}
+                          <Button
+                            className="buy btn"
+                            loading={childitem.loading}
+                            onClick={() =>
+                              buy(item.type, childitem.time, index, indexdeep)
+                            }
                           >
                             立即购买 ￥{childitem.money}
-                          </div>
+                          </Button>
                         </div>
                       </div>
                     );

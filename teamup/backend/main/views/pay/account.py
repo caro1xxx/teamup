@@ -84,6 +84,7 @@ class OrderHandle(APIView):
             print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
+    # flush qr
     def put(self, request, *args, **kwargs):
         try:
             orderId = json.loads(request.body).get('order_id', None)
