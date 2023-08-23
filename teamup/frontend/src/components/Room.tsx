@@ -55,6 +55,51 @@ import { changeSearchValue } from "../redux/modules/roomSlice";
 
 const loadingEmtryArray = generatorEmtryArray(randomNumber());
 
+// memo
+const areChatTeamEqual = (prevProps: any, nextProps: any) => {
+  return (
+    prevProps.data.type === nextProps.data.type &&
+    prevProps.data.level === nextProps.data.level &&
+    prevProps.data.state === nextProps.data.state &&
+    prevProps.data.price === nextProps.data.price &&
+    prevProps.data.isHomeowner === nextProps.data.isHomeowner &&
+    prevProps.data.max_quorum === nextProps.data.max_quorum &&
+    prevProps.data.surplus === nextProps.data.surplus &&
+    prevProps.data.isJoin === nextProps.data.isJoin
+  );
+};
+const areChatHint = (prevProps: any, nextProps: any) => {
+  return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+};
+const areChatDrawerBodyEqual = (prevProps: any, nextProps: any) => {
+  return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+};
+const areInputOptionsEqual = (prevProps: any, nextProps: any) => {
+  if (prevProps.users.length === nextProps.users.length) {
+    for (let i = 0; i < prevProps.users.length; i++) {
+      if (prevProps.users[i].key !== nextProps.users[i].key) {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+  return prevProps.currentSelectUser === nextProps.currentSelectUser;
+};
+const areChatMessageInputEqual = (prevProps: any, nextProps: any) => {
+  return true;
+};
+
+const MemoChatDrawerTeam = React.memo(ChatDrawerTeam, areChatTeamEqual);
+const MemoChatHint = React.memo(ChatHint, areChatHint);
+const MemoChatDrawerBody = React.memo(ChatDrawerBody, areChatDrawerBodyEqual);
+const MemoInputOptions = React.memo(ChatInputOptions, areInputOptionsEqual);
+
+const MemoChatMessageInput = React.memo(
+  ChatMessageInput,
+  areChatMessageInputEqual
+);
+
 const Room = () => {
   /*tools */
   const dispatch = useAppDispatch();
@@ -64,7 +109,7 @@ const Room = () => {
   const access_token = useAppSelector(
     (state) => state.user.access_token
   ) as string;
-  const MemoInputOptions = React.memo(ChatInputOptions);
+
   const createRoomFlag = useAppSelector((state) => state.room.flag) as number;
   const createRoomData = useAppSelector((state) => state.room.newCreate) as any;
   const orderby = useAppSelector((state) => state.room.orderBy) as
@@ -401,7 +446,7 @@ const Room = () => {
           receptionMessage(event.data);
         };
       };
-      await getAllPayState();
+      getAllPayState();
     }
   }, [userToRoomInfo.pk]);
 
@@ -446,7 +491,10 @@ const Room = () => {
       {},
       "get"
     );
-    if (result.code !== 200) return;
+    if (result.code !== 200) {
+      dispatchPayState({ type: "clear" });
+      return;
+    }
     // let isAllPay = await checkIsAllUserPayed(result.data)
     for (let i = 0; i < result.data.length; i++) {
       if (result.data[i].user === username) {
@@ -593,6 +641,7 @@ const Room = () => {
     if (!checkIslogin()) return;
     if (websocketRef.current === null && userToRoomInfo.pk !== 0) {
       connectRoom();
+      setUsers([]);
       getUsers();
     }
 
@@ -657,13 +706,13 @@ const Room = () => {
           onClose={closeRoom}
           width="500px"
         >
-          <ChatDrawerTeam
+          <MemoChatDrawerTeam
             data={TeamInfo}
             join={joinTeam}
             departure={departure}
           />
-          <ChatHint />
-          <ChatDrawerBody message={message} isLogin={isLogin} />
+          <MemoChatHint />
+          <MemoChatDrawerBody message={message} isLogin={isLogin} />
           <BottomOptions>
             <div className="options">
               <MemoInputOptions
@@ -684,7 +733,7 @@ const Room = () => {
                 </>
               ) : null}
             </div>
-            <ChatMessageInput send={sendMessage} isLogin={isLogin} />
+            <MemoChatMessageInput send={sendMessage} isLogin={isLogin} />
           </BottomOptions>
         </Drawer>
         {isLoading ? (
@@ -739,7 +788,7 @@ const Room = () => {
             <LoadingMore>
               {loadingMoreState === 0 ? (
                 <div className="btnbody" onClick={loadingMoreRooms}>
-                  加载更多车队{" "}
+                  加载更多车队
                   <img width={20} src={LoadingMoreIcon} alt="more" />
                 </div>
               ) : (

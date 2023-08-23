@@ -55,3 +55,16 @@ export type FavoriteState = {
   type: string;
   state: number;
 };
+
+export type ActivityListState = {
+  key: string;
+  begin_time: number;
+  end_time: number;
+  image: string;
+};
+
+export interface ResultActivityListState {
+  model: string;
+  pk: number;
+  fields: ActivityListState;
+}

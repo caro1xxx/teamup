@@ -3,6 +3,7 @@ from django.urls import re_path, path
 from main.views.user import loginAndRegister, property
 from main.views.room import handleRoom
 from main.views.pay import dealings, account
+from main.views.function import activity
 
 
 urlpatterns = [
@@ -19,6 +20,7 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/notify/$', property.Notify.as_view()),
     re_path(r'^api/v1/teamup/favorites/$', property.Favorite.as_view()),
     re_path(r'^api/v1/teamup/usermail/$', property.Mail.as_view()),
+    re_path(r'^api/v1/teamup/activity/$', activity.Activitys.as_view()),
 
 
     # pay

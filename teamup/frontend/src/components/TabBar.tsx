@@ -93,7 +93,6 @@ const TabBar = (props: Props) => {
     },
   ]);
   const location = useLocation();
-  const navigate = useNavigate();
   const dispath = useAppDispatch();
 
   // select bar

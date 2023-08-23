@@ -136,3 +136,14 @@ class UserMail(models.Model):
     password = models.CharField(max_length=32)
     user = models.ForeignKey(
         User, to_field='username', null=True, on_delete=models.SET_NULL, related_name='mail_user')
+
+
+class Activity(models.Model):
+    begin_time = models.IntegerField()
+    end_time = models.IntegerField()
+    image = models.CharField(max_length=128, verbose_name='图片保存路径')
+
+    # 活动是否结束
+    @property
+    def efficient(self):
+        return self.end_time > getCurrentTimestamp()

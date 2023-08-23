@@ -11,6 +11,10 @@ export const messageReducer = (state: any, action: any) => {
 
 export const payStateReducer = (state: any, action: any) => {
   switch (action.type) {
+    case "clear":
+      return {
+        isDeparture: false,
+      };
     case "push":
       return {
         isDeparture: true,

@@ -120,3 +120,8 @@ export const generateRandomString = (length: number) => {
   }
   return randomString;
 };
+
+export const parseTimeStmapToShowFormat = (ts: number) => {
+  const D = new Date(ts * 1000);
+  return `${D.getFullYear()}年 ${D.getMonth() + 1}月`;
+};

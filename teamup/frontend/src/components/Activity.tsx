@@ -1,11 +1,31 @@
 import React from "react";
 import { ActivityWrap } from "../style/other";
 import CloseIcon from "../assets/images/close.png";
+import { fecther } from "../utils/fecther";
 type Props = {
   close: () => void;
 };
 
 const Activity = (props: Props) => {
+  const [activityInfo, setActivityInfo] = React.useState({
+    begin_time: 0,
+    end_time: 0,
+    image: "",
+  });
+
+  const getActivity = async () => {
+    let result = await fecther(`activity/?all=1`, {}, "get");
+    if (result.code !== 200) {
+      props.close();
+      return;
+    }
+    setActivityInfo({ ...result.data });
+  };
+
+  React.useEffect(() => {
+    getActivity();
+  }, []);
+
   return (
     <ActivityWrap onClick={props.close}>
       <div
@@ -16,7 +36,9 @@ const Activity = (props: Props) => {
         className="content"
         style={{
           backgroundImage:
-            "url(" + require("../assets/images/bg/youhui.png") + ")",
+            activityInfo.image !== ""
+              ? `url('http://192.168.31.69/media/activity/${activityInfo.image}')`
+              : "",
         }}
       >
         <img

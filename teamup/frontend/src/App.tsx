@@ -19,6 +19,9 @@ import Login from "./components/Login";
 import Station from "./pages/Station";
 import Store from "./pages/Store";
 import Activity from "./components/Activity";
+import ActivityPage from "./pages/Activity";
+import Support from "./pages/Support";
+import Logs from "./pages/Logs";
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 
 import { message, ConfigProvider, theme } from "antd";
@@ -48,8 +51,7 @@ const App = (props: Props) => {
   const isLoginPupup = useAppSelector(
     (state) => state.user.loginPupup
   ) as boolean;
-  const [isActivity, setIsActivity] = React.useState(true);
-
+  const [isActivity, setIsActivity] = React.useState(false);
   const getUserInfo = async (token: string) => {
     dispatch(saveUserInfo(["", "", ""]));
     let result = await fecther(`login/?access_token=${token}`, {}, "get");
@@ -85,6 +87,7 @@ const App = (props: Props) => {
 
   const closeAcitvity = () => {
     setIsActivity(false);
+    setStorage("activityNetTs", new Date().getTime() / 1000 + 60 * 60 * 8);
   };
 
   useEffect(() => {
@@ -93,6 +96,13 @@ const App = (props: Props) => {
   }, [notifyAdditive, notifyflag, notifyMessage]);
 
   useEffect(() => {
+    if (!getStorage("activityNetTs")) {
+      setIsActivity(true);
+    } else if (
+      getStorage("activityNetTs") &&
+      getStorage("activityNetTs") < new Date().getTime() / 1000
+    )
+      setIsActivity(true);
     if (!getStorage("db_version")) setStorage("db_version", 1);
     if (!getStorage("access_token")) return;
     getUserInfo(getStorage("access_token")); // eslint-disable-next-line
@@ -111,6 +121,9 @@ const App = (props: Props) => {
             <Route path="/" element={<Station />} />
             <Route path="/home/*" element={<Station />} />
             <Route path="/store" element={<Store />} />
+            <Route path="/discount" element={<ActivityPage />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/ogs" element={<Logs />} />
           </Routes>
           <Bottom />
         </Wrap>

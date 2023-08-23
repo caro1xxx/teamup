@@ -14,7 +14,6 @@ const { Search } = Input;
 const ChatMessageInput = (props: Props) => {
   const [inputContent, setInputContent] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-
   // 发送消息
   const send = () => {
     if (isLoading) return;

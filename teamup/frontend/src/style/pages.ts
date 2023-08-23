@@ -68,3 +68,19 @@ export const StoreWrap = styled.div`
     }
   }
 `;
+
+export const ActivityWrap = styled.div`
+  margin: 50px 0px;
+  img {
+    width: 100%;
+    height: 350px;
+    border-radius: 10px;
+    margin: 20px 0px;
+  }
+  .title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bolder;
+    color: white;
+  }
+`;
