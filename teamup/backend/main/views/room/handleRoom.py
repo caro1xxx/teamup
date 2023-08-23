@@ -7,7 +7,7 @@ from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToCha
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from main.task import sendDepartureNotify
+from main.task import sendDepartureNotify, saveNewRoomsToRedis
 from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE
 
 
@@ -22,7 +22,12 @@ class Rooms(APIView):
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
+            memoryNewData = cache.get(type+'_new_data', None)
             roomResponse = RoomResponseCode()
+            if memoryNewData is not None:
+                roomResponse.getSuccess['data'] = json.loads(memoryNewData)
+                return JsonResponse(roomResponse.getSuccess)
+
             rooms = []
             if search == 'None':
                 if orderby == 'self':
@@ -137,6 +142,9 @@ class Rooms(APIView):
                                                    "take_seat_quorum": roomFields.take_seat_quorum,
                                                    "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
                                                    "users": [{"user": user.username, "avator_color": user.avator_color}], "stateType": roomFields.type.type}
+
+            saveNewRoomsToRedis.delay(roomFields.type.name)
+
             return JsonResponse(roomResponse.createdSuccess)
 
         except Exception as e:
