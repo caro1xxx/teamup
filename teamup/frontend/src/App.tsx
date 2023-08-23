@@ -18,7 +18,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Station from "./pages/Station";
 import Store from "./pages/Store";
-
+import Activity from "./components/Activity";
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 
 import { message, ConfigProvider, theme } from "antd";
@@ -48,6 +48,7 @@ const App = (props: Props) => {
   const isLoginPupup = useAppSelector(
     (state) => state.user.loginPupup
   ) as boolean;
+  const [isActivity, setIsActivity] = React.useState(true);
 
   const getUserInfo = async (token: string) => {
     dispatch(saveUserInfo(["", "", ""]));
@@ -82,6 +83,10 @@ const App = (props: Props) => {
     }
   };
 
+  const closeAcitvity = () => {
+    setIsActivity(false);
+  };
+
   useEffect(() => {
     if (notifyAdditive === 0) return;
     message[notifyflag ? "success" : "warning"](notifyMessage);
@@ -111,6 +116,7 @@ const App = (props: Props) => {
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}
+        {isActivity ? <Activity close={closeAcitvity} /> : null}
       </ConfigProvider>
     </BrowserRouter>
   );

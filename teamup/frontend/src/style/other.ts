@@ -184,3 +184,32 @@ export const AccountInfoWrap = styled.div`
     margin-top: 10px;
   }
 `;
+
+export const ActivityWrap = styled.div`
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  background-color: #0f0f1051;
+  z-index: 1000;
+  display: flex;
+  vertical-align: top;
+  justify-content: center;
+  align-items: center;
+  .content {
+    position: relative;
+    height: 243px;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    width: 700px;
+    border-radius: 10px;
+    background-color: #0f0f1051;
+    .close {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+    }
+  }
+`;

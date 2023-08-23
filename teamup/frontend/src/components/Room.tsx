@@ -152,7 +152,7 @@ const Room = () => {
           roomName: item.name,
           key: nanoid(),
           roomId: item.uuid,
-          online: 28,
+          online: item.message_count,
           teammate: [],
           surplus: item.surplus,
           description: textPhase(item.description),
@@ -804,20 +804,13 @@ const Item = (props: RoomItemProps) => {
           src={props.room.favorited ? FavoriteIcon : UnFavoriteIcon}
           alt="favorite"
         />
-        <div
-          style={{
-            display: "flex",
-            verticalAlign: "top",
-            justifyContent: "center",
-            alignItems: "center",
-            marginRight: "10px",
-          }}
-        >
-          <img src={PeploeIcon} alt="pe" style={{ marginRight: "2px" }} />
-          {props.room.online}
-        </div>
 
-        <Badge count={99} size="small" overflowCount={99}>
+        <Badge
+          color={"#05b665"}
+          count={props.room.online}
+          size="small"
+          overflowCount={99}
+        >
           <img src={MsgIcon} alt="msg" />
         </Badge>
       </div>

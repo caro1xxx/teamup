@@ -4,6 +4,7 @@ from main.contants import ChatResponseCode
 from main.task import sendChatNotifyMessage, forwardingRoomMessage
 from main.tools import decodeToken, getCurrentTimestamp
 import json
+from main.config import ROOM_MESSAGE_RECORD_TIMES
 
 
 class Chat(AsyncWebsocketConsumer):
@@ -60,6 +61,15 @@ class Chat(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         receiveMessage = json.loads(text_data)
         message = receiveMessage['message']
+
+        messageCount = cache.get('room_message_count_'+self.roomPk, None)
+
+        if messageCount is None:
+            cache.set('room_message_count_'+self.roomPk,
+                      1, ROOM_MESSAGE_RECORD_TIMES)
+        else:
+            cache.set('room_message_count_'+self.roomPk,
+                      messageCount+1, ROOM_MESSAGE_RECORD_TIMES)
 
         messageBody = {
             'type': 'chat_message',

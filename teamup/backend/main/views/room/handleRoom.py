@@ -63,6 +63,7 @@ class Rooms(APIView):
                                             "uuid": room.uuid,
                                             "type": room.type.name,
                                             "take_seat_quorum": room.take_seat_quorum,
+                                            "message_count": cache.get('room_message_count_'+str(room.pk), 0),
                                             "surplus": room.type.max_quorum - room.take_seat_quorum,
                                             "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], "stateType": room.type.type})
             # 已登录的用户 那么获取用户收藏
@@ -78,6 +79,7 @@ class Rooms(APIView):
                                             "uuid": room.uuid,
                                             "type": room.type.name,
                                             "take_seat_quorum": room.take_seat_quorum,
+                                            "message_count": cache.get('room_message_count_'+str(room.pk), 0),
                                             "surplus": room.type.max_quorum - room.take_seat_quorum,
                                             "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room],
                                             "favorited": 1 if room.users_favorited.filter(username=payload["username"]).exists() else 0, "stateType": room.type.type})

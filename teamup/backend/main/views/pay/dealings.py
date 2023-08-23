@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode, PayStateResponseCode
+from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
 import json
 from main.tools import sendMessageToChat, getCurrentTimestamp
 from django.core.cache import cache
@@ -50,6 +50,7 @@ class Pay(APIView):
                         sendMessageToChat('room_'+roomId, i['user']+'已付款')
                         checkAllUserPayed.delay(
                             serializeMemoryTeamAllPayOrder, roomId)
+
                         return JsonResponse(PayResponseCode.paySuccess)
 
                 return JsonResponse(PayResponseCode.payError)
@@ -59,7 +60,7 @@ class Pay(APIView):
                     'pay_account_'+orderId, None)
 
                 if memoryTeamAllPayOrder is None:
-                    return JsonResponse(RoomResponseCode.notDeparture)
+                    return JsonResponse(PayResponseCode.orderNotFound)
 
                 serializeMemoryTeamAllPayOrder = json.loads(
                     memoryTeamAllPayOrder)
@@ -70,6 +71,8 @@ class Pay(APIView):
                 sendMessageToChat('pay_notify_'+orderId, '已付款')
 
                 generatorAccountOfrPerson.delay(orderId)
+
+                cache.delete('pay_account_'+orderId)
 
                 return JsonResponse(PayResponseCode.paySuccess)
         except Exception as e:
