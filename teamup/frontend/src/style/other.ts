@@ -129,3 +129,58 @@ export const LoadingMore = styled.div`
     background-color: #2a9263ac;
   }
 `;
+
+export const LoadingWrap = styled.div`
+  .loadingwrap {
+    height: 213px;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+  }
+  .text {
+    margin-top: 10px;
+    height: 203px;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+  }
+  .loading {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    border: 2px solid #2a9263ac;
+    border-top-color: #05b665;
+    border-right-color: #05b665;
+    border-bottom-color: #05b665;
+    border-radius: 100%;
+    animation: circle infinite 0.75s linear;
+  }
+  @keyframes circle {
+    0% {
+      transform: rotate(0);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+export const AccountInfoWrap = styled.div`
+  width: 100%;
+  padding: 20px 0px;
+  .contentwrap {
+    display: flex;
+  }
+  .content {
+    flex: 1;
+    display: flex;
+    vertical-align: top;
+    justify-content: end;
+    align-items: center;
+  }
+  .hint {
+    color: #05b665;
+    font-size: 10px;
+    margin-top: 10px;
+  }
+`;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StoreWrap } from "../style/pages";
 import { nanoid } from "nanoid";
 import { Modal, Button } from "antd";
@@ -98,6 +98,12 @@ const Store = (props: Props) => {
     expire_time: 0,
   });
   const timerRef = React.useRef();
+  const WsRef = React.useRef<WebSocket | null>(null);
+  const [PayedInfo, setPayedInfo] = React.useState({
+    username: "",
+    password: "",
+    isPayed: 0,
+  });
 
   const buy = async (type: string, time: number, idx: number, didx: number) => {
     let newValue = [...serviceList];
@@ -175,6 +181,38 @@ const Store = (props: Props) => {
     }
   };
 
+  const connectPayNotify = (orderid: string) => {
+    WsRef.current = new WebSocket(`ws://192.168.31.69/ws/notify/${orderid}/`);
+    WsRef.current.onopen = () => {
+      if (!WsRef.current) return;
+      WsRef.current.onmessage = (event) => {
+        let jsonMsg = JSON.parse(event.data);
+        if (jsonMsg.message === "已付款") {
+          setPayedInfo({ ...PayedInfo, isPayed: 1 });
+        } else if (!jsonMsg.message.includes("分配失败")) {
+          setPayedInfo({
+            username: JSON.parse(jsonMsg.message).username,
+            password: JSON.parse(jsonMsg.message).password,
+            isPayed: 2,
+          });
+        }
+      };
+    };
+  };
+
+  useEffect(() => {
+    if (
+      OrderInfo.order_id !== "" &&
+      createRoomModel === true &&
+      WsRef.current === null
+    ) {
+      connectPayNotify(OrderInfo.order_id);
+    } else {
+      WsRef.current?.close();
+      WsRef.current = null;
+    }
+  }, [OrderInfo.order_id, createRoomModel]);
+
   // @ts-ignore
   React.useEffect(() => {
     if (!createRoomModel) {
@@ -244,11 +282,13 @@ const Store = (props: Props) => {
         width={350}
       >
         <BuyAccount
+          payinfo={PayedInfo}
           flush={flush}
           qrcode={OrderInfo.qrcode}
           qrstate={OrderInfo.qrstate}
           price={OrderInfo.price}
           discountPrice={OrderInfo.discountPrice}
+          isLogin={isLogin}
         />
       </Modal>
     </>

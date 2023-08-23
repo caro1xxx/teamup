@@ -1,5 +1,6 @@
 import django
 django.setup()
+import json
 from main.tools import sendMessageToChat, getCurrentTimestamp
 from main import models
 from backend import settings
@@ -91,6 +92,58 @@ def generatorAccount(roomId, users):
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
     else:
         sendMessageToChat('room_'+str(roomId), '账号不足')
+
+
+@shared_task
+def generatorAccountOfrPerson(OrderId):
+    orderFields = models.Order.objects.filter(order_id=OrderId).first()
+    specifyTypeModel = models.Group.objects.filter(
+        type=orderFields.type).all()
+
+    AccountFields = []
+    for group in specifyTypeModel:
+        if (group.remaining == 1):
+            AccountFields.append(group)
+            break
+
+    if len(AccountFields) == 0:
+        for group in specifyTypeModel:
+            if (group.remaining == 2):
+                AccountFields.append(group)
+                break
+
+    if len(AccountFields) == 0:
+        for group in specifyTypeModel:
+            if (group.remaining == 3):
+                AccountFields.append(group)
+                break
+
+    if len(AccountFields) == 0:
+        for group in specifyTypeModel:
+            if (group.remaining == 4):
+                AccountFields.append(group)
+                break
+
+    if len(AccountFields) == 0:
+        for group in specifyTypeModel:
+            if (group.remaining == 5):
+                AccountFields.append(group)
+                break
+
+    if len(AccountFields) == 1:
+        dispatchAccount = models.Account.objects.filter(
+            related_group_id=AccountFields[0].pk).first()
+
+        dispatchAccount.distribute_user_id = 4
+        dispatchAccount.save()
+
+        AccountFields[0].distribute = AccountFields[0].distribute + 1
+        AccountFields[0].save()
+
+        sendMessageToChat('pay_notify_'+OrderId,
+                          json.dumps({"username": dispatchAccount.username, 'password': dispatchAccount.password}))
+    else:
+        sendMessageToChat('pay_notify_'+OrderId, '分配失败,无可用账号')
 
 
 @shared_task

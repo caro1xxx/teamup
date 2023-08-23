@@ -4,7 +4,7 @@ from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode, Pa
 import json
 from main.tools import sendMessageToChat, getCurrentTimestamp
 from django.core.cache import cache
-from main.task import checkAllUserPayed
+from main.task import checkAllUserPayed, generatorAccountOfrPerson
 from main.config import ORDER_LIFEYCLE
 from main.models import Order
 
@@ -64,10 +64,12 @@ class Pay(APIView):
                 serializeMemoryTeamAllPayOrder = json.loads(
                     memoryTeamAllPayOrder)
 
-                orderFields = Order.objects.filter(order_id=orderId, state=0).update(
+                Order.objects.filter(order_id=orderId, state=0).update(
                     state=1, payed_time=getCurrentTimestamp(), payed_qrcode=serializeMemoryTeamAllPayOrder["qrcode"])
 
                 sendMessageToChat('pay_notify_'+orderId, '已付款')
+
+                generatorAccountOfrPerson.delay(orderId)
 
                 return JsonResponse(PayResponseCode.paySuccess)
         except Exception as e:
