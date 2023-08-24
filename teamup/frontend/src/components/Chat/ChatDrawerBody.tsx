@@ -4,6 +4,7 @@ import { MsgItemWrap, PleaseWrap } from "../../style/chat";
 import { parseStampTime } from "../../utils/tools";
 import { nanoid } from "nanoid";
 import { useAppDispatch } from "../../redux/hooks";
+import LoadingMoreIcon from "../../assets/images/loadingmore.png";
 import {
   changeLoginPupup,
   changeRegisterPupup,
@@ -11,11 +12,38 @@ import {
 type Props = {
   message: any;
   isLogin: boolean;
+  isCloseWs: boolean;
+  reconnect: () => void;
 };
 
 const BodyWrap = styled.div`
   height: calc(100vh - 350px - 50px);
   overflow: scroll;
+  .closehint {
+    margin: 20px 0px;
+    display: flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    .body {
+      cursor: pointer;
+      user-select: none;
+      height: 40px;
+      padding: 0px 10px;
+      display: inline-flex;
+      vertical-align: top;
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 5px;
+      border: solid 1px #0f7949;
+      background-color: #0a2a1c;
+    }
+    .body:hover {
+      border: solid 1px #0b5634;
+      background-color: #071a12;
+    }
+  }
 `;
 const ChatDrawerBody = (props: Props) => {
   const moveChatBottom = () => {
@@ -50,6 +78,14 @@ const ChatDrawerBody = (props: Props) => {
               />
             );
           })}
+          {props.isCloseWs ? (
+            <div className="closehint">
+              <div className="body" onClick={props.reconnect}>
+                长时间未操作,已断开连接点击重连
+                <img src={LoadingMoreIcon} width={20} alt="load" />
+              </div>
+            </div>
+          ) : null}
           <div id="point"></div>
         </BodyWrap>
       ) : (
@@ -69,6 +105,7 @@ const MessageItem = (props: {
 }) => {
   return (
     <MsgItemWrap $who={props.who}>
+      <div className="username">{props.who === 2 ? props.user : ""}</div>
       <div
         className={
           props.who === 0 ? "system" : props.who === 1 ? "self" : "other"

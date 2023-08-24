@@ -9,6 +9,7 @@ import { LoginUserInfo } from "../types/methodTypes";
 import { Validator, stopEventPropagation } from "../utils/tools";
 import { fecther } from "../utils/fecther";
 import { batchSetStorage } from "../utils/localstorage";
+import { changeRegisterPupup } from "../redux/modules/userSlice";
 import md5 from "md5";
 type Props = {};
 
@@ -121,8 +122,8 @@ const Login = (props: Props) => {
     let validator = new Validator();
     validator.add(userInfo.username, "isNonEmpty", "输入用户名");
     validator.add(userInfo.password, "isNonEmpty", "输入密码");
-    validator.add(userInfo.username, "minLength", "用户名长度需大于6", 6);
-    validator.add(userInfo.password, "minLength", "密码长度需大于8", 8);
+    validator.add(userInfo.username, "minLength", "用户名长度需>=5", 5);
+    validator.add(userInfo.password, "minLength", "密码长度需>=8", 8);
     let validatorResult = validator.start();
     if (validatorResult) {
       dispatch(changeMessage([validatorResult, false]));
@@ -151,16 +152,8 @@ const Login = (props: Props) => {
           ])
         );
         window.location.reload();
-        // setUserInfo({ ...userinfo, isLoading: true });
-        // closeLogin();
-        // dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));
-        // setUserInfo({ ...userinfo, isLoading: true });
         return;
       }
-      // dispatch(changeMessage([result.message, false]));
-      // setTimeout(() => {
-      //   setUserInfo({ ...userinfo, isLoading: false });
-      // }, 500);
     }
   };
 
@@ -217,7 +210,13 @@ const Login = (props: Props) => {
             </Button>
             <div style={{ fontSize: "12px", textAlign: "center" }}>
               没有账号？
-              <span style={{ color: "#05b665", cursor: "pointer" }}>
+              <span
+                style={{ color: "#05b665", cursor: "pointer" }}
+                onClick={() => {
+                  closeLogin();
+                  dispatch(changeRegisterPupup());
+                }}
+              >
                 我要注册
               </span>
             </div>

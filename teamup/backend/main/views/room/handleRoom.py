@@ -7,8 +7,8 @@ from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToCha
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from main.task import sendDepartureNotify, saveNewRoomsToRedis
-from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE
+from main.task import sendDepartureNotify
+from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME
 
 
 class Rooms(APIView):
@@ -22,29 +22,7 @@ class Rooms(APIView):
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
-            # 判断内存中是否存在Rooms 并且没有携带参数
-            memoryNewData = cache.get(type+'_new_data', None)
             roomResponse = RoomResponseCode()
-            if memoryNewData is not None and orderby == 'None' and search == 'None':
-                pageInatoredRooms, roomResponse.getSuccess['page_count'] = customizePaginator(
-                    json.loads(memoryNewData), 12, request.GET.get('page_num', 1))
-                responseData = []
-                username = fromAuthGetUsername(request)
-                # 如果登录返回收藏
-                if username:
-                    for i in pageInatoredRooms:
-                        roomFields = Room.objects.filter(pk=i['pk']).first()
-                        if roomFields.users_favorited.filter(username=username).exists():
-                            i["favorited"] = 1
-                        else:
-                            i["favorited"] = 0
-                        responseData.append(i)
-                else:
-                    for i in pageInatoredRooms:
-                        responseData.append(i)
-                roomResponse.getSuccess['data'] = responseData
-                return JsonResponse(roomResponse.getSuccess)
-
             rooms = []
             if search == 'None':
                 if orderby == 'self':
@@ -123,7 +101,7 @@ class Rooms(APIView):
 
             username = request.payload_data['username']
 
-            # 判断今天是否参加过房间
+            # 判断今天是否创建过房间
             allUserRooms = Room.objects.filter(
                 creator__username=username).all()
 
@@ -168,8 +146,6 @@ class Rooms(APIView):
                                                    "take_seat_quorum": roomFields.take_seat_quorum,
                                                    "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
                                                    "users": [{"user": user.username, "avator_color": user.avator_color}], "stateType": roomFields.type.type}
-
-            saveNewRoomsToRedis.delay(roomFields.type.name)
 
             return JsonResponse(roomResponse.createdSuccess)
 
@@ -498,7 +474,12 @@ class TypeInfo(APIView):
 
             res = {'code': 200, 'message': "获取成功",
                    'price': typeFields.price / typeFields.max_quorum}
-            return JsonResponse(res)
+
+            response = JsonResponse(res)
+            response['Cache-Control'] = 'max-age=' + \
+                str(TYPE_PRICE_CACHETIME)
+
+            return response
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

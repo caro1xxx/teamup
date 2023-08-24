@@ -159,8 +159,8 @@ const Register = (props: Props) => {
     validator.add(userInfo.password, "isNonEmpty", "输入密码");
     validator.add(userInfo.email, "isNonEmpty", "输入邮箱");
     validator.add(userInfo.code, "isNonEmpty", "输入验证码");
-    validator.add(userInfo.username, "minLength", "用户名长度需大于6", 6);
-    validator.add(userInfo.password, "minLength", "密码长度需大于8", 8);
+    validator.add(userInfo.username, "minLength", "用户名长度需>=5", 5);
+    validator.add(userInfo.password, "minLength", "密码长度需>=8", 8);
     validator.add(userInfo.email, "checkEmailFormat", "邮箱格式错误");
     let validatorResult = validator.start();
     if (validatorResult) {

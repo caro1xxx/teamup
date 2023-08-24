@@ -54,7 +54,7 @@ const App = (props: Props) => {
   const [isActivity, setIsActivity] = React.useState(false);
   const getUserInfo = async (token: string) => {
     dispatch(saveUserInfo(["", "", ""]));
-    let result = await fecther(`login/?access_token=${token}`, {}, "get");
+    let result = await fecther(`login/`, {}, "get");
     if (result.code !== 200) {
       dispatch(loginExpiration());
     } else if (result.code === 409) {

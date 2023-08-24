@@ -1,7 +1,5 @@
 import django
 django.setup()
-from main.config import NEWDATA_LIFECYCLE
-from django.core.cache import cache
 from django.core.mail import send_mail
 from celery import shared_task
 from backend import settings
@@ -137,7 +135,8 @@ def generatorAccountOfrPerson(OrderId):
         dispatchAccount = models.Account.objects.filter(
             related_group_id=AccountFields[0].pk).first()
 
-        dispatchAccount.distribute_user_id = 4
+        # 如果用户没有登录,那么将user表中的guest用户关联到account
+        dispatchAccount.distribute_user_id = 1
         dispatchAccount.save()
 
         AccountFields[0].distribute = AccountFields[0].distribute + 1
@@ -162,23 +161,3 @@ def forwardingRoomMessage(content, roomPk, receive_username, send_username):
     messageFields.receive_user.add(receive_user)
     messageFields.send_user.add(send_user)
     messageFields.save()
-
-
-@shared_task
-def saveNewRoomsToRedis(type):
-    rooms = models.Room.objects.filter(type__name=type).order_by(
-        '-take_seat_quorum')
-    roomAndRoomUser = []
-    for room in rooms:
-        users_in_room = room.users.all()
-        roomAndRoomUser.append({"name": room.name,  "description": room.description,
-                                "pk": room.pk,
-                                "create_time": room.create_time,
-                                "creator": room.creator.username,
-                                "uuid": room.uuid,
-                                "type": room.type.name,
-                                "take_seat_quorum": room.take_seat_quorum,
-                                "message_count": cache.get('room_message_count_'+str(room.pk), 0),
-                                "surplus": room.type.max_quorum - room.take_seat_quorum,
-                                "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room], "stateType": room.type.type})
-    cache.set(type+'_new_data', json.dumps(roomAndRoomUser), NEWDATA_LIFECYCLE)

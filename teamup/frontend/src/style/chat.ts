@@ -81,7 +81,7 @@ export const MsgItemWrap = styled.div<{ $who: number }>`
     user-select: none;
   }
   .other {
-    margin: 20px 0px;
+    margin: 30px 0px;
     padding: 10px;
     color: #000;
     border-radius: 3px;
@@ -90,8 +90,13 @@ export const MsgItemWrap = styled.div<{ $who: number }>`
     overflow-wrap: break-word;
     background-color: #fff;
   }
+  .username {
+    position: absolute;
+    left: 2px;
+    top: 10px;
+  }
   .self {
-    margin: 20px 0px;
+    margin: 30px 0px;
     background-color: #05b665;
     padding: 10px;
     color: #000;
@@ -104,7 +109,7 @@ export const MsgItemWrap = styled.div<{ $who: number }>`
     position: absolute;
     right: ${(props) => (props.$who === 1 ? "0px" : "")};
     left: ${(props) => (props.$who === 2 ? "0px" : "")};
-    bottom: 0px;
+    bottom: 12px;
     font-size: 10px;
     color: white;
     cursor: pointer;

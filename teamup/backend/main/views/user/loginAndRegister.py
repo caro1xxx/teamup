@@ -4,12 +4,10 @@ from rest_framework.views import APIView
 from main.models import User
 from backend import settings
 from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCode
-from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
+from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken, fromAuthGetUsername
 from django.core.cache import cache
 import json
 from main.config import REGISTER_CODE_LIFECYCLE
-
-
 from main.task import send_async_email
 
 
@@ -23,6 +21,9 @@ class register(APIView):
                 return JsonResponse(CommonErrorcode.paramsError)
 
             if not checkIsNotEmpty(UserData):
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            if len(UserData['username']) < 5 or len(UserData['password']) < 8:
                 return JsonResponse(CommonErrorcode.paramsError)
 
             UserFields = User.objects.filter(username=UserData['username'])
@@ -77,10 +78,12 @@ class login(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            token = request.GET.get('access_token', None)
-            if token is None or token == '':
+            authorization_header = request.META.get(
+                'HTTP_AUTHORIZATION', None)
+            if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
                 return JsonResponse(CommonErrorcode.paramsError)
-            payload = decodeToken(token)
+
+            payload = decodeToken(authorization_header.replace('Bearer ', ''))
             if payload['expire_time'] <= getCurrentTimestamp():
                 return JsonResponse(LoginResponseCode.tokenExpires)
 

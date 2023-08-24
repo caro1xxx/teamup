@@ -23,12 +23,20 @@ type Props = {
 const { Link } = Typography;
 const { TextArea } = Input;
 
-const type = [{ value: "netflix", label: "Netflix" }];
+const type = [
+  { value: "netflix", label: "Netflix", disabled: false },
+  { value: "disney", label: "disney(开发中)", disabled: true },
+  { value: "hulu", label: "hulu(开发中)", disabled: true },
+  { value: "spotify", label: "spotify(开发中)", disabled: true },
+  { value: "nintendo", label: "任天堂(开发中)", disabled: true },
+  { value: "youtube", label: "Youtube(开发中)", disabled: true },
+  { value: "pornhub", label: "Pornhub(开发中)", disabled: true },
+];
 const time = [
-  { value: "30", label: "30天" },
-  { value: "90", label: "90天" },
-  { value: "半年", label: "半年" },
-  { value: "一年", label: "一年" },
+  { value: "30", label: "30天", disabled: false },
+  { value: "90", label: "90天", disabled: false },
+  { value: "半年", label: "半年(开发中)", disabled: true },
+  { value: "一年", label: "一年(开发中)", disabled: true },
 ];
 const mailType = [
   { value: "1", label: "平台邮箱账号" },

@@ -85,19 +85,11 @@ const areInputOptionsEqual = (prevProps: any, nextProps: any) => {
   }
   return prevProps.currentSelectUser === nextProps.currentSelectUser;
 };
-const areChatMessageInputEqual = (prevProps: any, nextProps: any) => {
-  return true;
-};
 
 const MemoChatDrawerTeam = React.memo(ChatDrawerTeam, areChatTeamEqual);
 const MemoChatHint = React.memo(ChatHint, areChatHint);
 const MemoChatDrawerBody = React.memo(ChatDrawerBody, areChatDrawerBodyEqual);
 const MemoInputOptions = React.memo(ChatInputOptions, areInputOptionsEqual);
-
-const MemoChatMessageInput = React.memo(
-  ChatMessageInput,
-  areChatMessageInputEqual
-);
 
 const Room = () => {
   /*tools */
@@ -108,7 +100,6 @@ const Room = () => {
   const access_token = useAppSelector(
     (state) => state.user.access_token
   ) as string;
-
   const createRoomFlag = useAppSelector((state) => state.room.flag) as number;
   const createRoomData = useAppSelector((state) => state.room.newCreate) as any;
   const orderby = useAppSelector((state) => state.room.orderBy) as
@@ -169,6 +160,7 @@ const Room = () => {
   const currentPageNumRef = React.useRef(1);
   const sumPageNum = React.useRef(1);
   const [loadingMoreState, setLoadingMoreState] = React.useState(0);
+  const [isCloseWs, setisCloseWs] = React.useState(false);
 
   /*request */
   const getTypeOfRooms = async (
@@ -433,7 +425,7 @@ const Room = () => {
   };
 
   const connectRoom = React.useCallback(async () => {
-    if (!websocketRef.current) {
+    if (!websocketRef.current || websocketRef.current.readyState === 3) {
       dispatchMessage({ type: "clear" });
       websocketRef.current = new WebSocket(
         `ws://192.168.31.69/ws/room/${userToRoomInfo.pk}/${access_token}/`
@@ -444,6 +436,12 @@ const Room = () => {
         websocketRef.current.onmessage = (event) => {
           receptionMessage(event.data);
         };
+      };
+      // websocketRef.current.onerror = () => {
+      //   console.log("error");
+      // };
+      websocketRef.current.onclose = () => {
+        setisCloseWs(true);
       };
       getAllPayState();
     }
@@ -629,6 +627,19 @@ const Room = () => {
     getTypeOfRooms(location.pathname, "", "", false);
   };
 
+  // close ws
+  const closeWs = () => {
+    if (websocketRef.current && websocketRef.current.readyState === 1) {
+      websocketRef.current.close();
+    }
+  };
+
+  // reconnect
+  const reconnect= () =>{
+    setisCloseWs(false)
+    connectRoom()
+  }
+
   // listen router
   useEffect(() => {
     setIsLoading(true);
@@ -711,7 +722,12 @@ const Room = () => {
             departure={departure}
           />
           <MemoChatHint />
-          <MemoChatDrawerBody message={message} isLogin={isLogin} />
+          <MemoChatDrawerBody
+            isCloseWs={isCloseWs}
+            message={message}
+            isLogin={isLogin}
+            reconnect={reconnect}
+          />
           <BottomOptions>
             <div className="options">
               <MemoInputOptions
@@ -732,7 +748,12 @@ const Room = () => {
                 </>
               ) : null}
             </div>
-            <MemoChatMessageInput send={sendMessage} isLogin={isLogin} />
+            <ChatMessageInput
+            isCloseWs={isCloseWs}
+              closeWs={closeWs}
+              send={sendMessage}
+              isLogin={isLogin}
+            />
           </BottomOptions>
         </Drawer>
         {isLoading ? (

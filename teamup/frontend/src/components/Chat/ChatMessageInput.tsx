@@ -3,17 +3,22 @@ import { InputWrap } from "../../style/chat";
 import { MessageOutlined } from "@ant-design/icons";
 import "../../style/custome_antd.css";
 import { Input } from "antd";
+import { useMouse } from "ahooks";
 
 type Props = {
   send: (value: string) => void;
   isLogin: boolean;
+  closeWs: () => void;
+  isCloseWs: boolean;
 };
 
 const { Search } = Input;
 
 const ChatMessageInput = (props: Props) => {
+  const mouse = useMouse();
   const [inputContent, setInputContent] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const noActionTimer = React.useRef<NodeJS.Timer | null>();
   // 发送消息
   const send = () => {
     if (isLoading) return;
@@ -22,6 +27,20 @@ const ChatMessageInput = (props: Props) => {
     setInputContent("");
     setTimeout(() => setIsLoading(false), 500);
   };
+
+  React.useEffect(() => {
+    if (props.isCloseWs) return;
+    // @ts-ignore
+    clearTimeout(noActionTimer.current);
+    noActionTimer.current = setTimeout(() => {
+      props.closeWs();
+    }, 1000 * 5);
+    return () => {
+      if (noActionTimer.current) {
+        clearTimeout(noActionTimer.current);
+      }
+    };
+  }, [mouse.clientX]);
 
   return (
     <InputWrap>
