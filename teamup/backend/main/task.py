@@ -1,3 +1,5 @@
+import django
+django.setup()
 from main.config import NEWDATA_LIFECYCLE
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -7,8 +9,6 @@ from main import models
 from main.tools import sendMessageToChat, getCurrentTimestamp
 import json
 from django.core import serializers
-import django
-django.setup()
 
 
 @shared_task

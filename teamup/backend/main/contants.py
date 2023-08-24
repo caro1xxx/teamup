@@ -44,6 +44,7 @@ class RoomResponseCode:
     quitErrorDepartureed = {'code': 400, 'message': '已发车,无法退出'}
     notDeparture = {'code': 412, 'message': '未发车'}
     favoriteSuccess = {"code": 200, "message": "操作成功"}
+    todayCreated = {"code": 202, "message": "每天只能创建一次房间"}
 
 
 class ChatResponseCode:

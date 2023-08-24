@@ -32,6 +32,9 @@ class OrderHandle(APIView):
             if userFlag is None or userFlag == 'None' or userFlag == '':
                 username = fromAuthGetUsername(request)
 
+                if username == False:
+                    return JsonResponse({"code": 401, "message": "refuse"})
+
                 orderFields = Order.objects.filter(
                     user__username=username, type=type, time=time, state=0).first()
 

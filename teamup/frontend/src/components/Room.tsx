@@ -17,7 +17,6 @@ import FavoriteIcon from "../assets/images/favorite.png";
 import UnFavoriteIcon from "../assets/images/unfavorite.png";
 import LoadingMoreIcon from "../assets/images/loadingmore.png";
 import MsgIcon from "../assets/images/msg.png";
-import PeploeIcon from "../assets/images/peploe.png";
 
 // tools
 import { nanoid } from "nanoid";
@@ -182,7 +181,7 @@ const Room = () => {
       `room/?type=${type.split("/")[2]}&order_by=${
         orderby ? orderby : "None"
       }&search=${searchValue ? searchValue : "None"}&page_num=${
-        currentPageNumRef.current
+        searchValue ? 1 : currentPageNumRef.current
       }`,
       {},
       "get"

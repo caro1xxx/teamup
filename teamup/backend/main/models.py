@@ -1,11 +1,12 @@
 from django.db import models
 from main.tools import getCurrentTimestamp
+import datetime
 # daphne backend.asgi:application -b 0.0.0.0 -p 8000
 # python3 -m celery -A backend worker -l info
 
 
 class User(models.Model):
-    username = models.CharField(max_length=20, unique=True)
+    username = models.CharField(max_length=20, unique=True, db_index=True)
     password = models.CharField(max_length=32)
     create_time = models.IntegerField()
     avator_color = models.CharField(max_length=7)
@@ -60,6 +61,19 @@ class Room(models.Model):
         if self.take_seat_quorum > self.type.max_quorum:
             raise ValueError("当前车队已满员")
         super().save(*args, **kwargs)
+
+    @property
+    def todayIsCreate(self):
+        # 获取当前日期
+        today = datetime.date.today()
+        # 获取今天凌晨的时间
+        today_start = datetime.datetime.combine(today, datetime.time.min)
+        # 获取明天凌晨的时间
+        tomorrow_start = today_start + datetime.timedelta(days=1)
+        today_timestamp = int(today_start.timestamp())
+        # 将明天凌晨的时间转换为时间戳
+        tomorrow_timestamp = int(tomorrow_start.timestamp())
+        return self.create_time >= today_timestamp and self.create_time <= tomorrow_timestamp
 
 
 class Order(models.Model):

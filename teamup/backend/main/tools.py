@@ -104,7 +104,7 @@ def fromAuthGetUsername(request):
     authorization_header = request.META.get(
         'HTTP_AUTHORIZATION', None)
     if authorization_header is None or authorization_header == '' or authorization_header == 'Bearer':
-        return JsonResponse({"code": 401, "message": "refuse"})
+        return False
     payload = decodeToken(
         authorization_header.replace('Bearer ', ''))
     return payload['username']

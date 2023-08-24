@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode
-from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice
+from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, fromAuthGetUsername
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -22,10 +22,27 @@ class Rooms(APIView):
             if type is None or type == '':
                 return JsonResponse(CommonErrorcode.paramsError)
 
+            # 判断内存中是否存在Rooms 并且没有携带参数
             memoryNewData = cache.get(type+'_new_data', None)
             roomResponse = RoomResponseCode()
-            if memoryNewData is not None:
-                roomResponse.getSuccess['data'] = json.loads(memoryNewData)
+            if memoryNewData is not None and orderby == 'None' and search == 'None':
+                pageInatoredRooms, roomResponse.getSuccess['page_count'] = customizePaginator(
+                    json.loads(memoryNewData), 12, request.GET.get('page_num', 1))
+                responseData = []
+                username = fromAuthGetUsername(request)
+                # 如果登录返回收藏
+                if username:
+                    for i in pageInatoredRooms:
+                        roomFields = Room.objects.filter(pk=i['pk']).first()
+                        if roomFields.users_favorited.filter(username=username).exists():
+                            i["favorited"] = 1
+                        else:
+                            i["favorited"] = 0
+                        responseData.append(i)
+                else:
+                    for i in pageInatoredRooms:
+                        responseData.append(i)
+                roomResponse.getSuccess['data'] = responseData
                 return JsonResponse(roomResponse.getSuccess)
 
             rooms = []
@@ -93,7 +110,7 @@ class Rooms(APIView):
             return JsonResponse(roomResponse.getSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # create room
@@ -105,6 +122,15 @@ class Rooms(APIView):
                 return JsonResponse(CommonErrorcode.paramsError)
 
             username = request.payload_data['username']
+
+            # 判断今天是否参加过房间
+            allUserRooms = Room.objects.filter(
+                creator__username=username).all()
+
+            for i in allUserRooms:
+                if i.todayIsCreate:
+                    return JsonResponse(RoomResponseCode.todayCreated)
+
             parmasList = ['name', 'description',
                           'type', 'uuid', 'mailType', 'time']
             for i in parmasList:
