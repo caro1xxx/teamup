@@ -1,12 +1,22 @@
 import React from "react";
-
-type Props = {};
-
-const Order = (props: Props) => {
+import { OrderFieldsState } from "../../types/componentsPropsTypes";
+import { PayedOrderWrap } from "../../style/other";
+import { parseStampTime } from "../../utils/tools";
+const Order = (props: { order: OrderFieldsState[] }) => {
   return (
-    <div style={{ height: "100px", textAlign: "center", lineHeight: "100px" }}>
-      积极开发中...
-    </div>
+    <PayedOrderWrap>
+      {props.order.map((item) => {
+        return (
+          <div className="warp" key={item.key}>
+            <div style={{ textAlign: "center", fontSize: "10px" }}>
+              {parseStampTime(item.user_buy_expire_time)}到期
+            </div>
+            <div className="ac">账号:{item.username}</div>
+            <div className="ac">账号:{item.password}</div>
+          </div>
+        );
+      })}
+    </PayedOrderWrap>
   );
 };
 

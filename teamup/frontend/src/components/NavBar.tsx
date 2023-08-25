@@ -14,7 +14,12 @@ import {
   changeRegisterPupup,
   changeLoginPupup,
 } from "../redux/modules/userSlice";
-import { InfoState, FavoriteState } from "../types/componentsPropsTypes";
+import {
+  InfoState,
+  FavoriteState,
+  OrderState,
+  OrderFieldsState,
+} from "../types/componentsPropsTypes";
 import { fecther } from "../utils/fecther";
 type Props = {};
 
@@ -245,6 +250,7 @@ const BottomContent = () => {
     "基础"
   );
   const [message, setMessage] = React.useState<InfoState[] | []>([]);
+  const [order, setOrder] = React.useState<OrderFieldsState[] | []>([]);
   const detailInfo = useAppSelector((state) => state.user.detailInfo);
   const [FavoriteList, setFavoriteList] = React.useState<FavoriteState[] | []>(
     []
@@ -274,9 +280,25 @@ const BottomContent = () => {
     setFavoriteList(data);
   };
 
+  const getOrder = async () => {
+    let result = await fecther("payedorder/", {}, "get");
+    if (result.code !== 200) return;
+    let data: OrderFieldsState[] = [];
+    result.data.forEach((item: OrderState) => {
+      data.push({
+        key: nanoid(),
+        username: item.fields.username,
+        password: item.fields.password,
+        user_buy_expire_time: item.fields.user_buy_expire_time,
+      });
+    });
+    setOrder(data);
+  };
+
   React.useEffect(() => {
     getMessage();
     getFavorite();
+    getOrder();
   }, []);
 
   return (
@@ -291,7 +313,7 @@ const BottomContent = () => {
       ) : currentBarValue === "消息" ? (
         <Info message={message} />
       ) : currentBarValue === "订单" ? (
-        <Order />
+        <Order order={order} />
       ) : currentBarValue === "收藏" ? (
         <Favorite favoriteList={FavoriteList} />
       ) : (

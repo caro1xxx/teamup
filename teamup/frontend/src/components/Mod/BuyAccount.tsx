@@ -144,7 +144,7 @@ const AccountInfo = (props: {
             到期
           </div>
         </div>
-        {props.isLogin == null ? null : (
+        {props.isLogin ? null : (
           <div className="hint">登录后购买账号可享受平台免费保管</div>
         )}
       </div>

@@ -245,3 +245,23 @@ export const ActivityWrap = styled.div`
     }
   }
 `;
+
+export const PayedOrderWrap = styled.div`
+  max-height: 200px;
+  overflow: scroll;
+  .warp {
+    padding: 5px 10px;
+    background-color: #4c4c4c;
+    margin: 10px 0px;
+    border-radius: 5px;
+    font-size: 10px;
+    .ac {
+      background-color: #1e1e1e;
+      padding: 3px 5px;
+      border: 2px solid #525252;
+      color: #838383;
+      margin: 3px 0px;
+      border-radius: 5px;
+    }
+  }
+`;

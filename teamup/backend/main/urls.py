@@ -21,6 +21,7 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/favorites/$', property.Favorite.as_view()),
     re_path(r'^api/v1/teamup/usermail/$', property.Mail.as_view()),
     re_path(r'^api/v1/teamup/activity/$', activity.Activitys.as_view()),
+    re_path(r'^api/v1/teamup/payedorder/$', property.PayedOrder.as_view()),
 
 
     # pay

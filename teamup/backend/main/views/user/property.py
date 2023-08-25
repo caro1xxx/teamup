@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import Message, Room, UserMail, User
+from main.models import Message, Room, UserMail, User, Account
 from main.contants import CommonErrorcode
 from django.core import serializers
 import json
@@ -80,6 +80,23 @@ class Mail(APIView):
                 mailUserFields.save()
 
             return JsonResponse(CommonErrorcode.success)
+        except Exception as e:
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.used)
+
+
+class PayedOrder(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            username = request.payload_data['username']
+
+            accountFields = Account.objects.filter(
+                distribute_user__username=username).all()
+
+            CommonCode = CommonErrorcode()
+            CommonCode.success['data'] = json.loads(
+                serializers.serialize('json', accountFields))
+            return JsonResponse(CommonCode.success)
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.used)

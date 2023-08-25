@@ -68,3 +68,16 @@ export interface ResultActivityListState {
   pk: number;
   fields: ActivityListState;
 }
+
+export type OrderFieldsState = {
+  key: string;
+  username: number;
+  password: number;
+  user_buy_expire_time: number;
+};
+
+export interface OrderState {
+  model: string;
+  pk: number;
+  fields: OrderFieldsState;
+}
