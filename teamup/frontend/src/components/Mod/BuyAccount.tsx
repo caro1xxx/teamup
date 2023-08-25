@@ -2,6 +2,7 @@ import React from "react";
 import { QRCode, Input } from "antd";
 import styled from "styled-components";
 import { LoadingWrap, AccountInfoWrap } from "../../style/other";
+import { parseStampTime } from "../../utils/tools";
 
 type Props = {
   qrcode: string;
@@ -11,6 +12,7 @@ type Props = {
   discountPrice: number;
   isLogin: boolean;
   useDiscount: (code: string) => Promise<void>;
+  time: number;
   payinfo: {
     username: string;
     password: string;
@@ -54,6 +56,7 @@ const BuyAccount = (props: Props) => {
           username={props.payinfo.username}
           password={props.payinfo.password}
           isLogin={props.isLogin}
+          time={props.time}
         />
       ) : (
         <>
@@ -111,22 +114,38 @@ const AccountInfo = (props: {
   username: string;
   password: string;
   isLogin: boolean;
+  time: number;
 }) => {
   return (
     <AccountInfoWrap>
-      <div>
-        <div className="contentwrap">
-          <div>账号:</div>
-          <div className="content">{props.username}</div>
-        </div>
-        <div className="contentwrap">
-          <div>密码:</div>
-          <div className="content">{props.password}</div>
-        </div>
-        {props.isLogin ? null : (
-          <div className="hint">
-            由于你未登录,平台无法保存订单,请你妥善保管账号消息
+      <div className="contentwrap">
+        <div style={{ fontWeight: "bolder" }}>TEAMUP ACCOUNT CARD</div>
+        <img
+          className="type"
+          src={require("../../assets/images/logo/netflix.png")}
+          alt=""
+        />
+        <div className="info">
+          <div>
+            <div className="account">账号:</div>
+            <div className="account_">{props.username}</div>
           </div>
+          <div>
+            <div className="password">密码:</div>
+            <div className="password_">{props.password}</div>
+          </div>
+        </div>
+        <div className="exprie_time">
+          <div>
+            {parseStampTime(
+              parseInt(new Date().getTime() / 1000 + "") +
+                props.time * 60 * 60 * 24
+            )}
+            到期
+          </div>
+        </div>
+        {props.isLogin == null ? null : (
+          <div className="hint">登录后购买账号可享受平台免费保管</div>
         )}
       </div>
     </AccountInfoWrap>

@@ -8,7 +8,7 @@ type Props = {
 
 const Favorite = (props: Props) => {
   return (
-    <div style={{ marginTop: "20px" }}>
+    <div style={{ marginTop: "20px", overflow: "scroll", maxHeight: "200px" }}>
       {props.favoriteList.map((item: FavoriteState) => {
         return (
           <FavoriteWarp key={item.key}>

@@ -72,7 +72,8 @@ class Pay(APIView):
 
                 sendMessageToChat('pay_notify_'+orderId, '已付款')
 
-                generatorAccountOfrPerson.delay(orderId)
+                generatorAccountOfrPerson.delay(
+                    orderId, paymentTypeAndOther[1])
 
                 cache.delete('pay_account_'+orderId)
 

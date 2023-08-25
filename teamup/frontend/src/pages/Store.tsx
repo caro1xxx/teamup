@@ -9,6 +9,7 @@ import { generateRandomString } from "../utils/tools";
 import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import "../style/custome_antd.css";
+import { getStorage, setStorage } from "../utils/localstorage";
 
 type Props = {};
 
@@ -106,12 +107,21 @@ const Store = (props: Props) => {
   });
 
   const buy = async (type: string, time: number, idx: number, didx: number) => {
+    let userFlag: string = "";
+    if (!isLogin) {
+      if (getStorage("userFlag")) {
+        userFlag = getStorage("userFlag");
+      } else {
+        setStorage("userFlag", generateRandomString(5));
+        userFlag = generateRandomString(5);
+      }
+    }
     let newValue = [...serviceList];
     serviceList[idx].plan[didx].loading = true;
     setServiceList(newValue);
     let result = await fecther(
       "accountorder/",
-      { time, type, flag: isLogin ? "None" : generateRandomString(5) },
+      { time, type, flag: isLogin ? "None" : userFlag },
       "post"
     );
     serviceList[idx].plan[didx].loading = false;
@@ -189,7 +199,10 @@ const Store = (props: Props) => {
       WsRef.current.onmessage = (event) => {
         let jsonMsg = JSON.parse(event.data);
         if (jsonMsg.message === "已付款") {
-          setPayedInfo({ ...PayedInfo, isPayed: 1 });
+          setPayedInfo({
+            ...PayedInfo,
+            isPayed: 1,
+          });
         } else if (!jsonMsg.message.includes("分配失败")) {
           setPayedInfo({
             username: JSON.parse(jsonMsg.message).username,
@@ -304,6 +317,7 @@ const Store = (props: Props) => {
         <BuyAccount
           useDiscount={useDiscount}
           payinfo={PayedInfo}
+          time={OrderInfo.time}
           flush={flush}
           qrcode={OrderInfo.qrcode}
           qrstate={OrderInfo.qrstate}

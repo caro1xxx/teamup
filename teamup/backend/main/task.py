@@ -98,7 +98,7 @@ def generatorAccount(roomId, users, orderId):
 
 
 @shared_task
-def generatorAccountOfrPerson(OrderId):
+def generatorAccountOfrPerson(OrderId, username):
     orderFields = models.Order.objects.filter(order_id=OrderId).first()
     specifyTypeModel = models.Group.objects.filter(
         type=orderFields.type).all()
@@ -138,7 +138,11 @@ def generatorAccountOfrPerson(OrderId):
             related_group_id=AccountFields[0].pk).first()
 
         # 如果用户没有登录,那么将user表中的guest用户关联到account
-        dispatchAccount.distribute_user_id = 1
+        if username == 'unknown':
+            dispatchAccount.distribute_user_id = 1
+        else:
+            userFiedls = models.User.objects.filter(username=username).first()
+            dispatchAccount.distribute_user_id = userFiedls.pk
         dispatchAccount.user_buy_expire_time = getCurrentTimestamp() + \
             orderFields.time * 60 * 60 * 24
         dispatchAccount.save()

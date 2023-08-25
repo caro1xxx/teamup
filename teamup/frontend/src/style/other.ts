@@ -167,21 +167,53 @@ export const LoadingWrap = styled.div`
 
 export const AccountInfoWrap = styled.div`
   width: 100%;
-  padding: 20px 0px;
-  .contentwrap {
-    display: flex;
+  margin-top: 20px;
+  background: linear-gradient(to right, #259acc, #05b665);
+  color: transparent;
+  border-radius: 15px;
+  position: relative;
+  color: #fff;
+  .type {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    width: 30px;
   }
-  .content {
-    flex: 1;
+  .contentwrap {
+    padding: 20px;
+  }
+  .info {
+    margin-top: 10px;
     display: flex;
-    vertical-align: top;
-    justify-content: end;
-    align-items: center;
+    > div {
+      width: 50%;
+    }
+  }
+  .account {
+    font-size: 15px;
+    font-weight: lighter;
+    font-style: italic;
+  }
+  .account_ {
+    font-size: 15px;
+  }
+  .password {
+    font-size: 15px;
+    font-weight: lighter;
+    font-style: italic;
+  }
+  .password_ {
+    font-size: 15px;
+  }
+  .exprie_time {
+    margin-top: 10px;
+    font-size: 10px;
+    cursor: pointer;
+    user-select: none;
   }
   .hint {
-    color: #05b665;
-    font-size: 10px;
     margin-top: 10px;
+    font-size: 10px;
   }
 `;
 
