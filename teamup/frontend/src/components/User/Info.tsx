@@ -3,6 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import { calculateTimeDifference } from "../../utils/tools";
 import { InfoState } from "../../types/componentsPropsTypes";
+import { Empty } from "antd";
 
 type Props = {
   message: InfoState[];
@@ -81,22 +82,28 @@ const Wrap = styled.div`
 const Info = (props: Props) => {
   return (
     <BodyWrap>
-      {props.message.map((item: InfoState) => {
-        return (
-          <Wrap key={item.key}>
-            <div className="avator">{item.send.charAt(0)}</div>
-            <div className="content">
-              <div className="title">@{item.send}向你发送消息</div>
-              <div className="message">{item.content}</div>
-            </div>
-            <div className="state">
-              <div className="time">
-                {calculateTimeDifference(item.sendTime)}之前
-              </div>
-            </div>
-          </Wrap>
-        );
-      })}
+      {props.message.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      ) : (
+        <>
+          {props.message.map((item: InfoState) => {
+            return (
+              <Wrap key={item.key}>
+                <div className="avator">{item.send.charAt(0)}</div>
+                <div className="content">
+                  <div className="title">@{item.send}向你发送消息</div>
+                  <div className="message">{item.content}</div>
+                </div>
+                <div className="state">
+                  <div className="time">
+                    {calculateTimeDifference(item.sendTime)}之前
+                  </div>
+                </div>
+              </Wrap>
+            );
+          })}
+        </>
+      )}
     </BodyWrap>
   );
 };

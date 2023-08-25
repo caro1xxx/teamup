@@ -175,3 +175,12 @@ class DiscountCode(models.Model):
     effect = models.CharField(max_length=32)
     begin_time = models.IntegerField()
     end_time = models.IntegerField()
+
+
+class Question(models.Model):
+    username = models.CharField(max_length=32, unique=True)
+    email = models.CharField(max_length=128, unique=True)
+    use_type = models.CharField(max_length=32)
+    question = models.TextField()
+    suggestion = models.TextField()
+    score = models.IntegerField()
