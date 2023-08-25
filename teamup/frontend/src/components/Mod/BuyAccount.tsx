@@ -10,6 +10,7 @@ type Props = {
   price: number;
   discountPrice: number;
   isLogin: boolean;
+  useDiscount: (code: string) => Promise<void>;
   payinfo: {
     username: string;
     password: string;
@@ -34,6 +35,16 @@ const Wrap = styled.div`
 const { Search } = Input;
 
 const BuyAccount = (props: Props) => {
+  const [isLoading, setLoading] = React.useState(false);
+
+  const use = (e: string) => {
+    setLoading(true);
+    props.useDiscount(e);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
     <Wrap>
       {props.payinfo.isPayed === 1 ? (
@@ -61,7 +72,8 @@ const BuyAccount = (props: Props) => {
           <div className="detail">
             <div className="title">优惠价格:</div>
             <div className="price">
-              随机立减 -{(props.price - props.discountPrice).toFixed(2)}
+              {props.price - props.discountPrice < 1 ? "随机立减" : "折扣码"} -
+              {(props.price - props.discountPrice).toFixed(2)}
             </div>
           </div>
           <div className="detail">
@@ -72,7 +84,8 @@ const BuyAccount = (props: Props) => {
             style={{ width: "95%", margin: "0px 10px", marginTop: "10px" }}
             size="middle"
             placeholder="折扣码"
-            // onSearch={onSearch}
+            onSearch={(e) => use(e)}
+            loading={isLoading}
             enterButton="使用"
           />
         </>

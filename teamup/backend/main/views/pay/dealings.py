@@ -23,6 +23,7 @@ class Pay(APIView):
                 return JsonResponse(CommonErrorcode.paramsError)
 
             paymentTypeAndOther = paymentType.split('|')
+            # 房间发车账号
             if paymentTypeAndOther[0] == 'room':
                 roomId = paymentTypeAndOther[1]
                 memoryTeamAllPayOrder = cache.get(
@@ -49,12 +50,13 @@ class Pay(APIView):
 
                         sendMessageToChat('room_'+roomId, i['user']+'已付款')
                         checkAllUserPayed.delay(
-                            serializeMemoryTeamAllPayOrder, roomId)
+                            serializeMemoryTeamAllPayOrder, roomId, i["order_id"])
 
                         return JsonResponse(PayResponseCode.paySuccess)
 
                 return JsonResponse(PayResponseCode.payError)
 
+            # 店铺账号
             elif paymentTypeAndOther[0] == 'account':
                 memoryTeamAllPayOrder = cache.get(
                     'pay_account_'+orderId, None)

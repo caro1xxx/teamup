@@ -8,9 +8,11 @@ type Props = {
   qrcode: string;
   expire_time: number;
   price: number;
+  discountPrice: number;
   isOpenQr: boolean;
   payState: number;
   flushQr: () => void;
+  useDiscount: (code: string) => Promise<void>;
 };
 
 const ChatPayCode = (props: Props) => {
@@ -67,6 +69,8 @@ const ChatPayCode = (props: Props) => {
             expire_time={props.expire_time}
             price={props.price}
             qrstate={qrState}
+            discountPrice={props.discountPrice}
+            useDiscount={props.useDiscount}
           />
         ) : (
           "支付成功"
@@ -98,11 +102,23 @@ type PayCodeBodyProps = {
   qrcode: string;
   expire_time: number;
   price: number;
+  discountPrice: number;
   qrstate: boolean;
   flushQr: () => void;
+  useDiscount: (code: string) => Promise<void>;
 };
 
 const PayCodeBody = (props: PayCodeBodyProps) => {
+  const [isLoading, setLoading] = React.useState(false);
+
+  const use = (e: string) => {
+    setLoading(true);
+    props.useDiscount(e);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
     <PayCodeBodyWrap>
       <div className="title">
@@ -124,17 +140,21 @@ const PayCodeBody = (props: PayCodeBodyProps) => {
         </div>
         <div className="price">
           <div>优惠:</div>
-          <div className="value">随机立减 -0.5</div>
+          <div className="value">
+            {props.price - props.discountPrice >= 1 ? "折扣码" : "随机立减"} -
+            {(props.price - props.discountPrice).toFixed(2)}
+          </div>
         </div>
         <div className="price">
           <div>实际价格:</div>
-          <div className="value">¥{props.price - 0.5}</div>
+          <div className="value">¥{props.discountPrice}</div>
         </div>
         <Search
           style={{ width: "180px" }}
+          loading={isLoading}
           size="small"
           placeholder="折扣码"
-          // onSearch={onSearch}
+          onSearch={(e) => use(e)}
           enterButton="使用"
         />
       </div>

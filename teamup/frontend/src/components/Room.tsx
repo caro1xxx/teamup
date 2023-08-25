@@ -492,13 +492,14 @@ const Room = () => {
       dispatchPayState({ type: "clear" });
       return;
     }
-    // let isAllPay = await checkIsAllUserPayed(result.data)
     for (let i = 0; i < result.data.length; i++) {
       if (result.data[i].user === username) {
         result.data["selfPayCode"] = result.data[i].qrcode;
         result.data["expire_time"] = result.data[i].create_time + 60 * 3;
         result.data["price"] = result.data[i].price;
         result.data["payState"] = result.data[i].state;
+        result.data["discountPrice"] = result.data[i].discountPrice;
+        result.data["order_id"] = result.data[i].order_id;
         break;
       }
     }
@@ -635,10 +636,34 @@ const Room = () => {
   };
 
   // reconnect
-  const reconnect= () =>{
-    setisCloseWs(false)
-    connectRoom()
-  }
+  const reconnect = () => {
+    setisCloseWs(false);
+    connectRoom();
+  };
+
+  // 使用折扣码
+  const useDiscount = async (code: string) => {
+    let result = await fecther(
+      "paystate/",
+      {
+        orderId: allPayState.order_id,
+        discountCode: code,
+        roomId: userToRoomInfo.pk,
+      },
+      "post"
+    );
+    if (result.code === 200) {
+      dispatchPayState({
+        type: "changeOrderDiscountPrice",
+        payload: {
+          discountPrice: result.discountPrice,
+        },
+      });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+  };
 
   // listen router
   useEffect(() => {
@@ -738,18 +763,20 @@ const Room = () => {
                 <>
                   <ChatUserPayState data={allPayState.all} />
                   <ChatPayCode
+                    useDiscount={useDiscount}
                     flushQr={flushQr}
                     isOpenQr={isOpenQrRef.current}
                     price={allPayState.price}
                     qrcode={allPayState.selfPayCode}
                     expire_time={allPayState.expire_time}
                     payState={allPayState.payState}
+                    discountPrice={allPayState.discountPrice}
                   />
                 </>
               ) : null}
             </div>
             <ChatMessageInput
-            isCloseWs={isCloseWs}
+              isCloseWs={isCloseWs}
               closeWs={closeWs}
               send={sendMessage}
               isLogin={isLogin}

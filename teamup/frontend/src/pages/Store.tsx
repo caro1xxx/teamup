@@ -181,6 +181,7 @@ const Store = (props: Props) => {
     }
   };
 
+  // 打开二维码后 连接支付回调
   const connectPayNotify = (orderid: string) => {
     WsRef.current = new WebSocket(`ws://192.168.31.69/ws/notify/${orderid}/`);
     WsRef.current.onopen = () => {
@@ -198,6 +199,25 @@ const Store = (props: Props) => {
         }
       };
     };
+  };
+
+  // 使用折扣码
+  const useDiscount = async (code: string) => {
+    let result = await fecther(
+      "paystate/",
+      {
+        orderId: OrderInfo.order_id,
+        discountCode: code,
+        roomId: "account",
+      },
+      "post"
+    );
+    if (result.code === 200) {
+      setOrderInfo({ ...OrderInfo, discountPrice: result.discountPrice });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
   };
 
   useEffect(() => {
@@ -282,6 +302,7 @@ const Store = (props: Props) => {
         width={350}
       >
         <BuyAccount
+          useDiscount={useDiscount}
           payinfo={PayedInfo}
           flush={flush}
           qrcode={OrderInfo.qrcode}

@@ -68,3 +68,12 @@ class PayResponseCode:
 
 class TypeInfoResponseCode:
     typeNotFound = {'code': 404, 'message': "该类型不存在"}
+
+
+class CodeResonseCode:
+    codeError = {'code': 422, 'message': "折扣码错误"}
+    useSuccess = {'code': 200, 'message': "使用成功"}
+    used = {'code': 421, 'message': "已使用过该折扣码"}
+    orderUsed = {'code': 422, 'message': "该订单已使用过折扣"}
+    codeNotStartOrExpire = {'code': 423, 'message': "该折扣码未开始使用或已结束使用"}
+    orderNotFound = {'code': 444, 'message': "订单或房间不存在"}

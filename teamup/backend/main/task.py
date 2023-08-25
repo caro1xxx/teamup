@@ -29,17 +29,17 @@ def sendDepartureNotify(topic, userList):
 
 
 @shared_task
-def checkAllUserPayed(memoryallUser, roomId):
+def checkAllUserPayed(memoryallUser, roomId, orderId):
     for i in memoryallUser:
         if i["state"] == 0:
             return
     models.Room.objects.filter(pk=roomId).update(state=2)
     sendMessageToChat('room_'+roomId, '全员付款完毕')
-    generatorAccount(roomId, memoryallUser)
+    generatorAccount(roomId, memoryallUser, orderId)
 
 
 @shared_task
-def generatorAccount(roomId, users):
+def generatorAccount(roomId, users, orderId):
     usersCount = len(users)
     if usersCount == 0:
         return
@@ -76,6 +76,8 @@ def generatorAccount(roomId, users):
 
             for index, value in enumerate(allSameGroupAccounts):
                 value.distribute_user_id = allUsersFields[index].pk
+                value.user_buy_expire_time = getCurrentTimestamp() + models.Order.objects.filter(
+                    order_id=orderId).first().time * 60 * 60 * 24
                 value.save()
                 mainNotifys.append(
                     {"email": allUsersFields[index].email, "account": value.username, "password": value.password})
@@ -137,6 +139,8 @@ def generatorAccountOfrPerson(OrderId):
 
         # 如果用户没有登录,那么将user表中的guest用户关联到account
         dispatchAccount.distribute_user_id = 1
+        dispatchAccount.user_buy_expire_time = getCurrentTimestamp() + \
+            orderFields.time * 60 * 60 * 24
         dispatchAccount.save()
 
         AccountFields[0].distribute = AccountFields[0].distribute + 1

@@ -34,7 +34,7 @@ const ChatMessageInput = (props: Props) => {
     clearTimeout(noActionTimer.current);
     noActionTimer.current = setTimeout(() => {
       props.closeWs();
-    }, 1000 * 5);
+    }, 1000 * 60 * 3);
     return () => {
       if (noActionTimer.current) {
         clearTimeout(noActionTimer.current);

@@ -91,6 +91,7 @@ class Order(models.Model):
     userFlag = models.CharField(
         max_length=5, verbose_name="在用户未登录的情况下创建订单的标示", default='')
     payed_time = models.IntegerField(default=0)
+    discount_code = models.CharField(max_length=6, default='random')
 
 
 class Group(models.Model):
@@ -110,6 +111,8 @@ class Account(models.Model):
     email = models.CharField(max_length=64, unique=True)
     create_time = models.IntegerField()
     expire_time = models.IntegerField()
+    user_buy_expire_time = models.IntegerField(
+        default=0, verbose_name='用户购买的到期时间')
     distribute_user = models.OneToOneField(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name='distributeUser'
     )
@@ -161,3 +164,14 @@ class Activity(models.Model):
     @property
     def efficient(self):
         return self.end_time > getCurrentTimestamp()
+
+
+class DiscountCode(models.Model):
+    code = models.CharField(max_length=6, unique=True)
+    use_user = models.ManyToManyField(
+        User, related_name='user', verbose_name="使用折扣码的用户", blank=True)
+    use_order = models.ManyToManyField(
+        Order, related_name='order', verbose_name="使用折扣码的订单", blank=True)
+    effect = models.CharField(max_length=32)
+    begin_time = models.IntegerField()
+    end_time = models.IntegerField()

@@ -9,6 +9,7 @@ type Props = {
     state: number;
     user: string;
     avatorColor: string;
+    discountPrice: number;
   }[];
 };
 

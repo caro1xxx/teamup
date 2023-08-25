@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import User, Room, Order, RoomType
-from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode
+from main.models import User, Room, Order, RoomType, DiscountCode
+from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
 from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, fromAuthGetUsername
 import json
 from django.core.exceptions import ObjectDoesNotExist
@@ -327,23 +327,23 @@ class Handler(APIView):
                 users_email = [user.email for user in users_in_room]
                 priceOfItem = room.type.price / room.take_seat_quorum
                 currentStampTime = getCurrentTimestamp()
-                order_id = generateRandomnumber()
-                discount = discountPrice(priceOfItem)
 
                 ordersInsert = []
                 insertMysqlOrder = []
                 for user in users_in_room:
+                    discount = discountPrice(priceOfItem)
+                    order_id = generateRandomnumber()
                     insertMysqlOrder.append(
                         Order(order_id=order_id, room=room, user=user, price=priceOfItem, discount_price=discount, type=room.type.name, time=999))
                     ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "hello",
-                                        "room": room.pk, "user": user.username, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
+                                        "room": room.pk, "user": user.username, "discount_price": discount, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
 
                 Order.objects.bulk_create(insertMysqlOrder)
 
                 ordersSerialize = []
                 for i in ordersInsert:
                     ordersSerialize.append({"order_id": i["order_id"], "state": i["state"], "price": i["price"],
-                                           "qrcode": i["qrcode"], "user": i["user"], "avatorColor": i["avatorColor"], "create_time": i["create_time"]})
+                                           "qrcode": i["qrcode"], "user": i["user"], "avatorColor": i["avatorColor"], "create_time": i["create_time"], "discountPrice": i['discount_price']})
 
                 cache.set('pay_room_' + str(roomId),
                           json.dumps(ordersSerialize), ORDER_LIFEYCLE)
@@ -422,6 +422,84 @@ class PayState(APIView):
 
         except Exception as e:
             # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+    # 使用折扣码
+    def post(self, request, *args, **kwargs):
+        try:
+            orderId = json.loads(request.body).get('orderId', None)
+            discountCode = json.loads(request.body).get('discountCode', None)
+            roomId = json.loads(request.body).get('roomId', None)
+
+            if discountCode is None or discountCode == '' or len(discountCode) != 6 or orderId is None or orderId == '' or roomId is None:
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
+
+            try:
+                codeFields = DiscountCode.objects.get(code=discountCode)
+            except ObjectDoesNotExist:
+                return JsonResponse(CodeResonseCode.codeError)
+
+            # 有效期
+            if getCurrentTimestamp() < codeFields.begin_time or getCurrentTimestamp() > codeFields.end_time:
+                return JsonResponse(CodeResonseCode.codeNotStartOrExpire)
+
+            # 用户已使用
+            allUseCodeUser = codeFields.use_user.filter(username=username)
+            if len(allUseCodeUser) >= 1:
+                return JsonResponse(CodeResonseCode.used)
+
+            # 订单已使用
+            allUseCodeOrder = codeFields.use_order.filter(order_id=orderId)
+            if len(allUseCodeOrder) >= 1:
+                return JsonResponse(CodeResonseCode.orderUsed)
+
+            useOrderFields = Order.objects.get(order_id=orderId)
+            if useOrderFields.discount_code != 'random':
+                return JsonResponse(CodeResonseCode.orderUsed)
+
+            # 计算折扣
+            useOrderFields.discount_code = discountCode
+            effect = codeFields.effect.split('|')
+            if effect[0] == '-':
+                useOrderFields.discount_price = useOrderFields.price - \
+                    int(effect[1])
+            elif effect[0] == '%':
+                useOrderFields.discount_price = useOrderFields.price / \
+                    10 * int(effect[1])
+
+            memoryPrefix = ''
+            if roomId != 'account':
+                memoryPrefix = 'pay_room_'+str(roomId)
+            else:
+                memoryPrefix = 'pay_account_'+orderId
+            memoryOrder = cache.get(memoryPrefix, None)
+            if memoryOrder is None:
+                return JsonResponse(CodeResonseCode.orderNotFound)
+
+            serizeleMemoryOrder = json.loads(memoryOrder)
+            if roomId != 'account':
+                for i in serizeleMemoryOrder:
+                    if i['order_id'] == orderId:
+                        i['discountPrice'] = useOrderFields.discount_price
+                        break
+            else:
+                serizeleMemoryOrder['discountPrice'] = useOrderFields.discount_price
+            cache.set(memoryPrefix, json.dumps(
+                serizeleMemoryOrder), ORDER_LIFEYCLE)
+
+            # save
+            codeFields.use_user.add(User.objects.get(username=username))
+            codeFields.use_order.add(useOrderFields)
+            codeFields.save()
+            useOrderFields.save()
+
+            CodeCode = CodeResonseCode()
+            CodeCode.useSuccess['discountPrice'] = useOrderFields.discount_price
+            return JsonResponse(CodeCode.useSuccess)
+        except Exception as e:
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # 刷新二维码

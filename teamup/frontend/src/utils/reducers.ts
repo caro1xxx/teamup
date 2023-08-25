@@ -22,6 +22,8 @@ export const payStateReducer = (state: any, action: any) => {
         expire_time: action.payload.expire_time,
         payState: action.payload.payState,
         price: action.payload.price,
+        order_id: action.payload.order_id,
+        discountPrice: action.payload.discountPrice,
         all: [...state.all, action.payload],
       };
     case "init":
@@ -31,6 +33,8 @@ export const payStateReducer = (state: any, action: any) => {
         expire_time: action.payload.expire_time,
         payState: action.payload.payState,
         price: action.payload.price,
+        order_id: action.payload.order_id,
+        discountPrice: action.payload.discountPrice,
         all: [...action.payload],
       };
     case "flushQr":
@@ -40,6 +44,19 @@ export const payStateReducer = (state: any, action: any) => {
         expire_time: action.payload.expire_time,
         payState: state.payState,
         price: state.price,
+        order_id: state.order_id,
+        discountPrice: state.discountPrice,
+        all: [...state.all],
+      };
+    case "changeOrderDiscountPrice":
+      return {
+        isDeparture: true,
+        selfPayCode: state.selfPayCode,
+        expire_time: state.expire_time,
+        payState: state.payState,
+        price: state.price,
+        order_id: state.order_id,
+        discountPrice: action.payload.discountPrice,
         all: [...state.all],
       };
     case "changePayState":
@@ -59,6 +76,8 @@ export const payStateReducer = (state: any, action: any) => {
         expire_time: state.expire_time,
         payState: newValue.payState,
         price: state.price,
+        order_id: state.order_id,
+        discountPrice: state.discountPrice,
         all: [...newValue.all],
       };
     default:
@@ -72,6 +91,8 @@ export const payStateInitialState = {
   expire_time: 0,
   payState: 0,
   price: 0,
+  discountPrice: 0.0,
+  order_id: "",
   all: [
     {
       order_id: "",
@@ -80,6 +101,7 @@ export const payStateInitialState = {
       state: 0,
       user: "",
       avatorColor: "",
+      discountPrice: 0.0,
     },
   ],
 };
