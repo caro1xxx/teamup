@@ -184,3 +184,9 @@ class Question(models.Model):
     question = models.TextField()
     suggestion = models.TextField()
     score = models.IntegerField()
+
+
+class NeedChargeRoomAccounts(models.Model):
+    room_id = models.IntegerField(unique=True)
+    all_user_mail_info = models.CharField(
+        max_length=64, verbose_name='记录关联的房间中的所有用户的mail_user表中的id, =>[5,1,3,2,6]')

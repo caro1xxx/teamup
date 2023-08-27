@@ -5,6 +5,8 @@ import { parseStampTime } from "../../utils/tools";
 import { nanoid } from "nanoid";
 import { useAppDispatch } from "../../redux/hooks";
 import LoadingMoreIcon from "../../assets/images/loadingmore.png";
+import { Alert } from "antd";
+
 import {
   changeLoginPupup,
   changeRegisterPupup,
@@ -14,6 +16,8 @@ type Props = {
   isLogin: boolean;
   isCloseWs: boolean;
   reconnect: () => void;
+  roomType: number;
+  roomName: string;
 };
 
 const BodyWrap = styled.div`
@@ -65,8 +69,23 @@ const ChatDrawerBody = (props: Props) => {
 
   return (
     <>
+      {props.roomType === 2 ? (
+        <Alert
+          message={`当前车队类型为自备邮箱,请确保您提交的邮箱已注册${
+            props.roomName.split("-")[0]
+          }账号`}
+          type="error"
+        />
+      ) : null}
       {props.isLogin ? (
-        <BodyWrap>
+        <BodyWrap
+          style={{
+            height:
+              props.roomType === 2
+                ? "calc(100vh - 350px - 80px)"
+                : "calc(100vh - 350px - 50px)",
+          }}
+        >
           {props.message.map((item: any) => {
             return (
               <MessageItem

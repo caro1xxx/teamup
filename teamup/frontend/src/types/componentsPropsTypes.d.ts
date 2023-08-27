@@ -13,6 +13,7 @@ export type RoomItemProps = {
     surplus: number;
     description: string;
     favorited: number;
+    state:number;
   };
   open: (roomInfo: RoomInfo) => void;
   favorite: (roomPk: number, type: number) => Promise<void>;

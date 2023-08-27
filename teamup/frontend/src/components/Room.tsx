@@ -113,6 +113,7 @@ const Room = () => {
       roomName: "",
       key: nanoid(),
       roomId: "",
+      state: 0,
       online: 0,
       teammate: [{ username: "", key: nanoid(), avatorColor: "pink" }],
       surplus: 0,
@@ -190,6 +191,7 @@ const Room = () => {
           roomId: item.uuid,
           online: item.message_count,
           teammate: [],
+          state: item.state,
           surplus: item.surplus,
           description: textPhase(item.description),
           favorited: item.favorited ? 1 : 0,
@@ -427,6 +429,7 @@ const Room = () => {
   const connectRoom = React.useCallback(async () => {
     if (!websocketRef.current || websocketRef.current.readyState === 3) {
       dispatchMessage({ type: "clear" });
+      setisCloseWs(false);
       websocketRef.current = new WebSocket(
         `ws://192.168.31.69/ws/room/${userToRoomInfo.pk}/${access_token}/`
       );
@@ -691,6 +694,7 @@ const Room = () => {
       pk: createRoomData.pk,
       roomName: createRoomData.name,
       key: nanoid(),
+      state: 0,
       roomId: createRoomData.uuid,
       online: 28,
       teammate: [
@@ -752,6 +756,8 @@ const Room = () => {
             message={message}
             isLogin={isLogin}
             reconnect={reconnect}
+            roomName={TeamInfo.level}
+            roomType={TeamInfo.type}
           />
           <BottomOptions>
             <div className="options">
@@ -940,6 +946,7 @@ const Item = (props: RoomItemProps) => {
             <PeopleItem
               key={item.key}
               people={item}
+              state={props.room.state}
               index={index}
               surplus={props.room.surplus}
             />

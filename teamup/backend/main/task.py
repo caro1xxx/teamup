@@ -1,12 +1,12 @@
 import django
 django.setup()
-from django.core.mail import send_mail
-from celery import shared_task
-from backend import settings
-from main import models
-from main.tools import sendMessageToChat, getCurrentTimestamp
-import json
 from django.core import serializers
+import json
+from main.tools import sendMessageToChat, getCurrentTimestamp
+from main import models
+from backend import settings
+from celery import shared_task
+from django.core.mail import send_mail
 
 
 @shared_task
@@ -45,6 +45,20 @@ def generatorAccount(roomId, users, orderId):
         return
 
     roomFieldsType = models.Room.objects.filter(pk=roomId).first()
+
+    # 判断是否是自备邮箱类型
+    if roomFieldsType.type.type == 2:
+        sendMessageToChat('room_'+str(roomId),
+                          '系统正在充值到指定邮箱中,请耐心等待(2小时内到账)')
+
+        allUsersName = [user['user'] for user in users]
+        allUsersFields = models.User.objects.filter(
+            username__in=allUsersName).all()
+        allUsersId = [user.pk for user in allUsersFields]
+        models.NeedChargeRoomAccounts.objects.create(
+            room_id=roomId, all_user_mail_info=json.dumps(allUsersId))
+        return
+
     specifyTypeModel = models.Group.objects.filter(
         type=roomFieldsType.type.name).all()
 
@@ -94,7 +108,7 @@ def generatorAccount(roomId, users, orderId):
 
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
     else:
-        sendMessageToChat('room_'+str(roomId), '账号不足')
+        sendMessageToChat('room_'+str(roomId), '账号不足,正在补货中')
 
 
 @shared_task
