@@ -12,6 +12,8 @@ from asgiref.sync import async_to_sync
 from django.http import JsonResponse
 import requests
 import json
+import hashlib
+from main.config import APP_ID, API_SERCET
 
 
 def checkIsNotEmpty(data, *args):
@@ -99,7 +101,7 @@ def generateRandomnumber(length=32):
 
 
 def discountPrice(real_price):
-    return round(random.uniform(real_price-1, real_price), 2)
+    return round(random.uniform(real_price-1, real_price), 1)
 
 
 def fromAuthGetUsername(request):
@@ -115,8 +117,10 @@ def fromAuthGetUsername(request):
 def post_request(url, data):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     try:
+        print(data)
         response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
             data), headers=headers, verify=False)
+        print(response.text)
         jsonResult = json.loads(response.text)
         if jsonResult.get('msg', None) is None:
             jsonResult['user'] = data['order_uid']
@@ -127,5 +131,23 @@ def post_request(url, data):
             elif jsonResult['msg'] == '没有可用的收款码':
                 return 'full'
     except Exception as e:
-        # print(str(e))
+        print(str(e))
         return 'error'
+
+
+def toMD5(text):
+    return hashlib.md5(text.encode()).hexdigest()
+
+
+def buildOrderParmas(data, roomId):
+    sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
+        APP_ID, data["order_id"],  "room|"+str(roomId), "wechat", data['discount_price'], data["user"], API_SERCET)
+    return {"app_id": APP_ID, "order_no": data["order_id"], "trade_name": "room|"+str(roomId),
+            "pay_type": "wechat", "order_amount": data['discount_price'], "order_uid": data["user"], "sign": toMD5(sign)}
+
+
+def buildOrderParmasOfAccount(data, usernameOrUserFlag):
+    sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
+        APP_ID, data["order_id"],  "account|"+usernameOrUserFlag, "wechat", data['discountPrice'], data["user"], API_SERCET)
+    return {"app_id": APP_ID, "order_no": data["order_id"], "trade_name": "account|"+usernameOrUserFlag,
+            "pay_type": "wechat", "order_amount": data['discountPrice'], "order_uid": data["user"], "sign": toMD5(sign)}

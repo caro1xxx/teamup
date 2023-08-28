@@ -3,12 +3,12 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType, DiscountCode
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
-from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice
+from main.tools import customizePaginator, getCurrentTimestamp, toMD5, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from main.task import sendDepartureNotify, getPayOrder
-from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME
+from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME, PAY_HOST, APP_ID, API_SERCET
 
 
 class Rooms(APIView):
@@ -340,7 +340,7 @@ class Handler(APIView):
                     discount = discountPrice(priceOfItem)
                     order_id = generateRandomnumber()
                     insertMysqlOrder.append(
-                        Order(order_id=order_id, room=room, user=user, price=priceOfItem, discount_price=discount, type=room.type.name, time=999))
+                        Order(order_id=order_id, room=room, user=user, price=priceOfItem, discount_price=discount, type=room.type.name, time=999, create_time=currentStampTime))
                     ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "hello",
                                         "room": room.pk, "user": user.username, "discount_price": discount, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
 
@@ -530,7 +530,25 @@ class PayState(APIView):
 
             for i in serializeMemoryTeamAllPayOrder:
                 if i["user"] == username:
+                    data = []
+                    # 生成参数
+                    sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
+                        APP_ID, i["order_id"],  "room|"+str(roomId), "wechat", 0.01, i["user"], API_SERCET)
+                    data.append({"app_id": APP_ID, "order_no": i["order_id"], "trade_name": "room|"+str(roomId),
+                                "pay_type": "wechat", "order_amount": 0.01, "order_uid": i["user"], "sign": toMD5(sign)})
+
+                    # 重新获取qrcode
+                    result = post_request(PAY_HOST, data[0])
+
+                    if result == 'full':
+                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                    elif result == 'exist':
+                        return JsonResponse({'code': 418, 'message': '订单存在'})
+                    elif result == 'error':
+                        return JsonResponse({'code': 418, 'message': '刷新失败,请稍后再试'})
+
                     i["create_time"] = getCurrentTimestamp()
+                    i['qrcode'] = result['qr']
                     cache.set('pay_room_'+str(roomId),
                               json.dumps(serializeMemoryTeamAllPayOrder), ORDER_LIFEYCLE)
                     return JsonResponse(PayStateResponseCode.flushSuccess)

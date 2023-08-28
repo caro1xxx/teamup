@@ -92,6 +92,7 @@ class Order(models.Model):
         max_length=5, verbose_name="在用户未登录的情况下创建订单的标示", default='')
     payed_time = models.IntegerField(default=0)
     discount_code = models.CharField(max_length=6, default='random')
+    create_time = models.IntegerField()
 
 
 class Group(models.Model):

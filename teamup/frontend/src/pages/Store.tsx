@@ -10,6 +10,7 @@ import { useAppDispatch } from "../redux/hooks";
 import { changeMessage } from "../redux/modules/notifySlice";
 import "../style/custome_antd.css";
 import { getStorage, setStorage } from "../utils/localstorage";
+import { WEBSOCKER_HOST, QRCODE_FLUSH_TIME } from "../env/config";
 
 type Props = {};
 
@@ -109,6 +110,7 @@ const Store = (props: Props) => {
     password: "",
     isPayed: 0,
   });
+  const isFlushingRef = React.useRef(false);
 
   const buy = async (type: string, time: number, idx: number, didx: number) => {
     let userFlag: string = "";
@@ -136,7 +138,7 @@ const Store = (props: Props) => {
     }
     setOrderInfo({
       ...result.order,
-      expire_time: result.order.create_time + 60 * 3,
+      expire_time: result.order.create_time + QRCODE_FLUSH_TIME,
       qrstate: true,
     });
     setCreateRoomModel(true);
@@ -179,26 +181,40 @@ const Store = (props: Props) => {
 
   // 刷新code
   const flush = async () => {
+    if (isFlushingRef.current) {
+      dispatch(changeMessage(["刷新中", false]));
+      return;
+    }
+    isFlushingRef.current = true;
     let result = await fecther(
       "accountorder/",
-      { order_id: OrderInfo.order_id },
+      {
+        order_id: OrderInfo.order_id,
+        flag: isLogin ? "None" : getStorage("userFlag"),
+      },
       "put"
     );
     if (result.code == 200) {
+      if (WsRef.current) {
+        WsRef.current.close();
+        WsRef.current = null;
+      }
       let newValue = { ...OrderInfo };
-      newValue.create_time = parseInt(new Date().getTime() / 1000 + "");
-      newValue.expire_time = newValue.create_time + 60 * 3;
+      newValue.create_time = result.order.create_time;
+      newValue.expire_time = newValue.create_time + QRCODE_FLUSH_TIME;
+      newValue.qrcode = result.order.qrcode;
+      newValue.discountPrice = result.order.discountPrice;
+      newValue.order_id = result.order.order_id;
       newValue.qrstate = true;
       setOrderInfo(newValue);
     } else {
-      dispatch(changeMessage(["刷新二维码失败", false]));
+      dispatch(changeMessage([result.message, false]));
     }
   };
 
   // 打开二维码后 连接支付回调
   const connectPayNotify = (orderid: string) => {
-    WsRef.current = new WebSocket(`ws://192.168.31.69/ws/notify/${orderid}/`);
-    // WsRef.current = new WebSocket(`ws://198.211.58.237/ws/notify/${orderid}/`);
+    WsRef.current = new WebSocket(`${WEBSOCKER_HOST}notify/${orderid}/`);
     WsRef.current.onopen = () => {
       if (!WsRef.current) return;
       WsRef.current.onmessage = (event) => {

@@ -20,11 +20,11 @@ class CheckAccessToken(MiddlewareMixin):
                              'team', 'handler', 'connect_paynofity_sse', 'activity']
 
             if requestMethods == 'POST':
-                allowPath = ['login', 'register', 'accountorder']
+                allowPath = ['login', 'register', 'accountorder', 'paynotify']
                 pass
 
             if requestMethods == 'PUT':
-                allowPath = ['paynotify']
+                allowPath = ['accountorder']
                 pass
 
             if requestMethods == 'DELETE':

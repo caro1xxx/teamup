@@ -2,20 +2,34 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
 import json
-from main.tools import sendMessageToChat, getCurrentTimestamp
+from main.tools import sendMessageToChat, getCurrentTimestamp, toMD5
 from django.core.cache import cache
 from main.task import checkAllUserPayed, generatorAccountOfrPerson
-from main.config import ORDER_LIFEYCLE
+from main.config import ORDER_LIFEYCLE, API_SERCET
 from main.models import Order
+from django.http import HttpResponse
 
 
 class Pay(APIView):
 
     # 支付回调
-    def put(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         try:
-            paymentType = json.loads(request.body).get('trade_name', None)
-            orderId = json.loads(request.body).get('order_no', None)
+            no = request.POST.get("no", None)
+            orderId = request.POST.get("order_no", None)
+            paymentType = request.POST.get("trade_name", None)
+            pay_type = request.POST.get("pay_type", None)
+            order_amount = request.POST.get("order_amount", None)
+            pay_amount = request.POST.get("pay_amount", None)
+            order_uid = request.POST.get("order_uid", None)
+            sign = request.POST.get("sign", None)
+
+            text = 'no={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&pay_amount={}&order_uid={}&{}'.format(
+                no, orderId, paymentType, pay_type, order_amount, pay_amount, order_uid, API_SERCET)
+            mySign = toMD5(text)
+
+            if mySign != sign:
+                return JsonResponse(CommonErrorcode.illegallyError)
 
             if paymentType == '' or paymentType is None:
                 return JsonResponse(CommonErrorcode.paramsError)
@@ -52,7 +66,8 @@ class Pay(APIView):
                         checkAllUserPayed.delay(
                             serializeMemoryTeamAllPayOrder, roomId, i["order_id"])
 
-                        return JsonResponse(PayResponseCode.paySuccess)
+                        return HttpResponse("success")
+                        # return JsonResponse(PayResponseCode.paySuccess)
 
                 return JsonResponse(PayResponseCode.payError)
 
@@ -77,7 +92,8 @@ class Pay(APIView):
 
                 cache.delete('pay_account_'+orderId)
 
-                return JsonResponse(PayResponseCode.paySuccess)
+                return HttpResponse("success")
+                # return JsonResponse(PayResponseCode.paySuccess)
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

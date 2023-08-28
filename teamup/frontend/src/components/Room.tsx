@@ -41,7 +41,7 @@ import {
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 import ClipboardJS from "clipboard";
 import { LoadingMore } from "../style/other";
-
+import {WEBSOCKER_HOST,QRCODE_FLUSH_TIME} from '../env/config'
 // types
 import type { MenuProps } from "antd";
 import { RoomInfo } from "../types/paramsTypes";
@@ -431,8 +431,7 @@ const Room = () => {
       dispatchMessage({ type: "clear" });
       setisCloseWs(false);
       websocketRef.current = new WebSocket(
-        `ws://192.168.31.69/ws/room/${userToRoomInfo.pk}/${access_token}/`
-        // `ws://198.211.58.237/ws/room/${userToRoomInfo.pk}/${access_token}/`
+        `${WEBSOCKER_HOST}room/${userToRoomInfo.pk}/${access_token}/`
       );
       websocketRef.current.onopen = function () {
         initMessageRecord();
@@ -499,7 +498,7 @@ const Room = () => {
     for (let i = 0; i < result.data.length; i++) {
       if (result.data[i].user === username) {
         result.data["selfPayCode"] = result.data[i].qrcode;
-        result.data["expire_time"] = result.data[i].create_time + 60 * 3;
+        result.data["expire_time"] = result.data[i].create_time + QRCODE_FLUSH_TIME;
         result.data["price"] = result.data[i].price;
         result.data["payState"] = result.data[i].state;
         result.data["discountPrice"] = result.data[i].discountPrice;
@@ -522,7 +521,7 @@ const Room = () => {
     dispatchPayState({
       type: "flushQr",
       payload: {
-        expire_time: parseInt(new Date().getTime() / 1000 + "") + 3 * 60,
+        expire_time: parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
       },
     });
   };

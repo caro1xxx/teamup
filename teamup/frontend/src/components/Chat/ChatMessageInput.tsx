@@ -4,6 +4,7 @@ import { MessageOutlined } from "@ant-design/icons";
 import "../../style/custome_antd.css";
 import { Input } from "antd";
 import { useMouse } from "ahooks";
+import { ROOM_AUTO_CLOSE_TIME } from "../../env/config";
 
 type Props = {
   send: (value: string) => void;
@@ -34,7 +35,7 @@ const ChatMessageInput = (props: Props) => {
     clearTimeout(noActionTimer.current);
     noActionTimer.current = setTimeout(() => {
       props.closeWs();
-    }, 1000 * 60 * 3);
+    }, ROOM_AUTO_CLOSE_TIME);
     return () => {
       if (noActionTimer.current) {
         clearTimeout(noActionTimer.current);

@@ -64,6 +64,9 @@ export const TeamWrap = styled.div`
     cursor: pointer;
     user-select: none;
   }
+  .loadingmargin {
+    margin-right: 10px;
+  }
 `;
 
 export const MsgItemWrap = styled.div<{ $who: number }>`
@@ -333,6 +336,9 @@ export const InputOptionsWrap = styled.div`
     align-items: center;
     border-radius: 10px;
     background-color: #0f0f10;
+  }
+  .loadingmargin {
+    margin-right: 10px;
   }
   .options_back:hover {
     background-color: #525252;

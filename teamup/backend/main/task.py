@@ -1,16 +1,15 @@
 import django
 django.setup()
-from main.config import PAY_HOST, APP_ID, API_SERCET, ORDER_LIFEYCLE
+from main.tools import sendMessageToChat, getCurrentTimestamp, post_request, buildOrderParmas
+from main.config import PAY_HOST, ORDER_LIFEYCLE
 from django.core.cache import cache
 from django.core import serializers
 import json
-from main.tools import sendMessageToChat, getCurrentTimestamp, post_request
 from main import models
 from backend import settings
 from celery import shared_task
 from django.core.mail import send_mail
 from concurrent.futures import ThreadPoolExecutor
-import hashlib
 
 
 @shared_task
@@ -194,10 +193,7 @@ def getPayOrder(orders, roomId, username):
     data = []
     num_requests = len(orders)
     for i in orders:
-        sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
-            APP_ID, i["order_id"],  "room|"+str(roomId), "wechat", 49.15, i["user"], API_SERCET)
-        data.append({"app_id": APP_ID, "order_no": i["order_id"], "trade_name": "room|"+str(roomId),
-                    "pay_type": "wechat", "order_amount": 49.15, "order_uid": i["user"], "sign": hashlib.md5(sign.encode()).hexdigest()})
+        data.append(buildOrderParmas(i, roomId))
 
     # 并发请求order
     requestUsersOrderQrValue = []
@@ -223,8 +219,8 @@ def getPayOrder(orders, roomId, username):
     payRoomOrders = json.loads(cache.get('pay_room_' + str(roomId), None))
     for payOrder in requestUsersOrderQrValue:
         for order in payRoomOrders:
-            # if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discountPrice']):
-            if payOrder['user'] == order['user'] and payOrder['pay_amount'] == '49.15':
+            if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discountPrice']):
+                # if payOrder['user'] == order['user'] and payOrder['pay_amount'] == '0.01':
                 order['qrcode'] = payOrder['qr_value']
                 break
 
