@@ -3,17 +3,18 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType, DiscountCode
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
-from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, fromAuthGetUsername
+from main.tools import customizePaginator, getCurrentTimestamp, sendMessageToChat, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from main.task import sendDepartureNotify
+from main.task import sendDepartureNotify, getPayOrder
 from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME
 
 
 class Rooms(APIView):
     # get room list
     def get(self, request, *args, **kwargs):
+        ret = {'code': 200, 'message': '获取成功'}
         try:
             type = request.GET.get('type', None)
             orderby = request.GET.get('order_by', None)
@@ -45,7 +46,7 @@ class Rooms(APIView):
             else:
                 rooms = Room.objects.filter(name__contains=search).all()
 
-            pageInatoredRooms, roomResponse.getSuccess['page_count'] = customizePaginator(
+            pageInatoredRooms, ret['page_count'] = customizePaginator(
                 rooms, 12, request.GET.get('page_num', 1))
 
             roomAndRoomUser = []
@@ -86,8 +87,8 @@ class Rooms(APIView):
                                             "users": [{"user": user.username, "avator_color": user.avator_color} for user in users_in_room],
                                             "favorited": 1 if room.users_favorited.filter(username=payload["username"]).exists() else 0, "stateType": room.type.type})
 
-            roomResponse.getSuccess['data'] = roomAndRoomUser
-            return JsonResponse(roomResponse.getSuccess)
+            ret['data'] = roomAndRoomUser
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -138,18 +139,18 @@ class Rooms(APIView):
             cache.set('room_' + str(roomFields.pk),
                       json.dumps({}), ROOM_LIFECYCLE)
 
-            roomResponse = RoomResponseCode()
-            roomResponse.createdSuccess["data"] = {"name": roomFields.name,  "description": roomFields.description,
-                                                   "pk": roomFields.pk,
-                                                   "create_time": roomFields.create_time,
-                                                   "creator": roomFields.creator.username,
-                                                   "uuid": roomFields.uuid,
-                                                   "type": roomFields.type.name,
-                                                   "take_seat_quorum": roomFields.take_seat_quorum,
-                                                   "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
-                                                   "users": [{"user": user.username, "avator_color": user.avator_color}], "stateType": roomFields.type.type}
+            ret = {'code': 200, 'message': '创建房间成功'}
+            ret["data"] = {"name": roomFields.name,  "description": roomFields.description,
+                           "pk": roomFields.pk,
+                           "create_time": roomFields.create_time,
+                           "creator": roomFields.creator.username,
+                           "uuid": roomFields.uuid,
+                           "type": roomFields.type.name,
+                           "take_seat_quorum": roomFields.take_seat_quorum,
+                           "surplus": roomFields.type.max_quorum - roomFields.take_seat_quorum,
+                           "users": [{"user": user.username, "avator_color": user.avator_color}], "stateType": roomFields.type.type}
 
-            return JsonResponse(roomResponse.createdSuccess)
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -174,7 +175,8 @@ class Team(APIView):
             user_join_list = [{"username": user.username,
                                "avator_color": user.avator_color} for user in users_in_room]
 
-            RoomResponseCode.getSuccess['data'] = {
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['data'] = {
                 "room_id": room.id,
                 "homeowner": room.creator.username,
                 "state": room.state,
@@ -187,7 +189,7 @@ class Team(APIView):
                 "surplus": room.type.max_quorum - room.take_seat_quorum,
             }
 
-            return JsonResponse(RoomResponseCode.getSuccess)
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -288,9 +290,10 @@ class Handler(APIView):
             users_in_room = room.users.all()
             user_join_list = [user.username for user in users_in_room]
 
-            RoomResponseCode.getSuccess['data'] = user_join_list
-            RoomResponseCode.getSuccess['leader'] = room.creator.username
-            return JsonResponse(RoomResponseCode.getSuccess)
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['data'] = user_join_list
+            ret['leader'] = room.creator.username
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -318,8 +321,9 @@ class Handler(APIView):
                 return JsonResponse(RoomResponseCode.fleetDepartureed)
 
             if room.take_seat_quorum == 0:
-                RoomResponseCode.fleetDepartureError['message'] = '发车失败,人数不足'
-                return JsonResponse(RoomResponseCode.fleetDepartureError)
+                ret = {'code': 403, 'message': '发车失败'}
+                ret['message'] = '发车失败,人数不足'
+                return JsonResponse(ret)
 
             room.state = 1
             room.save()
@@ -350,7 +354,8 @@ class Handler(APIView):
                 cache.set('pay_room_' + str(roomId),
                           json.dumps(ordersSerialize), ORDER_LIFEYCLE)
 
-                sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
+                # get pay order
+                getPayOrder.delay(ordersSerialize, roomId, username)
 
                 sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
                                           room.type.name+'车队已发车', users_email)
@@ -418,9 +423,10 @@ class PayState(APIView):
             if memoryTeamAllPayOrder is None:
                 return JsonResponse(RoomResponseCode.notDeparture)
 
-            PayStateResponseCode.teamAllPayOrder['data'] = json.loads(
+            ret = {'code': 200, 'message': '获取队伍支付状态成功'}
+            ret['data'] = json.loads(
                 memoryTeamAllPayOrder)
-            return JsonResponse(PayStateResponseCode.teamAllPayOrder)
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -497,11 +503,11 @@ class PayState(APIView):
             codeFields.save()
             useOrderFields.save()
 
-            CodeCode = CodeResonseCode()
-            CodeCode.useSuccess['discountPrice'] = useOrderFields.discount_price
-            return JsonResponse(CodeCode.useSuccess)
+            ret = {'code': 200, 'message': "使用成功"}
+            ret['discountPrice'] = useOrderFields.discount_price
+            return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # 刷新二维码

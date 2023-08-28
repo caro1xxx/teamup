@@ -71,9 +71,14 @@ export const StoreWrap = styled.div`
 
 export const ActivityWrap = styled.div`
   margin: 50px 0px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  grid-column-gap: 20px;
+  grid-row-gap: 20px;
   img {
     width: 100%;
-    height: 350px;
+    height: 200px;
     border-radius: 10px;
     margin: 20px 0px;
   }

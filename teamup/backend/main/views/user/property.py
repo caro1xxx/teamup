@@ -37,16 +37,15 @@ class Favorite(APIView):
 
             allRooms = Room.objects.all()
 
-            CommonCode = CommonErrorcode()
-
-            CommonCode.success['data'] = []
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['data'] = []
             for i in allRooms:
                 for n in i.users_favorited.all():
                     if n.username == username:
-                        CommonCode.success['data'].append(
+                        ret['data'].append(
                             {"roomName": i.name, "surplus": i.type.max_quorum - i.take_seat_quorum, "pk": i.pk, "roomId": i.uuid, "type": i.type.name, "state": i.state})
 
-            response = JsonResponse(CommonCode.success)
+            response = JsonResponse(ret)
 
             response['Cache-Control'] = 'max-age=' + \
                 str(USER_FAVORITER_CACHETIME)
@@ -93,10 +92,10 @@ class PayedOrder(APIView):
             accountFields = Account.objects.filter(
                 distribute_user__username=username).all()
 
-            CommonCode = CommonErrorcode()
-            CommonCode.success['data'] = json.loads(
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['data'] = json.loads(
                 serializers.serialize('json', accountFields))
-            return JsonResponse(CommonCode.success)
+            return JsonResponse(ret)
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.used)

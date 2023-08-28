@@ -9,15 +9,14 @@ from main.config import ACTIVITY_CACHETIME
 
 class Activitys(APIView):
     def get(self, request, *args, **kwargs):
+        ret = {'code': 200, 'message': '获取成功'}
         try:
             count = request.GET.get('count', None)
-
-            CommonCode = CommonErrorcode()
             if count == 'all':
-                CommonCode.success['data'] = json.loads(
+                ret['data'] = json.loads(
                     serializers.serialize('json', Activity.objects.all()))
 
-                response = JsonResponse(CommonCode.success)
+                response = JsonResponse(ret)
 
                 response['Cache-Control'] = 'max-age=' + \
                     str(ACTIVITY_CACHETIME)
@@ -27,9 +26,9 @@ class Activitys(APIView):
                 newAcitvity = Activity.objects.last()
                 data = {"begin_time": newAcitvity.begin_time,
                         "end_time": newAcitvity.end_time, "image": newAcitvity.image}
-                CommonCode.success['data'] = data
+                ret['data'] = data
 
-                response = JsonResponse(CommonCode.success)
+                response = JsonResponse(ret)
 
                 response['Cache-Control'] = 'max-age=' + \
                     str(ACTIVITY_CACHETIME)

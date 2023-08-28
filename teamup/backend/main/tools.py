@@ -10,6 +10,8 @@ import string
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from django.http import JsonResponse
+import requests
+import json
 
 
 def checkIsNotEmpty(data, *args):
@@ -108,3 +110,22 @@ def fromAuthGetUsername(request):
     payload = decodeToken(
         authorization_header.replace('Bearer ', ''))
     return payload['username']
+
+
+def post_request(url, data):
+    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    try:
+        response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
+            data), headers=headers, verify=False)
+        jsonResult = json.loads(response.text)
+        if jsonResult.get('msg', None) is None:
+            jsonResult['user'] = data['order_uid']
+            return jsonResult
+        else:
+            if jsonResult['msg'] == '商户订单号已存在':
+                return 'exist'
+            elif jsonResult['msg'] == '没有可用的收款码':
+                return 'full'
+    except Exception as e:
+        # print(str(e))
+        return 'error'

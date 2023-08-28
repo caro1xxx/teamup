@@ -80,9 +80,9 @@ class OrderHandle(APIView):
                 else:
                     memoryOrder = json.loads(isMemoryOrder)
 
-            CommonCode = CommonErrorcode()
-            CommonCode.success['order'] = memoryOrder
-            return JsonResponse(CommonErrorcode.success)
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['order'] = memoryOrder
+            return JsonResponse(ret)
         except Exception as e:
             print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

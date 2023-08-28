@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from main.models import User
 from backend import settings
 from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCode
-from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken, fromAuthGetUsername
+from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
 from django.core.cache import cache
 import json
 from main.config import REGISTER_CODE_LIFECYCLE
@@ -38,11 +38,13 @@ class register(APIView):
 
             RegisterUser = User.objects.create(username=UserData['username'], password=UserData['password'],
                                                email=UserData['email'], create_time=getCurrentTimestamp(), avator_color=UserData['avator_color'])
-            RegisterResponseCode.success['access_token'] = encrypteToken(
+
+            ret = {'code': 200, 'message': '注册成功'}
+            ret['access_token'] = encrypteToken(
                 self, RegisterUser)
-            RegisterResponseCode.success['create_time'] = RegisterUser.create_time
+            ret['create_time'] = RegisterUser.create_time
             cache.delete('code_' + UserData['email'])
-            return JsonResponse(RegisterResponseCode.success)
+            return JsonResponse(ret)
 
         except Exception as e:
             UserFields = User.objects.filter(username=UserData['username'])
@@ -87,12 +89,13 @@ class login(APIView):
             if payload['expire_time'] <= getCurrentTimestamp():
                 return JsonResponse(LoginResponseCode.tokenExpires)
 
-            LoginResponseCode.tokenToInfoSuccess['username'] = payload['username']
-            LoginResponseCode.tokenToInfoSuccess['admin'] = payload['admin']
-            LoginResponseCode.tokenToInfoSuccess['premium'] = payload['premium']
-            LoginResponseCode.tokenToInfoSuccess['email'] = payload['email']
-            LoginResponseCode.tokenToInfoSuccess['create_time'] = payload['create_time']
-            LoginResponseCode.tokenToInfoSuccess['avator_color'] = payload['avator_color']
+            ret = {'code': 200, 'message': '获取成功'}
+            ret['username'] = payload['username']
+            ret['admin'] = payload['admin']
+            ret['premium'] = payload['premium']
+            ret['email'] = payload['email']
+            ret['create_time'] = payload['create_time']
+            ret['avator_color'] = payload['avator_color']
 
             class UserInfo:
                 username = payload['username']
@@ -100,9 +103,9 @@ class login(APIView):
                 premium = payload['premium']
                 email = payload['email']
                 avator_color = payload['avator_color']
-            LoginResponseCode.tokenToInfoSuccess['access_token'] = encrypteToken(
+            ret['access_token'] = encrypteToken(
                 self, UserInfo)
-            return JsonResponse(LoginResponseCode.tokenToInfoSuccess)
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))
@@ -119,12 +122,13 @@ class login(APIView):
             if UserFields is None or UserFields.password != UserData['password']:
                 return JsonResponse(LoginResponseCode.usernameOrPasswordError)
 
-            LoginResponseCode.loginSuccess['username'] = UserFields.username
-            LoginResponseCode.loginSuccess['admin'] = UserFields.admin
-            LoginResponseCode.loginSuccess['premium'] = UserFields.premium
-            LoginResponseCode.loginSuccess['email'] = UserFields.email
-            LoginResponseCode.loginSuccess['create_time'] = UserFields.create_time
-            LoginResponseCode.loginSuccess['avator_color'] = UserFields.avator_color
+            ret = {'code': 200, 'message': '登录成功'}
+            ret['username'] = UserFields.username
+            ret['admin'] = UserFields.admin
+            ret['premium'] = UserFields.premium
+            ret['email'] = UserFields.email
+            ret['create_time'] = UserFields.create_time
+            ret['avator_color'] = UserFields.avator_color
 
             class UserInfo:
                 username = UserFields.username
@@ -132,10 +136,10 @@ class login(APIView):
                 premium = UserFields.premium
                 email = UserFields.email
                 avator_color = UserFields.avator_color
-            LoginResponseCode.loginSuccess['access_token'] = encrypteToken(
+            ret['access_token'] = encrypteToken(
                 self, UserInfo)
 
-            return JsonResponse(LoginResponseCode.loginSuccess)
+            return JsonResponse(ret)
 
         except Exception as e:
             # print(str(e))

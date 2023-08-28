@@ -31,10 +31,11 @@ const Store = (props: Props) => {
             { title: "平台邮箱 安全同行", key: nanoid() },
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
-            { title: "5秒出货 无需等待", key: nanoid() },
+            { title: "独立观影记录 享受4K蓝光", key: nanoid() },
           ],
           money: 16,
           loading: false,
+          emtry: false,
         },
         {
           time: 90,
@@ -46,10 +47,11 @@ const Store = (props: Props) => {
             { title: "平台邮箱 安全同行", key: nanoid() },
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
-            { title: "5秒出货 无需等待", key: nanoid() },
+            { title: "独立观影记录 享受4K蓝光", key: nanoid() },
           ],
           money: 40,
           loading: false,
+          emtry: false,
         },
         {
           time: 180,
@@ -61,10 +63,11 @@ const Store = (props: Props) => {
             { title: "平台邮箱 安全同行", key: nanoid() },
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
-            { title: "5秒出货 无需等待", key: nanoid() },
+            { title: "独立观影记录 享受4K蓝光", key: nanoid() },
           ],
           money: 70,
           loading: false,
+          emtry: true,
         },
         {
           time: 365,
@@ -76,10 +79,11 @@ const Store = (props: Props) => {
             { title: "平台邮箱 安全同行", key: nanoid() },
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
-            { title: "5秒出货 无需等待", key: nanoid() },
+            { title: "独立观影记录 享受4K蓝光", key: nanoid() },
           ],
           money: 100,
           loading: false,
+          emtry: true,
         },
       ],
     },
@@ -194,6 +198,7 @@ const Store = (props: Props) => {
   // 打开二维码后 连接支付回调
   const connectPayNotify = (orderid: string) => {
     WsRef.current = new WebSocket(`ws://192.168.31.69/ws/notify/${orderid}/`);
+    // WsRef.current = new WebSocket(`ws://198.211.58.237/ws/notify/${orderid}/`);
     WsRef.current.onopen = () => {
       if (!WsRef.current) return;
       WsRef.current.onmessage = (event) => {
@@ -290,10 +295,19 @@ const Store = (props: Props) => {
                             className="buy btn"
                             loading={childitem.loading}
                             onClick={() =>
-                              buy(item.type, childitem.time, index, indexdeep)
+                              childitem.emtry
+                                ? null
+                                : buy(
+                                    item.type,
+                                    childitem.time,
+                                    index,
+                                    indexdeep
+                                  )
                             }
                           >
-                            立即购买 ￥{childitem.money}
+                            {childitem.emtry
+                              ? "补货中"
+                              : `立即购买 ￥${childitem.money}`}
                           </Button>
                         </div>
                       </div>

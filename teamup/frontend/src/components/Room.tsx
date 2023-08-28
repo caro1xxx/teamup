@@ -432,6 +432,7 @@ const Room = () => {
       setisCloseWs(false);
       websocketRef.current = new WebSocket(
         `ws://192.168.31.69/ws/room/${userToRoomInfo.pk}/${access_token}/`
+        // `ws://198.211.58.237/ws/room/${userToRoomInfo.pk}/${access_token}/`
       );
       websocketRef.current.onopen = function () {
         initMessageRecord();
