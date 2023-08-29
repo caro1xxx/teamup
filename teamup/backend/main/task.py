@@ -7,25 +7,38 @@ from main import models
 import json
 from django.core import serializers
 from main.tools import sendMessageToChat, getCurrentTimestamp
+from django.template.loader import render_to_string
 
 
-@shared_task
+@shared_task  # 注册验证码
 def send_async_email(subject, message, from_email, recipient_list):
-    send_mail(subject, message, from_email, [recipient_list])
+    email_content = render_to_string(
+        'RegisterCode.html', {'code': str(message)})
+    send_mail(subject, message, from_email, [
+              recipient_list], html_message=email_content)
+
+
+@shared_task  # @消息
+def send_aite_mail(subject, message, from_email, recipient_list):
+    email_content = render_to_string(
+        'AiteMessage.html', {'content': message['content'], 'recivceUser': message['recivceUser'], 'sendUser': message['sendUser']})
+    send_mail(subject, '', from_email, [
+              recipient_list], html_message=email_content)
 
 
 @shared_task
-def sendChatNotifyMessage(topic, message, who):
-
-    UserFields = models.User.objects.filter(username=who).first()
-
-    send_async_email(
+def sendChatNotifyMessage(topic, message):
+    UserFields = models.User.objects.filter(
+        username=message['recivceUser']).first()
+    send_aite_mail(
         topic, message, settings.EMAIL_HOST_USER, UserFields.email)
 
 
 @shared_task
 def sendDepartureNotify(topic, userList):
-    send_mail(topic, '队长已发车,请尽快支付', settings.EMAIL_HOST_USER, userList)
+    email_content = render_to_string('Departure.html')
+    send_mail(topic, '', settings.EMAIL_HOST_USER,
+              userList, html_message=email_content)
 
 
 @shared_task
@@ -94,7 +107,7 @@ def generatorAccount(roomId, users, orderId):
                     order_id=orderId).first().time * 60 * 60 * 24
                 value.save()
                 mainNotifys.append(
-                    {"email": allUsersFields[index].email, "account": value.username, "password": value.password})
+                    {"email": allUsersFields[index].email, "account": value.username, "password": value.password, "seat": value.seat_code})
 
             eqGroup[0].distribute = eqGroup[0].distribute + usersCount
             eqGroup[0].save()
@@ -103,8 +116,10 @@ def generatorAccount(roomId, users, orderId):
             roomFieldsType.save()
 
             for item in mainNotifys:
+                email_content = render_to_string('AccountGenertor.html', {
+                                                 'account': item["account"], "password": item["password"], "seat": item["seat"]})
                 send_mail(
-                    'Teamup@账号生成通知', item["account"], settings.EMAIL_HOST_USER, [item["email"]])
+                    'Teamup@账号生成通知', '', settings.EMAIL_HOST_USER, [item["email"]], html_message=email_content)
 
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
     else:

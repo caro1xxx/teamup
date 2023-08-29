@@ -80,7 +80,7 @@ class Chat(AsyncWebsocketConsumer):
 
         if receiveMessage.get('aite', None) != 'None' and receiveMessage.get('aite', None) is not None:
             sendChatNotifyMessage.delay(
-                'Teamup车队@消息通知', self.user_info['username']+'@你:'+receiveMessage['message'], receiveMessage['aite'])
+                'Teamup车队@消息通知', {'content': receiveMessage['message'], "recivceUser": receiveMessage['aite'], "sendUser": self.user_info['username']})
             messageBody['aite'] = receiveMessage['aite']
             forwardingRoomMessage.delay(
                 receiveMessage['message'], self.roomPk, receiveMessage['aite'], self.user_info['username'])

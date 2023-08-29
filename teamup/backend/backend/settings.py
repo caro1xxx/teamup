@@ -1,5 +1,5 @@
 from pathlib import Path
-import datetime
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p4ng)wb9z1vcnsfo_peau-3#+xed$+0gr1r8#8@6+nmj0e@fw-'
 
@@ -37,7 +37,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'main/mail/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
