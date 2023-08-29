@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Wrap = styled.div`
   display: flex;
-  margin-top: 300px;
+  margin-top: 100px;
   font-style: italic;
   font-size: 12px;
   > div {

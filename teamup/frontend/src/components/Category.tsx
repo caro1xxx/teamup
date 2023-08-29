@@ -11,6 +11,7 @@ import {
   changeRoomOrderBy,
   changeSearchValue,
 } from "../redux/modules/roomSlice";
+import KefuIcon from "../assets/images/kefu.png";
 import { nanoid } from "nanoid";
 
 type Props = {};
@@ -103,6 +104,13 @@ const Category = (props: Props) => {
             </div>
           );
         })}
+        {/* <div>
+          {isLogin ? (
+            <div className="btn">
+              <img src={KefuIcon} alt="客服" />
+            </div>
+          ) : null}
+        </div> */}
 
         {isLogin ? (
           <div className="create">

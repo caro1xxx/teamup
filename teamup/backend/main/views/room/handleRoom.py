@@ -596,7 +596,7 @@ class PayState(APIView):
 
                     ret = {'code': 200, 'message': '二维码刷新成功'}
                     ret['order'] = {"order_id": orderFields.order_id,
-                                    "discount_price": orderFields.discount_price,'qrcode':i['qrcode']}
+                                    "discount_price": orderFields.discount_price, 'qrcode': i['qrcode']}
                     return JsonResponse(ret)
 
             return JsonResponse(PayStateResponseCode.flushError)

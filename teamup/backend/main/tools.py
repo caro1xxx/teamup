@@ -133,7 +133,6 @@ def post_request(url, data):
     try:
         response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
             data), headers=headers, verify=False)
-        print(response.text)
         jsonResult = json.loads(response.text)
         if jsonResult.get('msg', None) is None:
             jsonResult['user'] = data['order_uid']

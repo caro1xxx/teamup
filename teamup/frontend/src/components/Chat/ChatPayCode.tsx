@@ -141,7 +141,6 @@ const PayCodeBody = (props: PayCodeBodyProps) => {
         <div className="price">
           <div>优惠:</div>
           <div className="value">
-            {props.discountPrice}
             {props.price - props.discountPrice >= 1 ? "折扣码" : "随机立减"} -
             {(props.price - props.discountPrice).toFixed(2)}
           </div>
