@@ -289,6 +289,7 @@ const BottomContent = () => {
         key: nanoid(),
         username: item.fields.username,
         password: item.fields.password,
+        seat_code: item.fields.seat_code,
         user_buy_expire_time: item.fields.user_buy_expire_time,
       });
     });

@@ -13,7 +13,7 @@ export type RoomItemProps = {
     surplus: number;
     description: string;
     favorited: number;
-    state:number;
+    state: number;
   };
   open: (roomInfo: RoomInfo) => void;
   favorite: (roomPk: number, type: number) => Promise<void>;
@@ -74,6 +74,7 @@ export type OrderFieldsState = {
   key: string;
   username: number;
   password: number;
+  seat_code: number;
   user_buy_expire_time: number;
 };
 

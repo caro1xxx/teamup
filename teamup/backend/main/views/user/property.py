@@ -90,7 +90,7 @@ class PayedOrder(APIView):
             username = request.payload_data['username']
 
             accountFields = Account.objects.filter(
-                distribute_user__username=username).all()
+                distribute_user__username=username).all().order_by('-pk')
 
             ret = {'code': 200, 'message': '获取成功'}
             ret['data'] = json.loads(
