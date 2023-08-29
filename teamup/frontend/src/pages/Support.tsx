@@ -56,6 +56,15 @@ const Support = (props: Props) => {
         <Paragraph>
           请谨慎保管座位码,一般情况是座位码泄露导致的该问题,可以联系客服修改座位码
         </Paragraph>
+        <Paragraph>· 为什么进入一下房间时会要求输入会员邮箱密码</Paragraph>
+        <Paragraph>
+          因为该房间类型为自备邮箱,表示该房间发车成功后不会使用平台生成的账号密码,而是由车队成员提供的邮箱密码进行充值会员
+        </Paragraph>
+        <Paragraph>· 不小心把自备邮箱密码输错了怎么办？</Paragraph>
+        <Paragraph>
+          点击个人头像 - 退出登录 -
+          重新登录后再点击该房间就会重新要求输入邮箱密码
+        </Paragraph>
       </Typography>
       <Title level={5}>没有找到解决办法?</Title>
       <Paragraph>关注微信公众号:bezos的小屋 联系客服解决问题</Paragraph>
