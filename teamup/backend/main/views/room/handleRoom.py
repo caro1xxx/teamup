@@ -413,27 +413,57 @@ class Handler(APIView):
 
     # favorite
     def put(self, request, *args, **kwargs):
-        roomPk = json.loads(request.body).get('room_pk', None)
-        type = json.loads(request.body).get('type', None)
-
-        if roomPk is None or roomPk == '' or type is None or type == '':
-            return JsonResponse(CommonErrorcode.paramsError)
-
-        username = request.payload_data['username']
-
         try:
-            room = Room.objects.get(pk=roomPk)
-            users = User.objects.get(username=username)
-        except ObjectDoesNotExist:
-            return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+            roomPk = json.loads(request.body).get('room_pk', None)
+            type = json.loads(request.body).get('type', None)
 
-        if type == 0:
-            room.users_favorited.remove(users)
-        else:
-            room.users_favorited.add(users)
-        room.save()
+            if roomPk is None or roomPk == '' or type is None or type == '':
+                return JsonResponse(CommonErrorcode.paramsError)
 
-        return JsonResponse(RoomResponseCode.favoriteSuccess)
+            username = request.payload_data['username']
+
+            try:
+                room = Room.objects.get(pk=roomPk)
+                users = User.objects.get(username=username)
+            except ObjectDoesNotExist:
+                return JsonResponse(RoomResponseCode.roomOrUserNotFound)
+
+            if type == 0:
+                room.users_favorited.remove(users)
+            else:
+                room.users_favorited.add(users)
+            room.save()
+
+            return JsonResponse(RoomResponseCode.favoriteSuccess)
+        except Exception as e:
+            # print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
+
+    # 踢人
+    def delete(self, request, *args, **kwargs):
+        try:
+            roomId = json.loads(request.body).get('room_id', None)
+            kickUser = json.loads(request.body).get('kick_username', None)
+
+            if kickUser is None or kickUser == '' or roomId is None or roomId == '':
+                return JsonResponse(CommonErrorcode.paramsError)
+
+            username = request.payload_data['username']
+
+            roomFields = Room.objects.filter(pk=roomId).first()
+            if username != roomFields.creator.username:
+                return JsonResponse(CommonErrorcode.illegallyError)
+
+            roomFields.take_seat_quorum = roomFields.take_seat_quorum-1
+            userFields = User.objects.filter(username=kickUser).first()
+            roomFields.users.remove(userFields)
+            roomFields.save()
+            sendMessageToChat('room_'+str(roomId),
+                              '队长将{}从座位上扒拉下来了'.format(kickUser))
+            return JsonResponse({'code': 200, 'message': "成功将{}踢下座位".format(kickUser)})
+        except Exception as e:
+            print(str(e))
+            return JsonResponse(CommonErrorcode.serverError)
 
 
 class PayState(APIView):

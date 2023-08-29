@@ -13,6 +13,8 @@ type Props = {
   data: TeamInfoProps;
   join: () => Promise<void>;
   departure: () => Promise<void>;
+  username: string;
+  kick: (username: string) => Promise<void>;
 };
 
 const ChatDrawerTeam = (props: Props) => {
@@ -33,10 +35,29 @@ const ChatDrawerTeam = (props: Props) => {
           <>
             {props.data.join_users.map((item) => {
               return (
-                <div className="people" key={item.key}>
-                  <div style={{ backgroundColor: item.avatorColor }}>
-                    {item.name.charAt(0)}
-                  </div>
+                <div key={item.key}>
+                  {item.name === props.username || !props.data.isHomeowner ? (
+                    <div className="people" key={item.key}>
+                      <div style={{ backgroundColor: item.avatorColor }}>
+                        {item.name.charAt(0)}
+                      </div>
+                    </div>
+                  ) : (
+                    <Popconfirm
+                      placement="bottom"
+                      title={"踢下座位?"}
+                      description={""}
+                      onConfirm={() => props.kick(item.name)}
+                      okText="是"
+                      cancelText="否"
+                    >
+                      <div className="people" key={item.key}>
+                        <div style={{ backgroundColor: item.avatorColor }}>
+                          {item.name.charAt(0)}
+                        </div>
+                      </div>
+                    </Popconfirm>
+                  )}
                 </div>
               );
             })}

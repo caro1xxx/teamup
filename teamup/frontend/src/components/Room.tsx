@@ -412,6 +412,8 @@ const Room = () => {
         listenWsToDeparture();
       } else if (jsonMessage.message.includes("账号分配成功")) {
         listenWsToAccount();
+      } else if (jsonMessage.message.includes("扒拉下来了")) {
+        listenWsToKickUser();
       }
       return;
     }
@@ -610,6 +612,11 @@ const Room = () => {
     getTeamInfo(userToRoomInfo.pk);
   };
 
+  // 接收来自webscoket的踢人消息
+  const listenWsToKickUser = () => {
+    getTeamInfo(userToRoomInfo.pk);
+  };
+
   // 收藏
   const favoriteRoom = async (roomPk: number, type: number) => {
     if (!isLogin) {
@@ -677,6 +684,21 @@ const Room = () => {
           discountPrice: result.discountPrice,
         },
       });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+  };
+
+  // 踢人
+  const kickOutUser = async (username: string) => {
+    let result = await fecther(
+      "handler/",
+      { room_id: userToRoomInfo.pk, kick_username: username },
+      "delete"
+    );
+    if (result.code == 200) {
+      console.log(123123);
     }
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
@@ -764,6 +786,8 @@ const Room = () => {
             data={TeamInfo}
             join={joinTeam}
             departure={departure}
+            username={username}
+            kick={kickOutUser}
           />
           <MemoChatHint />
           <MemoChatDrawerBody
