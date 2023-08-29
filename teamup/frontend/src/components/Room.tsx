@@ -41,7 +41,7 @@ import {
 import { createOrOpenDB, addItem, getAllItems } from "../utils/chatDB";
 import ClipboardJS from "clipboard";
 import { LoadingMore } from "../style/other";
-import {WEBSOCKER_HOST,QRCODE_FLUSH_TIME} from '../env/config'
+import { WEBSOCKER_HOST, QRCODE_FLUSH_TIME } from "../env/config";
 // types
 import type { MenuProps } from "antd";
 import { RoomInfo } from "../types/paramsTypes";
@@ -162,6 +162,7 @@ const Room = () => {
   const sumPageNum = React.useRef(1);
   const [loadingMoreState, setLoadingMoreState] = React.useState(0);
   const [isCloseWs, setisCloseWs] = React.useState(false);
+  const isFlushQrLoadingRef = React.useRef(false);
 
   /*request */
   const getTypeOfRooms = async (
@@ -476,12 +477,12 @@ const Room = () => {
     );
     if (result.code === 200) {
       setTeamInfo({ ...TeamInfo, state: 1 });
+      await getAllPayState();
+      isOpenQrRef.current = true;
     }
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
     );
-    await getAllPayState();
-    isOpenQrRef.current = true;
   };
 
   // 获取全员支付状态
@@ -498,10 +499,11 @@ const Room = () => {
     for (let i = 0; i < result.data.length; i++) {
       if (result.data[i].user === username) {
         result.data["selfPayCode"] = result.data[i].qrcode;
-        result.data["expire_time"] = result.data[i].create_time + QRCODE_FLUSH_TIME;
+        result.data["expire_time"] =
+          result.data[i].create_time + QRCODE_FLUSH_TIME;
         result.data["price"] = result.data[i].price;
         result.data["payState"] = result.data[i].state;
-        result.data["discountPrice"] = result.data[i].discountPrice;
+        result.data["discountPrice"] = result.data[i].discount_price;
         result.data["order_id"] = result.data[i].order_id;
         break;
       }
@@ -511,19 +513,32 @@ const Room = () => {
 
   // 刷新二维码
   const flushQr = async () => {
+    if (isFlushQrLoadingRef.current) {
+      dispatch(changeMessage(["正在刷新中", false]));
+      return;
+    }
+    isFlushQrLoadingRef.current = true;
     let result = await fecther(
       "paystate/",
       { room_id: userToRoomInfo.pk },
       "put"
     );
-    if (result.code !== 200) return;
-    // fetch
-    dispatchPayState({
-      type: "flushQr",
-      payload: {
-        expire_time: parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
-      },
-    });
+    if (result.code === 200) {
+      dispatchPayState({
+        type: "flushQr",
+        payload: {
+          expire_time:
+            parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
+          order_id: result.order.order_id,
+          qrcode: result.order.qrcode,
+          discount_price: result.order.discount_price,
+        },
+      });
+    }
+    dispatch(
+      changeMessage([result.message, result.code === 200 ? true : false])
+    );
+    isFlushQrLoadingRef.current = false;
   };
 
   // @选择用户

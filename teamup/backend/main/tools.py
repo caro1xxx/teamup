@@ -13,7 +13,8 @@ from django.http import JsonResponse
 import requests
 import json
 import hashlib
-from main.config import APP_ID, API_SERCET
+from main.config import APP_ID, API_SERCET, RECORD_DISCOUNT_EXPIRE_TIME
+from django.core.cache import cache
 
 
 def checkIsNotEmpty(data, *args):
@@ -101,7 +102,20 @@ def generateRandomnumber(length=32):
 
 
 def discountPrice(real_price):
-    return round(random.uniform(real_price-1, real_price), 1)
+    keys = cache.keys('*')
+    isRepeatDiscount = [
+        key for key in keys if key.startswith("record_discount")]
+    discount = round(random.uniform(real_price-1, real_price), 1)
+    if len(isRepeatDiscount) == 0:
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount
+    else:
+        while 'record_discount'+str(discount) in isRepeatDiscount:
+            discount = round(random.uniform(real_price-1, real_price), 1)
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount
 
 
 def fromAuthGetUsername(request):
@@ -117,7 +131,6 @@ def fromAuthGetUsername(request):
 def post_request(url, data):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     try:
-        print(data)
         response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
             data), headers=headers, verify=False)
         print(response.text)

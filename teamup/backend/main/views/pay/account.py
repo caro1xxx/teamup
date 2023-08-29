@@ -55,7 +55,7 @@ class OrderHandle(APIView):
                             memoryOrder, username)
                         result = post_request(PAY_HOST, orderParams)
                         if result == 'full':
-                            return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                            return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                         elif result == 'exist':
                             return JsonResponse({'code': 418, 'message': '订单存在'})
                         elif result == 'error':
@@ -76,7 +76,7 @@ class OrderHandle(APIView):
                         memoryOrder, username)
                     result = post_request(PAY_HOST, orderParams)
                     if result == 'full':
-                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                     elif result == 'exist':
                         return JsonResponse({'code': 418, 'message': '订单存在'})
                     elif result == 'error':
@@ -108,7 +108,7 @@ class OrderHandle(APIView):
                             memoryOrder, memoryOrder['user'])
                         result = post_request(PAY_HOST, orderParams)
                         if result == 'full':
-                            return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                            return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                         elif result == 'exist':
                             return JsonResponse({'code': 418, 'message': '订单存在'})
                         elif result == 'error':
@@ -129,7 +129,7 @@ class OrderHandle(APIView):
                         memoryOrder, memoryOrder['user'])
                     result = post_request(PAY_HOST, orderParams)
                     if result == 'full':
-                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                     elif result == 'exist':
                         return JsonResponse({'code': 418, 'message': '订单存在'})
                     elif result == 'error':
@@ -171,7 +171,7 @@ class OrderHandle(APIView):
                     memoryOrder, username)
                 result = post_request(PAY_HOST, orderParams)
                 if result == 'full':
-                    return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                    return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                 elif result == 'exist':
                     return JsonResponse({'code': 418, 'message': '订单存在'})
                 elif result == 'error':
@@ -192,7 +192,7 @@ class OrderHandle(APIView):
                     memoryOrder, memoryOrder['user'])
                 result = post_request(PAY_HOST, orderParams)
                 if result == 'full':
-                    return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                    return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                 elif result == 'exist':
                     return JsonResponse({'code': 418, 'message': '订单存在'})
                 elif result == 'error':

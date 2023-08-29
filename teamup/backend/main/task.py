@@ -1,15 +1,12 @@
 import django
 django.setup()
-from main.tools import sendMessageToChat, getCurrentTimestamp, post_request, buildOrderParmas
-from main.config import PAY_HOST, ORDER_LIFEYCLE
-from django.core.cache import cache
-from django.core import serializers
-import json
-from main import models
-from backend import settings
-from celery import shared_task
 from django.core.mail import send_mail
-from concurrent.futures import ThreadPoolExecutor
+from celery import shared_task
+from backend import settings
+from main import models
+import json
+from django.core import serializers
+from main.tools import sendMessageToChat, getCurrentTimestamp
 
 
 @shared_task
@@ -186,45 +183,3 @@ def forwardingRoomMessage(content, roomPk, receive_username, send_username):
     messageFields.receive_user.add(receive_user)
     messageFields.send_user.add(send_user)
     messageFields.save()
-
-
-@shared_task
-def getPayOrder(orders, roomId, username):
-    data = []
-    num_requests = len(orders)
-    for i in orders:
-        data.append(buildOrderParmas(i, roomId))
-
-    # 并发请求order
-    requestUsersOrderQrValue = []
-    with ThreadPoolExecutor(max_workers=num_requests) as executor:
-        results = [executor.submit(post_request, PAY_HOST, d) for d in data]
-        # 获取每个任务的结果
-        for future in results:
-            result = future.result()
-            if result == 'full':
-                sendMessageToChat('room_'+str(roomId), '支付通道繁忙,请联系客服')
-                return
-            elif result == 'exist':
-                sendMessageToChat('room_'+str(roomId), '订单存在')
-                return
-            elif result == 'error':
-                sendMessageToChat('room_'+str(roomId), '发车失败,请联系客服')
-                return
-            else:
-                requestUsersOrderQrValue.append(
-                    {'pay_no': result['no'], 'user': result['user'], 'qr_value': result['qr'], 'pay_amount': result['pay_amount']})
-
-    # 修改redis order
-    payRoomOrders = json.loads(cache.get('pay_room_' + str(roomId), None))
-    for payOrder in requestUsersOrderQrValue:
-        for order in payRoomOrders:
-            if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discountPrice']):
-                # if payOrder['user'] == order['user'] and payOrder['pay_amount'] == '0.01':
-                order['qrcode'] = payOrder['qr_value']
-                break
-
-    cache.set('pay_room_' + str(roomId),
-              json.dumps(payRoomOrders), ORDER_LIFEYCLE)
-
-    sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')

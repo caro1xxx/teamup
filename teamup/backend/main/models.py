@@ -25,6 +25,7 @@ class RoomType(models.Model):
     price = models.FloatField(verbose_name="总价")
     type = models.IntegerField(verbose_name='平台账号或者自备账号')
     max_quorum = models.IntegerField()
+    time = models.IntegerField()
 
     def natural_key(self):
         return {'typename': self.name}

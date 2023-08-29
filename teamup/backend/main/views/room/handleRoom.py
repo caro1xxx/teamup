@@ -3,12 +3,13 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType, DiscountCode
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
-from main.tools import customizePaginator, getCurrentTimestamp, toMD5, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request
+from main.tools import customizePaginator, getCurrentTimestamp, toMD5, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request, buildOrderParmas, sendMessageToChat
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from main.task import sendDepartureNotify, getPayOrder
+from main.task import sendDepartureNotify
 from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME, PAY_HOST, APP_ID, API_SERCET
+from concurrent.futures import ThreadPoolExecutor
 
 
 class Rooms(APIView):
@@ -325,40 +326,79 @@ class Handler(APIView):
                 ret['message'] = '发车失败,人数不足'
                 return JsonResponse(ret)
 
-            room.state = 1
-            room.save()
-
             try:
                 users_in_room = room.users.all()
                 users_email = [user.email for user in users_in_room]
                 priceOfItem = room.type.price / room.take_seat_quorum
                 currentStampTime = getCurrentTimestamp()
 
+                # 存储进入redis的集合
                 ordersInsert = []
-                insertMysqlOrder = []
+                # 临时存储即将入库的订单集合
+                cloneInsertFiveFields = []
+                # 生成对应人数的记录
                 for user in users_in_room:
                     discount = discountPrice(priceOfItem)
                     order_id = generateRandomnumber()
-                    insertMysqlOrder.append(
-                        Order(order_id=order_id, room=room, user=user, price=priceOfItem, discount_price=discount, type=room.type.name, time=999, create_time=currentStampTime))
-                    ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "hello",
+                    ordersInsert.append({"order_id": order_id, "state": 0, "qrcode": "empty",
                                         "room": room.pk, "user": user.username, "discount_price": discount, "create_time": currentStampTime, "price": priceOfItem, "avatorColor": user.avator_color})
+                    cloneInsertFiveFields.append({"order_id": order_id, "room": room, "user": user.username, "price": priceOfItem,
+                                                 "discount_price": discount, "type": room.type.name, "time": room.type.time, "create_time": currentStampTime})
 
-                Order.objects.bulk_create(insertMysqlOrder)
-
+                # 构建需要请求订单的数据
                 ordersSerialize = []
                 for i in ordersInsert:
                     ordersSerialize.append({"order_id": i["order_id"], "state": i["state"], "price": i["price"],
-                                           "qrcode": i["qrcode"], "user": i["user"], "avatorColor": i["avatorColor"], "create_time": i["create_time"], "discountPrice": i['discount_price']})
+                                           "qrcode": i["qrcode"], "user": i["user"], "avatorColor": i["avatorColor"], "create_time": i["create_time"], "discount_price": i['discount_price']})
 
+                requestOrderdata = []
+                for i in ordersSerialize:
+                    requestOrderdata.append(buildOrderParmas(i, roomId))
+                # 并发请求order
+                requestUsersOrderQrValue = []
+                with ThreadPoolExecutor(max_workers=len(ordersSerialize)) as executor:
+                    results = [executor.submit(
+                        post_request, PAY_HOST, data) for data in requestOrderdata]
+                    # 获取每个任务的结果
+                    for future in results:
+                        result = future.result()
+                        if result == 'full':
+                            sendMessageToChat(
+                                'room_'+str(roomId), '支付通道繁忙,请稍后再试或联系客服')
+                            return JsonResponse({'code': 418, 'message': '支付通道繁忙,支付通道繁忙,请稍后再试或联系客服'})
+                        elif result == 'exist':
+                            sendMessageToChat('room_'+str(roomId), '订单存在')
+                            return JsonResponse({'code': 418, 'message': '订单存在'})
+                        elif result == 'error':
+                            sendMessageToChat(
+                                'room_'+str(roomId), '发车失败,请联系客服')
+                            return JsonResponse({'code': 418, 'message': '发车失败,请联系客服'})
+                        else:
+                            requestUsersOrderQrValue.append(
+                                {'pay_no': result['no'], 'user': result['user'], 'qr_value': result['qr'], 'pay_amount': result['pay_amount']})
+
+                # 走到这里代表成功请求订单集合
+                # 修改即将存入redis的集合
+                for payOrder in requestUsersOrderQrValue:
+                    for order in ordersInsert:
+                        if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discount_price'])+'0':
+                            order['qrcode'] = payOrder['qr_value']
+                            break
+
+                # 批量入库
+                insertMysqlOrder = []
+                for mysqlDate in cloneInsertFiveFields:
+                    insertMysqlOrder.append(
+                        Order(order_id=mysqlDate["order_id"], room=mysqlDate['room'], user=User.objects.filter(username=mysqlDate['user']).first(), price=mysqlDate["price"], discount_price=mysqlDate['discount_price'], type=mysqlDate["type"], time=mysqlDate['time'], create_time=mysqlDate['create_time']))
+                Order.objects.bulk_create(insertMysqlOrder)
+                room.state = 1
+                room.save()
                 cache.set('pay_room_' + str(roomId),
-                          json.dumps(ordersSerialize), ORDER_LIFEYCLE)
+                          json.dumps(ordersInsert), ORDER_LIFEYCLE)
 
-                # get pay order
-                getPayOrder.delay(ordersSerialize, roomId, username)
-
-                sendDepartureNotify.delay('Temaup车队@您加入的'+room.name +
-                                          room.type.name+'车队已发车', users_email)
+                sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
+                sendDepartureNotify.delay(
+                    'Temaup车队@您加入的'+room.name + room.type.name+'车队已发车', users_email)
             except Exception as e:
                 # print(str(e))
                 room.state = 0
@@ -530,31 +570,36 @@ class PayState(APIView):
 
             for i in serializeMemoryTeamAllPayOrder:
                 if i["user"] == username:
-                    data = []
+                    orderFields = Order.objects.filter(
+                        order_id=i['order_id']).first()
                     # 生成参数
-                    sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
-                        APP_ID, i["order_id"],  "room|"+str(roomId), "wechat", 0.01, i["user"], API_SERCET)
-                    data.append({"app_id": APP_ID, "order_no": i["order_id"], "trade_name": "room|"+str(roomId),
-                                "pay_type": "wechat", "order_amount": 0.01, "order_uid": i["user"], "sign": toMD5(sign)})
+                    i['discount_price'] = discountPrice(i['price'])
+                    i['create_time'] = getCurrentTimestamp()
+                    i['order_id'] = generateRandomnumber()
+                    requestOrderParmas = buildOrderParmas(i, roomId)
 
                     # 重新获取qrcode
-                    result = post_request(PAY_HOST, data[0])
-
+                    result = post_request(PAY_HOST, requestOrderParmas)
                     if result == 'full':
-                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请联系客服'})
+                        return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
                     elif result == 'exist':
                         return JsonResponse({'code': 418, 'message': '订单存在'})
                     elif result == 'error':
-                        return JsonResponse({'code': 418, 'message': '刷新失败,请稍后再试'})
+                        return JsonResponse({'code': 418, 'message': '发车失败,请稍后再试'})
 
-                    i["create_time"] = getCurrentTimestamp()
                     i['qrcode'] = result['qr']
+                    orderFields.order_id = i['order_id']
+                    orderFields.discount_price = i['discount_price']
+                    orderFields.save()
                     cache.set('pay_room_'+str(roomId),
                               json.dumps(serializeMemoryTeamAllPayOrder), ORDER_LIFEYCLE)
-                    return JsonResponse(PayStateResponseCode.flushSuccess)
+
+                    ret = {'code': 200, 'message': '二维码刷新成功'}
+                    ret['order'] = {"order_id": orderFields.order_id,
+                                    "discount_price": orderFields.discount_price,'qrcode':i['qrcode']}
+                    return JsonResponse(ret)
 
             return JsonResponse(PayStateResponseCode.flushError)
-
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

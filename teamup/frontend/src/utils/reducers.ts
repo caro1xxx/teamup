@@ -40,12 +40,12 @@ export const payStateReducer = (state: any, action: any) => {
     case "flushQr":
       return {
         isDeparture: true,
-        selfPayCode: state.selfPayCode,
+        selfPayCode: action.payload.qrcode,
         expire_time: action.payload.expire_time,
         payState: state.payState,
         price: state.price,
-        order_id: state.order_id,
-        discountPrice: state.discountPrice,
+        order_id: action.payload.order_id,
+        discountPrice: action.payload.discount_price,
         all: [...state.all],
       };
     case "changeOrderDiscountPrice":
