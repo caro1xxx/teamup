@@ -6,8 +6,8 @@ from backend import settings
 from main import models
 import json
 from django.core import serializers
-from main.tools import sendMessageToChat, getCurrentTimestamp
 from django.template.loader import render_to_string
+from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
 
 
 @shared_task  # 注册验证码
@@ -117,7 +117,7 @@ def generatorAccount(roomId, users, orderId):
 
             for item in mainNotifys:
                 email_content = render_to_string('AccountGenertor.html', {
-                                                 'account': item["account"], "password": item["password"], "seat": item["seat"]})
+                                                 'account': item["account"], "password": item["password"], "seat": item["seat"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
                 send_mail(
                     'Teamup@账号生成通知', '', settings.EMAIL_HOST_USER, [item["email"]], html_message=email_content)
 
@@ -180,7 +180,7 @@ def generatorAccountOfrPerson(OrderId, username):
         AccountFields[0].save()
 
         sendMessageToChat('pay_notify_'+OrderId,
-                          json.dumps({"username": dispatchAccount.username, 'password': dispatchAccount.password}))
+                          json.dumps({"username": dispatchAccount.username, 'password': dispatchAccount.password, "seat": dispatchAccount.seat_code}))
     else:
         sendMessageToChat('pay_notify_'+OrderId, '分配失败,无可用账号')
 

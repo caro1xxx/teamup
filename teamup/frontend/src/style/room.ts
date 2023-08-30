@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const Wrap = styled.div`
+  z-index: 2;
   margin-top: 20px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -6,7 +6,9 @@ type Props = {};
 
 const Support = (props: Props) => {
   return (
-    <div style={{ margin: "100px 50px 0px 50px" }}>
+    <div
+      style={{ margin: "100px 50px 0px 50px", position: "relative", zIndex: 2 }}
+    >
       <Typography>
         <Title level={4}>帮助 - 参加问卷调查补充问题</Title>
 

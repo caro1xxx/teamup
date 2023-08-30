@@ -3,6 +3,8 @@ import styled from "styled-components";
 export const CategoryWrap = styled.div`
   margin-top: 20px;
   display: flex;
+  position: relative;
+  z-index: 2;
   .btn {
     cursor: pointer;
     background-color: #232323;
@@ -262,6 +264,19 @@ export const PayedOrderWrap = styled.div`
       color: #838383;
       margin: 3px 0px;
       border-radius: 5px;
+    }
+  }
+  .changepwd {
+    display: flex;
+    .change {
+      flex: 1;
+      text-align: end;
+      color: #ea4335;
+      cursor: pointer;
+      user-select: none;
+    }
+    .change:hover {
+      color: #eb847b;
     }
   }
 `;

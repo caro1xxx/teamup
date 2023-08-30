@@ -15,6 +15,7 @@ import json
 import hashlib
 from main.config import APP_ID, API_SERCET, RECORD_DISCOUNT_EXPIRE_TIME
 from django.core.cache import cache
+from datetime import datetime
 
 
 def checkIsNotEmpty(data, *args):
@@ -163,3 +164,9 @@ def buildOrderParmasOfAccount(data, usernameOrUserFlag):
         APP_ID, data["order_id"],  "account|"+usernameOrUserFlag, "wechat", data['discountPrice'], data["user"], API_SERCET)
     return {"app_id": APP_ID, "order_no": data["order_id"], "trade_name": "account|"+usernameOrUserFlag,
             "pay_type": "wechat", "order_amount": data['discountPrice'], "order_uid": data["user"], "sign": toMD5(sign)}
+
+
+def fromTsToTime(timestamp):
+    dt_object = datetime.fromtimestamp(timestamp)
+    formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
+    return formatted_date

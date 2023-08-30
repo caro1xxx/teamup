@@ -18,7 +18,10 @@ const Order = (props: { order: OrderFieldsState[] }) => {
                   {parseStampTime(item.user_buy_expire_time)}到期
                 </div>
                 <div className="ac">账号:{item.username}</div>
-                <div className="ac">密码:{item.password}</div>
+                <div className="ac changepwd">
+                  <div>密码:{item.password}</div>
+                  <div className="change">修改密码</div>
+                </div>
                 <div className="ac">座位PIN:{item.seat_code}</div>
               </div>
             );

@@ -78,7 +78,7 @@ class Room(models.Model):
 
 
 class Order(models.Model):
-    order_id = models.CharField(max_length=32)
+    order_id = models.CharField(max_length=32, db_index=True)
     price = models.FloatField()
     discount_price = models.FloatField()
     payed_qrcode = models.TextField(default='')
@@ -170,7 +170,7 @@ class Activity(models.Model):
 
 
 class DiscountCode(models.Model):
-    code = models.CharField(max_length=6, unique=True)
+    code = models.CharField(max_length=6, unique=True, db_index=True)
     use_user = models.ManyToManyField(
         User, related_name='user', verbose_name="使用折扣码的用户", blank=True)
     use_order = models.ManyToManyField(
@@ -190,6 +190,11 @@ class Question(models.Model):
 
 
 class NeedChargeRoomAccounts(models.Model):
-    room_id = models.IntegerField(unique=True)
+    room_id = models.IntegerField(unique=True, db_index=True)
     all_user_mail_info = models.CharField(
         max_length=64, verbose_name='记录关联的房间中的所有用户的mail_user表中的id, =>[5,1,3,2,6]')
+
+
+class NeedChangePaaaword(models.Model):
+    group = models.ForeignKey(
+        Group, to_field='id', null=True, on_delete=models.SET_NULL, related_name='gourp_id')

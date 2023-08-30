@@ -451,6 +451,10 @@ class Handler(APIView):
             username = request.payload_data['username']
 
             roomFields = Room.objects.filter(pk=roomId).first()
+
+            if roomFields.state != 0:
+                return JsonResponse({'code': 422, 'message': "已发车无法踢人"})
+
             if username != roomFields.creator.username:
                 return JsonResponse(CommonErrorcode.illegallyError)
 

@@ -16,6 +16,7 @@ type Props = {
   payinfo: {
     username: string;
     password: string;
+    seat: string;
     isPayed: number;
   };
 };
@@ -55,6 +56,7 @@ const BuyAccount = (props: Props) => {
         <AccountInfo
           username={props.payinfo.username}
           password={props.payinfo.password}
+          seat={props.payinfo.seat}
           isLogin={props.isLogin}
           time={props.time}
         />
@@ -113,6 +115,7 @@ const Loading = () => {
 const AccountInfo = (props: {
   username: string;
   password: string;
+  seat: string;
   isLogin: boolean;
   time: number;
 }) => {
@@ -133,6 +136,10 @@ const AccountInfo = (props: {
           <div>
             <div className="password">密码:</div>
             <div className="password_">{props.password}</div>
+          </div>
+          <div>
+            <div className="password">座位PIN:</div>
+            <div className="password_">{props.seat}</div>
           </div>
         </div>
         <div className="exprie_time">

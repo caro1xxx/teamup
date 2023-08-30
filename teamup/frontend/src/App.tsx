@@ -23,7 +23,8 @@ import ActivityPage from "./pages/Activity";
 import Support from "./pages/Support";
 import Logs from "./pages/Logs";
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
-
+import BackNetIcon from "./assets/images/undraw_netflix_q00o.png";
+import BackNetIcon2 from "./assets/images/back_maks2.png";
 import { message, ConfigProvider, theme } from "antd";
 import { fecther } from "./utils/fecther";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -34,6 +35,31 @@ const Wrap = styled.div`
   width: 1200px;
   margin: 0 auto;
   position: relative;
+  .mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    background-color: #1b1c1e68;
+    backdrop-filter: blur(1px);
+  }
+  .backwarp {
+    position: relative;
+  }
+  .back {
+    top: 450px;
+    left: 150px;
+    z-index: 0;
+    position: fixed;
+  }
+  .back2 {
+    bottom: -200px;
+    right: 300px;
+    z-index: 0;
+    position: fixed;
+  }
 `;
 
 const App = (props: Props) => {
@@ -126,6 +152,18 @@ const App = (props: Props) => {
             <Route path="/logs" element={<Logs />} />
           </Routes>
           <Bottom />
+          <div className="back">
+            <div className="backwarp">
+              <img src={BackNetIcon} alt="image" />
+              <div className="mask"></div>
+            </div>
+          </div>
+          <div className="back2">
+            <div className="backwarp">
+              <img src={BackNetIcon2} alt="image" />
+              <div className="mask"></div>
+            </div>
+          </div>
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}

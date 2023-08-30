@@ -1,5 +1,7 @@
 import styled from "styled-components";
 export const StoreWrap = styled.div`
+  position: relative;
+  z-index: 2;
   margin: 40px 0px;
   .title {
     text-align: center;

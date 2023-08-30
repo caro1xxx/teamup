@@ -25,7 +25,7 @@ const Store = (props: Props) => {
         {
           time: 30,
           key: nanoid(),
-          level: "略有小成",
+          level: "初出茅庐",
           image: require("../assets/images/30.png"),
           includes: [
             { title: "Netflix标准会员 30天", key: nanoid() },
@@ -41,7 +41,7 @@ const Store = (props: Props) => {
         {
           time: 90,
           key: nanoid(),
-          level: "初出茅庐",
+          level: "略有小成",
           image: require("../assets/images/90.png"),
           includes: [
             { title: "Netflix标准会员 90天", key: nanoid() },
@@ -108,6 +108,7 @@ const Store = (props: Props) => {
   const [PayedInfo, setPayedInfo] = React.useState({
     username: "",
     password: "",
+    seat: "",
     isPayed: 0,
   });
   const isFlushingRef = React.useRef(false);
@@ -228,6 +229,7 @@ const Store = (props: Props) => {
           setPayedInfo({
             username: JSON.parse(jsonMsg.message).username,
             password: JSON.parse(jsonMsg.message).password,
+            seat: JSON.parse(jsonMsg.message).seat,
             isPayed: 2,
           });
         }

@@ -4,7 +4,9 @@ type Props = {};
 
 const Logs = (props: Props) => {
   return (
-    <div style={{ margin: "50px 50px 0px 50px" }}>
+    <div
+      style={{ margin: "50px 50px 0px 50px", position: "relative", zIndex: 2 }}
+    >
       <div
         style={{
           textAlign: "center",

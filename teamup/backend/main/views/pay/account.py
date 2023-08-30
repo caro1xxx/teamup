@@ -26,7 +26,6 @@ class OrderHandle(APIView):
                 return JsonResponse(CommonErrorcode.typeError)
 
             memoryOrder = {}
-
             # 用户
             if userFlag is None or userFlag == 'None' or userFlag == '':
                 username = fromAuthGetUsername(request)
@@ -35,13 +34,13 @@ class OrderHandle(APIView):
 
                 orderFields = Order.objects.filter(
                     user__username=username, type=type, time=time, state=0).first()
-
                 # 如果数据库内有这个订单
                 if orderFields is not None:
                     # 并且这个订单没有到期
                     if orderFields.create_time+ORDER_EXPIRE_TIME > getCurrentTimestamp()+30:
                         isMemoryOrder = cache.get(
                             'pay_account_' + orderFields.order_id, None)
+                        print(isMemoryOrder)
                         memoryOrder = json.loads(isMemoryOrder)
                     # 订单到期 -> 请求订单 -> 修改这条记录并且修改redis内记录
                     else:
@@ -142,7 +141,7 @@ class OrderHandle(APIView):
             ret['order'] = memoryOrder
             return JsonResponse(ret)
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # flush qr
