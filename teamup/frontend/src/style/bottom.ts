@@ -1,6 +1,8 @@
 import styled from "styled-components";
 
 export const Wrap = styled.div`
+  position: relative;
+  z-index: 2;
   display: flex;
   margin-top: 100px;
   font-style: italic;

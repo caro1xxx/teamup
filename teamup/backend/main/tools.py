@@ -133,6 +133,7 @@ def fromAuthGetUsername(request):
 def post_request(url, data):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     try:
+        print(data)
         response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
             data), headers=headers, verify=False)
         jsonResult = json.loads(response.text)
@@ -178,3 +179,20 @@ def fromTsToTime(timestamp):
     dt_object = datetime.fromtimestamp(timestamp)
     formatted_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_date
+
+
+def toUseDiscountPrice(real_price):
+    keys = cache.keys('*')
+    isRepeatDiscount = [
+        key for key in keys if key.startswith("record_discount")]
+    discount = round(random.uniform(real_price, real_price+0.3), 1)
+    if len(isRepeatDiscount) == 0:
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount
+    else:
+        while 'record_discount'+str(discount) in isRepeatDiscount:
+            discount = round(random.uniform(real_price, real_price+0.3), 1)
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount

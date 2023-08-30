@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType, DiscountCode
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
-from main.tools import customizePaginator, getCurrentTimestamp, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request, buildOrderParmas, sendMessageToChat, buildOrderParamasOfDiscount
+from main.tools import customizePaginator, getCurrentTimestamp, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request, buildOrderParmas, sendMessageToChat, buildOrderParamasOfDiscount, toUseDiscountPrice
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -546,11 +546,11 @@ class PayState(APIView):
             useOrderFields.order_id = generateRandomnumber()
             effect = codeFields.effect.split('|')
             if effect[0] == '-':
-                useOrderFields.discount_price = useOrderFields.price - \
-                    int(effect[1])
+                useOrderFields.discount_price = toUseDiscountPrice(
+                    useOrderFields.price - int(effect[1]))
             elif effect[0] == '%':
-                useOrderFields.discount_price = useOrderFields.price / \
-                    10 * int(effect[1])
+                useOrderFields.discount_price = toUseDiscountPrice(
+                    useOrderFields.price / 10 * int(effect[1]))
 
             memoryPrefix = ''
             if roomId != 'account':
