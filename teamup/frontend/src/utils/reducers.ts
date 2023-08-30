@@ -52,7 +52,7 @@ export const payStateReducer = (state: any, action: any) => {
       return {
         isDeparture: true,
         selfPayCode: state.selfPayCode,
-        expire_time: state.expire_time,
+        expire_time: action.payload.expire_time,
         payState: state.payState,
         price: state.price,
         order_id: state.order_id,

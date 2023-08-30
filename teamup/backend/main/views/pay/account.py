@@ -40,7 +40,6 @@ class OrderHandle(APIView):
                     if orderFields.create_time+ORDER_EXPIRE_TIME > getCurrentTimestamp()+30:
                         isMemoryOrder = cache.get(
                             'pay_account_' + orderFields.order_id, None)
-                        print(isMemoryOrder)
                         memoryOrder = json.loads(isMemoryOrder)
                     # 订单到期 -> 请求订单 -> 修改这条记录并且修改redis内记录
                     else:

@@ -11,6 +11,7 @@ import { changeMessage } from "../redux/modules/notifySlice";
 import "../style/custome_antd.css";
 import { getStorage, setStorage } from "../utils/localstorage";
 import { WEBSOCKER_HOST, QRCODE_FLUSH_TIME } from "../env/config";
+import { current } from "@reduxjs/toolkit";
 
 type Props = {};
 
@@ -103,7 +104,6 @@ const Store = (props: Props) => {
     qrstate: false,
     expire_time: 0,
   });
-  const timerRef = React.useRef();
   const WsRef = React.useRef<WebSocket | null>(null);
   const [PayedInfo, setPayedInfo] = React.useState({
     username: "",
@@ -112,6 +112,7 @@ const Store = (props: Props) => {
     isPayed: 0,
   });
   const isFlushingRef = React.useRef(false);
+  const isUseingDiscount = React.useRef(false);
 
   const buy = async (type: string, time: number, idx: number, didx: number) => {
     let userFlag: string = "";
@@ -134,7 +135,7 @@ const Store = (props: Props) => {
     serviceList[idx].plan[didx].loading = false;
     setServiceList(newValue);
     if (result.code !== 200) {
-      dispatch(changeMessage(["商品已下架", false]));
+      dispatch(changeMessage(["系统繁忙,请稍后再试", false]));
       return;
     }
     setOrderInfo({
@@ -145,39 +146,12 @@ const Store = (props: Props) => {
     setCreateRoomModel(true);
   };
 
-  // 检查二维码是否到期
+  // 二维码到期
   const captureChangeQr = () => {
-    if (!createRoomModel) {
-      if (timerRef === null || !OrderInfo.qrstate) return;
-      // @ts-ignore
-      clearInterval(timerRef.current);
-    } else {
-      if (!OrderInfo.qrstate) return;
-      if (
-        OrderInfo.qrstate ===
-        OrderInfo.expire_time > new Date().getTime() / 1000
-      ) {
-      } else {
-        setOrderInfo({
-          ...OrderInfo,
-          qrstate: OrderInfo.expire_time > new Date().getTime() / 1000,
-        });
-      }
-      // @ts-ignore
-      timerRef.current = setInterval(() => {
-        if (
-          OrderInfo.qrstate ===
-          OrderInfo.expire_time > new Date().getTime() / 1000
-        )
-          return;
-        setOrderInfo({
-          ...OrderInfo,
-          qrstate: OrderInfo.expire_time > new Date().getTime() / 1000,
-        });
-        // @ts-ignore
-        clearInterval(timerRef.current);
-      }, 1000);
-    }
+    setOrderInfo({
+      ...OrderInfo,
+      qrstate: OrderInfo.expire_time > new Date().getTime() / 1000,
+    });
   };
 
   // 刷新code
@@ -239,6 +213,13 @@ const Store = (props: Props) => {
 
   // 使用折扣码
   const useDiscount = async (code: string) => {
+    if (isUseingDiscount.current) {
+      dispatch(changeMessage(["正在使用折扣码中", false]));
+    }
+    if (!isLogin) {
+      dispatch(changeMessage(["登录后才能使用折扣码", false]));
+    }
+    isUseingDiscount.current = true;
     let result = await fecther(
       "paystate/",
       {
@@ -249,11 +230,23 @@ const Store = (props: Props) => {
       "post"
     );
     if (result.code === 200) {
-      setOrderInfo({ ...OrderInfo, discountPrice: result.discountPrice });
+      if (WsRef.current) {
+        WsRef.current.close();
+        WsRef.current = null;
+      }
+      setOrderInfo({
+        ...OrderInfo,
+        discountPrice: result.discountPrice,
+        order_id: result.order_id,
+        qrcode: result.qrcode,
+        qrstate: true,
+        expire_time: new Date().getTime() / 1000 + QRCODE_FLUSH_TIME,
+      });
     }
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
     );
+    isUseingDiscount.current = false;
   };
 
   useEffect(() => {
@@ -268,18 +261,6 @@ const Store = (props: Props) => {
       WsRef.current = null;
     }
   }, [OrderInfo.order_id, createRoomModel]);
-
-  // @ts-ignore
-  React.useEffect(() => {
-    if (!createRoomModel) {
-      // @ts-ignore
-      timerRef.current = null;
-    } else {
-      captureChangeQr();
-    }
-    //@ts-ignore
-    return () => (timerRef.current = null);
-  }, [createRoomModel]);
 
   return (
     <>
@@ -351,11 +332,13 @@ const Store = (props: Props) => {
           payinfo={PayedInfo}
           time={OrderInfo.time}
           flush={flush}
+          qrcodeExpire={captureChangeQr}
           qrcode={OrderInfo.qrcode}
           qrstate={OrderInfo.qrstate}
           price={OrderInfo.price}
           discountPrice={OrderInfo.discountPrice}
           isLogin={isLogin}
+          timeLeft={OrderInfo.expire_time}
         />
       </Modal>
     </>

@@ -3,12 +3,12 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from main.models import User, Room, Order, RoomType, DiscountCode
 from main.contants import CommonErrorcode, RoomResponseCode, PayStateResponseCode, TypeInfoResponseCode, CodeResonseCode
-from main.tools import customizePaginator, getCurrentTimestamp, toMD5, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request, buildOrderParmas, sendMessageToChat
+from main.tools import customizePaginator, getCurrentTimestamp, generateRandomnumber, checkIsNotEmpty, decodeToken, discountPrice, post_request, buildOrderParmas, sendMessageToChat, buildOrderParamasOfDiscount
 import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from main.task import sendDepartureNotify
-from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME, PAY_HOST, APP_ID, API_SERCET
+from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME, PAY_HOST, ACCOUNT_ORDER_LIFEYCLE
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -400,7 +400,7 @@ class Handler(APIView):
                 sendDepartureNotify.delay(
                     'Temaup车队@您加入的'+room.name + room.type.name+'车队已发车', users_email)
             except Exception as e:
-                # print(str(e))
+                print(str(e))
                 room.state = 0
                 room.save()
                 return JsonResponse(CommonErrorcode.serverError)
@@ -408,7 +408,7 @@ class Handler(APIView):
             return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # favorite
@@ -543,6 +543,7 @@ class PayState(APIView):
 
             # 计算折扣
             useOrderFields.discount_code = discountCode
+            useOrderFields.order_id = generateRandomnumber()
             effect = codeFields.effect.split('|')
             if effect[0] == '-':
                 useOrderFields.discount_price = useOrderFields.price - \
@@ -561,27 +562,57 @@ class PayState(APIView):
                 return JsonResponse(CodeResonseCode.orderNotFound)
 
             serizeleMemoryOrder = json.loads(memoryOrder)
+            requestOrderClone = None
             if roomId != 'account':
                 for i in serizeleMemoryOrder:
                     if i['order_id'] == orderId:
                         i['discountPrice'] = useOrderFields.discount_price
+                        i['discount_price'] = useOrderFields.discount_price
+                        i['create_time'] = getCurrentTimestamp()
+                        i['order_id'] = useOrderFields.order_id
+                        requestOrderClone = i
                         break
             else:
                 serizeleMemoryOrder['discountPrice'] = useOrderFields.discount_price
-            cache.set(memoryPrefix, json.dumps(
-                serizeleMemoryOrder), ORDER_LIFEYCLE)
+                serizeleMemoryOrder['order_id'] = useOrderFields.order_id
+                serizeleMemoryOrder['create_time'] = getCurrentTimestamp()
 
-            # save
+            # 请求折扣价格订单
+            orderParams = buildOrderParamasOfDiscount(
+                requestOrderClone if requestOrderClone is not None else serizeleMemoryOrder, 'room|'+str(roomId) if roomId != 'account' else 'account|'+serizeleMemoryOrder['user'])
+            result = post_request(PAY_HOST, orderParams)
+            if result == 'full':
+                return JsonResponse({'code': 418, 'message': '支付通道繁忙,请稍后再试或联系客服'})
+            elif result == 'exist':
+                return JsonResponse({'code': 418, 'message': '订单存在'})
+            elif result == 'error':
+                return JsonResponse({'code': 418, 'message': '刷新失败,请稍后再试'})
+
+            # 入库操作
+            if roomId != 'account':
+                for i in serizeleMemoryOrder:
+                    if i['order_id'] == useOrderFields.order_id:
+                        i['qrcode'] = result['qr']
+                        break
+                cache.set(memoryPrefix, json.dumps(
+                    serizeleMemoryOrder), ORDER_LIFEYCLE)
+            else:
+                serizeleMemoryOrder['qrcode'] = result['qr']
+                cache.set('pay_account_'+useOrderFields.order_id,
+                          json.dumps(serizeleMemoryOrder), ACCOUNT_ORDER_LIFEYCLE)
+                cache.delete(memoryPrefix)
             codeFields.use_user.add(User.objects.get(username=username))
             codeFields.use_order.add(useOrderFields)
             codeFields.save()
             useOrderFields.save()
 
-            ret = {'code': 200, 'message': "使用成功"}
+            ret = {'code': 200, 'message': "使用成功,请在二维码有效期内付款(刷新二维码后无效)"}
             ret['discountPrice'] = useOrderFields.discount_price
+            ret['order_id'] = useOrderFields.order_id
+            ret['qrcode'] = result['qr']
             return JsonResponse(ret)
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # 刷新二维码

@@ -46,9 +46,7 @@ class CheckAccessToken(MiddlewareMixin):
             data = {}
             for key, value in payload.items():
                 data[key] = value
-
             request.payload_data = data
-
             return None
         except Exception as e:
             # print(str(e))

@@ -4,6 +4,7 @@ import { PayCodeWrap, PayCodeBodyWrap } from "../../style/chat";
 import WechatPayIcon from "../../assets/images/wechat.png";
 import LoadingPayIcon from "../../assets/images/loadingpay.png";
 import SuccessIcon from "../../assets/images/success.png";
+import { useCountDown } from "ahooks";
 type Props = {
   qrcode: string;
   expire_time: number;
@@ -17,34 +18,16 @@ type Props = {
 
 const ChatPayCode = (props: Props) => {
   const [qrState, setQrState] = React.useState(true);
-  const timerRef = React.useRef(null);
 
   const manualOpenPayCode = () => {
     let paycodeEle = document.getElementById("paycode");
     paycodeEle?.click();
   };
 
-  // 检查二维码是否到期
-  const captureChangeQr = (open: boolean) => {
-    if (!open) {
-      if (timerRef === null || !qrState) return;
-      // @ts-ignore
-      clearInterval(timerRef.current);
-    } else {
-      if (!qrState) return;
-      if (qrState === props.expire_time > new Date().getTime() / 1000) {
-      } else {
-        setQrState(props.expire_time > new Date().getTime() / 1000);
-      }
-      // @ts-ignore
-      timerRef.current = setInterval(() => {
-        if (qrState === props.expire_time > new Date().getTime() / 1000) return;
-        setQrState(props.expire_time > new Date().getTime() / 1000);
-        // @ts-ignore
-        clearInterval(timerRef.current);
-      }, 1000);
-    }
-  };
+  React.useEffect(() => {
+    if (props.expire_time === 0 || qrState === true) return;
+    setQrState(true);
+  }, [props.expire_time]);
 
   React.useEffect(() => {
     if (!props.isOpenQr) return;
@@ -52,11 +35,6 @@ const ChatPayCode = (props: Props) => {
       manualOpenPayCode();
     });
   }, [props.isOpenQr]);
-
-  React.useEffect(() => {
-    if (props.expire_time === 0) return;
-    setQrState(true);
-  }, [props.expire_time]);
 
   return (
     <Tooltip
@@ -71,12 +49,12 @@ const ChatPayCode = (props: Props) => {
             qrstate={qrState}
             discountPrice={props.discountPrice}
             useDiscount={props.useDiscount}
+            setqr={setQrState}
           />
         ) : (
           "支付成功"
         )
       }
-      onOpenChange={(open) => captureChangeQr(open)}
       trigger={["click"]}
     >
       <PayCodeWrap id="paycode">
@@ -106,10 +84,17 @@ type PayCodeBodyProps = {
   qrstate: boolean;
   flushQr: () => void;
   useDiscount: (code: string) => Promise<void>;
+  setqr: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const PayCodeBody = (props: PayCodeBodyProps) => {
   const [isLoading, setLoading] = React.useState(false);
+  const [countdown] = useCountDown({
+    leftTime: props.expire_time * 1000 - new Date().getTime(),
+    onEnd: () => {
+      props.setqr(false);
+    },
+  });
 
   const use = (e: string) => {
     setLoading(true);
@@ -133,6 +118,19 @@ const PayCodeBody = (props: PayCodeBodyProps) => {
         size={200}
         onRefresh={props.flushQr}
       />
+      <div style={{ textAlign: "center", fontSize: "12px" }}>
+        {countdown === 0 ? (
+          "二维码已失效,请刷新"
+        ) : (
+          <>
+            二维码于
+            <span style={{ color: "red" }}>
+              {Math.round(countdown / 1000)}秒
+            </span>
+            后失效
+          </>
+        )}
+      </div>
       <div className="detail">
         <div className="price">
           <div>订单价格:</div>

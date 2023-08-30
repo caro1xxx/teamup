@@ -1,13 +1,13 @@
 import django
 django.setup()
-from django.core.mail import send_mail
-from celery import shared_task
-from backend import settings
-from main import models
-import json
-from django.core import serializers
-from django.template.loader import render_to_string
 from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
+from django.template.loader import render_to_string
+from django.core import serializers
+import json
+from main import models
+from backend import settings
+from celery import shared_task
+from django.core.mail import send_mail
 
 
 @shared_task  # 注册验证码
@@ -198,3 +198,12 @@ def forwardingRoomMessage(content, roomPk, receive_username, send_username):
     messageFields.receive_user.add(receive_user)
     messageFields.send_user.add(send_user)
     messageFields.save()
+
+
+@shared_task
+def batchChangePasswordMail(accountFields):
+    for account in accountFields:
+        email_content = render_to_string('ChangeAccountPassword.html', {
+                                         'password': account['password']})
+        send_mail('Teamup车队{}密码修改通知'.format(account['username']), '', settings.EMAIL_HOST_USER,
+                  [account['email']], html_message=email_content)

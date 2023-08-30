@@ -83,6 +83,7 @@ def randomNum():
 
 
 def sendMessageToChat(room_name, message):
+    print('send notify ws')
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         room_name,
@@ -163,6 +164,13 @@ def buildOrderParmasOfAccount(data, usernameOrUserFlag):
     sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
         APP_ID, data["order_id"],  "account|"+usernameOrUserFlag, "wechat", data['discountPrice'], data["user"], API_SERCET)
     return {"app_id": APP_ID, "order_no": data["order_id"], "trade_name": "account|"+usernameOrUserFlag,
+            "pay_type": "wechat", "order_amount": data['discountPrice'], "order_uid": data["user"], "sign": toMD5(sign)}
+
+
+def buildOrderParamasOfDiscount(data, usernameOrUserFlag):
+    sign = 'app_id={}&order_no={}&trade_name={}&pay_type={}&order_amount={}&order_uid={}&{}'.format(
+        APP_ID, data["order_id"],  usernameOrUserFlag, "wechat", data['discountPrice'], data["user"], API_SERCET)
+    return {"app_id": APP_ID, "order_no": data["order_id"], "trade_name": usernameOrUserFlag,
             "pay_type": "wechat", "order_amount": data['discountPrice'], "order_uid": data["user"], "sign": toMD5(sign)}
 
 

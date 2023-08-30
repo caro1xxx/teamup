@@ -72,7 +72,7 @@ export interface ResultActivityListState {
 
 export type OrderFieldsState = {
   key: string;
-  username: number;
+  username: string;
   password: number;
   seat_code: number;
   user_buy_expire_time: number;

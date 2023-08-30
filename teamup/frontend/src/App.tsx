@@ -49,7 +49,7 @@ const Wrap = styled.div`
     position: relative;
   }
   .back {
-    top: 450px;
+    bottom: -50px;
     left: 150px;
     z-index: 0;
     position: fixed;

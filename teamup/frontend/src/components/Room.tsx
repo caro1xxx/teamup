@@ -482,9 +482,18 @@ const Room = () => {
       await getAllPayState();
       isOpenQrRef.current = true;
     }
-    dispatch(
-      changeMessage([result.message, result.code === 200 ? true : false])
-    );
+    if (result.code === 500) {
+      dispatch(
+        changeMessage([
+          "暂时无法发车,请稍后再试(支付通道繁忙)",
+          result.code === 200 ? true : false,
+        ])
+      );
+    } else {
+      dispatch(
+        changeMessage([result.message, result.code === 200 ? true : false])
+      );
+    }
   };
 
   // 获取全员支付状态
@@ -682,6 +691,8 @@ const Room = () => {
         type: "changeOrderDiscountPrice",
         payload: {
           discountPrice: result.discountPrice,
+          expire_time:
+            parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
         },
       });
     }

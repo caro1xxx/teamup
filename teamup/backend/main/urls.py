@@ -3,7 +3,7 @@ from django.urls import re_path, path
 from main.views.user import loginAndRegister, property
 from main.views.room import handleRoom
 from main.views.pay import dealings, account
-from main.views.function import activity,questionnaire
+from main.views.function import activity, questionnaire
 
 
 urlpatterns = [
@@ -22,6 +22,8 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/usermail/$', property.Mail.as_view()),
     re_path(r'^api/v1/teamup/activity/$', activity.Activitys.as_view()),
     re_path(r'^api/v1/teamup/payedorder/$', property.PayedOrder.as_view()),
+    re_path(r'^api/v1/teamup/changepwdaccount/$',
+            property.ChangeAccountPassword.as_view()),
     re_path(r'^api/v1/teamup/check/$', questionnaire.Check.as_view()),
 
 

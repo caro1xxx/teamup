@@ -198,3 +198,5 @@ class NeedChargeRoomAccounts(models.Model):
 class NeedChangePaaaword(models.Model):
     group = models.ForeignKey(
         Group, to_field='id', null=True, on_delete=models.SET_NULL, related_name='gourp_id')
+    submit_time = models.IntegerField()
+    state = models.IntegerField(verbose_name='0未处理,1已处理')

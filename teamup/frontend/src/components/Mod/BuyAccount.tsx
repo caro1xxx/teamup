@@ -3,6 +3,7 @@ import { QRCode, Input } from "antd";
 import styled from "styled-components";
 import { LoadingWrap, AccountInfoWrap } from "../../style/other";
 import { parseStampTime } from "../../utils/tools";
+import { useCountDown } from "ahooks";
 
 type Props = {
   qrcode: string;
@@ -13,12 +14,14 @@ type Props = {
   isLogin: boolean;
   useDiscount: (code: string) => Promise<void>;
   time: number;
+  timeLeft: number;
   payinfo: {
     username: string;
     password: string;
     seat: string;
     isPayed: number;
   };
+  qrcodeExpire: () => void;
 };
 
 const Wrap = styled.div`
@@ -39,6 +42,12 @@ const { Search } = Input;
 
 const BuyAccount = (props: Props) => {
   const [isLoading, setLoading] = React.useState(false);
+  const [countdown] = useCountDown({
+    leftTime: props.timeLeft * 1000 - new Date().getTime(),
+    onEnd: () => {
+      props.qrcodeExpire();
+    },
+  });
 
   const use = (e: string) => {
     setLoading(true);
@@ -70,6 +79,19 @@ const BuyAccount = (props: Props) => {
             bordered={false}
             onRefresh={props.flush}
           />
+          <div style={{ textAlign: "center" }}>
+            {countdown === 0 ? (
+              "二维码已失效,请刷新"
+            ) : (
+              <>
+                二维码于
+                <span style={{ color: "red" }}>
+                  {Math.round(countdown / 1000)}秒
+                </span>
+                后失效
+              </>
+            )}
+          </div>
           <div className="detail">
             <div className="title">订单价格:</div>
             <div className="price">{props.price}</div>
