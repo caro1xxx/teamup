@@ -280,3 +280,38 @@ export const PayedOrderWrap = styled.div`
     }
   }
 `;
+
+export const AskWrap = styled.div`
+  position: fixed;
+  width: 480px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(143, 143, 143, 0.322),
+    0 6px 20px 0 rgba(142, 142, 142, 0.129);
+  bottom: 20px;
+  font-size: 10px;
+  color: #5d5d5d;
+  font-weight: lighter;
+  right: 20px;
+  z-index: 3;
+  padding: 30px;
+  .btotbn {
+    display: flex;
+    > div {
+      width: calc(33.3% - 20px);
+      text-align: center;
+      line-height: 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      margin: 10px 10px;
+      margin-bottom: 0px;
+    }
+    .hulu {
+      border: 0.5px #5d5d5d solid;
+    }
+    .hulu:hover {
+      background-color: #cecece;
+    }
+  }
+`;

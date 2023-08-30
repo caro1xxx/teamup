@@ -133,7 +133,6 @@ def fromAuthGetUsername(request):
 def post_request(url, data):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     try:
-        print(data)
         response = requests.post(url, proxies={'http': '', 'https': ''}, data=json.dumps(
             data), headers=headers, verify=False)
         jsonResult = json.loads(response.text)

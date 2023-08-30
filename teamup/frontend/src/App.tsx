@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import NavBar from "./components/NavBar";
 import Bottom from "./components/Bottom";
+import CookieAsk from "./components/CookieAsk";
 import {
   getStorage,
   setStorage,
@@ -78,6 +79,7 @@ const App = (props: Props) => {
     (state) => state.user.loginPupup
   ) as boolean;
   const [isActivity, setIsActivity] = React.useState(false);
+  const [showAgreeCookie, setshowAgreeCookie] = React.useState(false);
   const getUserInfo = async (token: string) => {
     dispatch(saveUserInfo(["", "", ""]));
     let result = await fecther(`login/`, {}, "get");
@@ -130,6 +132,7 @@ const App = (props: Props) => {
     )
       setIsActivity(true);
     if (!getStorage("db_version")) setStorage("db_version", 1);
+    if (!getStorage("agreeCookiePotoce")) setshowAgreeCookie(true);
     if (!getStorage("access_token")) return;
     getUserInfo(getStorage("access_token")); // eslint-disable-next-line
   }, []);
@@ -164,6 +167,7 @@ const App = (props: Props) => {
               <div className="mask"></div>
             </div>
           </div>
+          {showAgreeCookie ? <CookieAsk close={setshowAgreeCookie} /> : null}
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}
