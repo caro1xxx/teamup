@@ -19,7 +19,7 @@ const Store = (props: Props) => {
   const dispatch = useAppDispatch();
   const [serviceList, setServiceList] = React.useState([
     {
-      icon: require("../assets/images/logo/netflix.png"),
+      icon: require("../assets/images/logo/netflix.webp"),
       key: nanoid(),
       type: "netflix",
       plan: [
@@ -27,7 +27,7 @@ const Store = (props: Props) => {
           time: 30,
           key: nanoid(),
           level: "初出茅庐",
-          image: require("../assets/images/30.png"),
+          image: require("../assets/images/30.webp"),
           includes: [
             { title: "Netflix标准会员 30天", key: nanoid() },
             { title: "平台邮箱 安全同行", key: nanoid() },
@@ -43,7 +43,7 @@ const Store = (props: Props) => {
           time: 90,
           key: nanoid(),
           level: "略有小成",
-          image: require("../assets/images/90.png"),
+          image: require("../assets/images/90.webp"),
           includes: [
             { title: "Netflix标准会员 90天", key: nanoid() },
             { title: "平台邮箱 安全同行", key: nanoid() },
@@ -59,7 +59,7 @@ const Store = (props: Props) => {
           time: 180,
           key: nanoid(),
           level: "登堂入室",
-          image: require("../assets/images/180.png"),
+          image: require("../assets/images/180.webp"),
           includes: [
             { title: "Netflix标准会员 180天", key: nanoid() },
             { title: "平台邮箱 安全同行", key: nanoid() },
@@ -75,7 +75,7 @@ const Store = (props: Props) => {
           time: 365,
           key: nanoid(),
           level: "渐入佳境",
-          image: require("../assets/images/365.png"),
+          image: require("../assets/images/365.webp"),
           includes: [
             { title: "Netflix标准会员 365天", key: nanoid() },
             { title: "平台邮箱 安全同行", key: nanoid() },

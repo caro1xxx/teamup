@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import CheckPng from "../assets/images/bg/check.png";
+import CheckPng from "../assets/images/bg/check.webp";
 import { Modal, Input, Select, Rate } from "antd";
 import { useAppSelector, useAppDispatch } from "../redux/hooks";
 import "../style/custome_antd.css";

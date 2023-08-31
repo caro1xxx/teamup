@@ -114,16 +114,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # 邮件
-# 设置邮件域名 发送邮件服务器：smtp.qq.com
 EMAIL_HOST = 'smtp.qq.com'
-# 设置端口号，为数字  使用SSL，端口号465或587
 EMAIL_PORT = 25
-# 设置发件人邮箱
 EMAIL_HOST_USER = 'wakeups@qq.com'
-# 设置发件人授权码
 EMAIL_HOST_PASSWORD = 'tsxwwpxunwiaechh'
-# 设置是否启用安全连接
 EMAIL_USER_TLS = True
+
 
 
 # redis

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import CloseIcon from "../assets/images/close.png";
+import CloseIcon from "../assets/images/close.webp";
 import { Input, Button } from "antd";
 import { fecther } from "../utils/fecther";
 import { useAppDispatch } from "../redux/hooks";
@@ -211,7 +211,7 @@ const Register = (props: Props) => {
         onKeyDown={onKeyDownEnter}
         style={{
           backgroundImage:
-            'url("' + require("../assets/images/logback.png") + '")',
+            'url("' + require("../assets/images/logback.webp") + '")',
         }}
       >
         <div className="mask">

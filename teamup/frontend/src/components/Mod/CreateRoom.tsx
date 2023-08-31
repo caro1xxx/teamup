@@ -6,7 +6,7 @@ import { Validator } from "../../utils/tools";
 import { useAppDispatch } from "../../redux/hooks";
 import { changeMessage } from "../../redux/modules/notifySlice";
 import { fecther } from "../../utils/fecther";
-import CopyIcon from "../../assets/images/copy.png";
+import CopyIcon from "../../assets/images/copy.webp";
 import ClipboardJS from "clipboard";
 type Props = {
   create: (data: {

@@ -4,7 +4,7 @@ import { MsgItemWrap, PleaseWrap } from "../../style/chat";
 import { parseStampTime } from "../../utils/tools";
 import { nanoid } from "nanoid";
 import { useAppDispatch } from "../../redux/hooks";
-import LoadingMoreIcon from "../../assets/images/loadingmore.png";
+import LoadingMoreIcon from "../../assets/images/loadingmore.webp";
 import { Alert } from "antd";
 
 import {

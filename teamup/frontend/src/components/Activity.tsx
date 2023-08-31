@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityWrap } from "../style/other";
-import CloseIcon from "../assets/images/close.png";
+import CloseIcon from "../assets/images/close.webp";
 import { fecther } from "../utils/fecther";
 type Props = {
   close: () => void;

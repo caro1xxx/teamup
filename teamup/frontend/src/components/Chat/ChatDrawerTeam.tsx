@@ -3,11 +3,11 @@ import { TeamWrap, TeamTypeWrap } from "../../style/chat";
 import { TeamInfoProps } from "../../types/componentsPropsTypes";
 import { Button, Popconfirm, Skeleton } from "antd";
 // assets
-import FleetBackIcon from "../../assets/images/fleet_back.png";
+import FleetBackIcon from "../../assets/images/fleet_back.webp";
 import "../../style/custome_antd.css";
-import WrapIcon from "../../assets/images/wrap.png";
-import TypeIcon from "../../assets/images/type.png";
-import PriceIcon from "../../assets/images/price.png";
+import WrapIcon from "../../assets/images/wrap.webp";
+import TypeIcon from "../../assets/images/type.webp";
+import PriceIcon from "../../assets/images/price.webp";
 
 type Props = {
   data: TeamInfoProps;

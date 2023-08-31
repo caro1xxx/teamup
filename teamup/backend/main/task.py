@@ -14,7 +14,7 @@ from django.core.mail import send_mail
 def send_async_email(subject, message, from_email, recipient_list):
     email_content = render_to_string(
         'RegisterCode.html', {'code': str(message)})
-    send_mail(subject, message, from_email, [
+    send_mail(subject, message, 'Teamup Team <'+ from_email+'>', [
               recipient_list], html_message=email_content)
 
 

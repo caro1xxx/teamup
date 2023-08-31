@@ -1,7 +1,7 @@
 import React from "react";
 import { InputOptionsWrap } from "../../style/chat";
 import { Dropdown } from "antd";
-import AiteIcon from "../../assets/images/aite.png";
+import AiteIcon from "../../assets/images/aite.webp";
 
 type Props = {
   // @ts-ignore

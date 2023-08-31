@@ -1,9 +1,9 @@
 import React from "react";
 import { Tooltip, Input, QRCode } from "antd";
 import { PayCodeWrap, PayCodeBodyWrap } from "../../style/chat";
-import WechatPayIcon from "../../assets/images/wechat.png";
-import LoadingPayIcon from "../../assets/images/loadingpay.png";
-import SuccessIcon from "../../assets/images/success.png";
+import WechatPayIcon from "../../assets/images/wechat.webp";
+import LoadingPayIcon from "../../assets/images/loadingpay.webp";
+import SuccessIcon from "../../assets/images/success.webp";
 import { useCountDown } from "ahooks";
 type Props = {
   qrcode: string;

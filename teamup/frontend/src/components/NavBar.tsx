@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { Popover, Segmented } from "antd";
-import UserIcon from "../assets/images/user.png";
+import UserIcon from "../assets/images/user.webp";
 import Base from "./User/Base";
 import Info from "./User/Info";
 import Favorite from "./User/Favorite";

@@ -12,11 +12,11 @@ import ChatPayCode from "./Chat/ChatPayCode";
 import SelfMail from "./Mod/SelfMail";
 
 // assets
-import ShareIcon from "../assets/images/share.png";
-import FavoriteIcon from "../assets/images/favorite.png";
-import UnFavoriteIcon from "../assets/images/unfavorite.png";
-import LoadingMoreIcon from "../assets/images/loadingmore.png";
-import MsgIcon from "../assets/images/msg.png";
+import ShareIcon from "../assets/images/share.webp";
+import FavoriteIcon from "../assets/images/favorite.webp";
+import UnFavoriteIcon from "../assets/images/unfavorite.webp";
+import LoadingMoreIcon from "../assets/images/loadingmore.webp";
+import MsgIcon from "../assets/images/msg.webp";
 
 // tools
 import { nanoid } from "nanoid";

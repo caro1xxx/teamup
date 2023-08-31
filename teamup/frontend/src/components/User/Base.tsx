@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import VipFalseIcon from "../../assets/images/vip_false.png";
-import VipIcon from "../../assets/images/vip.png";
+import VipFalseIcon from "../../assets/images/vip_false.webp";
+import VipIcon from "../../assets/images/vip.webp";
 import { parseStampTime } from "../../utils/tools";
 import { clearStorage } from "../../utils/localstorage";
 import { Divider, Button } from "antd";

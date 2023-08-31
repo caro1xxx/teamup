@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import CloseIcon from "../assets/images/close.png";
+import CloseIcon from "../assets/images/close.webp";
 import { useAppDispatch } from "../redux/hooks";
 import { changeLoginPupup, saveUserInfo } from "../redux/modules/userSlice";
 import { changeMessage } from "../redux/modules/notifySlice";
@@ -169,7 +169,7 @@ const Login = (props: Props) => {
         onKeyDown={onKeyDownEnter}
         style={{
           backgroundImage:
-            'url("' + require("../assets/images/logback.png") + '")',
+            'url("' + require("../assets/images/logback.webp") + '")',
         }}
       >
         <div className="mask">

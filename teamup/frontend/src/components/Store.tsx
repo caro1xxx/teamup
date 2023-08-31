@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import StoreIcon from "../assets/images/store.png";
+import StoreIcon from "../assets/images/store.webp";
 import { Link } from "react-router-dom";
 type Props = {};
 

@@ -147,7 +147,7 @@ const AccountInfo = (props: {
         <div style={{ fontWeight: "bolder" }}>TEAMUP ACCOUNT CARD</div>
         <img
           className="type"
-          src={require("../../assets/images/logo/netflix.png")}
+          src={require("../../assets/images/logo/netflix.webp")}
           alt=""
         />
         <div className="info">

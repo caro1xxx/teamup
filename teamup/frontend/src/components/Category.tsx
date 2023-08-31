@@ -1,5 +1,5 @@
 import React from "react";
-import TestIcon from "../assets/images/test.png";
+import TestIcon from "../assets/images/test.webp";
 import { CategoryWrap } from "../style/other";
 import { Input, Modal } from "antd";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
@@ -11,7 +11,7 @@ import {
   changeRoomOrderBy,
   changeSearchValue,
 } from "../redux/modules/roomSlice";
-import KefuIcon from "../assets/images/kefu.png";
+import KefuIcon from "../assets/images/kefu.webp";
 import { nanoid } from "nanoid";
 
 type Props = {};
@@ -24,19 +24,19 @@ const Category = (props: Props) => {
   const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
   const [OderByState, setOrderByState] = React.useState([
     {
-      icon: require("../assets/images/descending.png"),
+      icon: require("../assets/images/descending.webp"),
       key: nanoid(),
       label: "asce",
       select: false,
     },
     {
-      icon: require("../assets/images/ascending.png"),
+      icon: require("../assets/images/ascending.webp"),
       key: nanoid(),
       label: "desc",
       select: false,
     },
     {
-      icon: require("../assets/images/self.png"),
+      icon: require("../assets/images/self.webp"),
       key: nanoid(),
       label: "self",
       select: false,
