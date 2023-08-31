@@ -140,7 +140,7 @@ class OrderHandle(APIView):
             ret['order'] = memoryOrder
             return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # flush qr
@@ -204,5 +204,5 @@ class OrderHandle(APIView):
             ret['order'] = memoryOrder
             return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

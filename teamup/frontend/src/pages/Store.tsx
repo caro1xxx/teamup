@@ -215,9 +215,11 @@ const Store = (props: Props) => {
   const useDiscount = async (code: string) => {
     if (isUseingDiscount.current) {
       dispatch(changeMessage(["正在使用折扣码中", false]));
+      return;
     }
     if (!isLogin) {
       dispatch(changeMessage(["登录后才能使用折扣码", false]));
+      return;
     }
     isUseingDiscount.current = true;
     let result = await fecther(

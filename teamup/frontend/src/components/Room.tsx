@@ -30,7 +30,7 @@ import {
   textPhase,
   checkVaildate,
 } from "../utils/tools";
-import { Skeleton, Drawer, Empty, Modal, Spin, Badge } from "antd";
+import { Skeleton, Drawer, Empty, Modal, Spin, Badge, Tag } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { getStorage, setStorage } from "../utils/localstorage";
 import {
@@ -414,6 +414,11 @@ const Room = () => {
         listenWsToAccount();
       } else if (jsonMessage.message.includes("扒拉下来了")) {
         listenWsToKickUser();
+      } else if (
+        jsonMessage.message.includes("离开座位") ||
+        jsonMessage.message.includes("加入车队")
+      ) {
+        ListenWsToleaveOrJoinTeam();
       }
       return;
     }
@@ -716,6 +721,10 @@ const Room = () => {
     );
   };
 
+  const ListenWsToleaveOrJoinTeam = () => {
+    getTeamInfo(userToRoomInfo.pk);
+  };
+
   // listen router
   useEffect(() => {
     setIsLoading(true);
@@ -966,6 +975,11 @@ const Item = (props: RoomItemProps) => {
           <img src={MsgIcon} alt="msg" />
         </Badge>
       </div>
+      <div className="tag">
+        <Tag>4K ultra</Tag>
+        <Tag>翻车包赔</Tag>
+        <Tag>24 × 7售后</Tag>
+      </div>
 
       <div
         className="description"
@@ -1022,6 +1036,9 @@ const LoadingItem = () => {
         <Skeleton.Avatar active className="loading_avator" />
         <Skeleton.Avatar active className="loading_avator" />
         <Skeleton.Avatar active className="loading_avator" />
+      </div>
+      <div className="tags">
+        <Skeleton.Input active block size="small" />
       </div>
     </ItemWrap>
   );

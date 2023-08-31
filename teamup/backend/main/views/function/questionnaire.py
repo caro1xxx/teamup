@@ -26,5 +26,5 @@ class Check(APIView):
             return JsonResponse({'message': "感谢参与", 'code': 200})
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

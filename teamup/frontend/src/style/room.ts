@@ -39,11 +39,17 @@ export const ItemWrap = styled.div`
   background-color: #232323;
   border-radius: 5px;
   position: relative;
-  height: 320px;
+  height: 350px;
+  .tags {
+    font-size: 15px;
+    margin: 20px 30px 10px 30px;
+    font-weight: bolder;
+    display: flex;
+  }
 
   .options {
     position: absolute;
-    bottom: 30px;
+    bottom: 50px;
     left: 30px;
     display: flex;
     img {
@@ -56,6 +62,12 @@ export const ItemWrap = styled.div`
       flex: 1;
       color: #d5d5d5;
     }
+  }
+  .tag {
+    position: absolute;
+    bottom: 15px;
+    margin: 0px 30px;
+    margin-top: 10px;
   }
   .title {
     font-size: 15px;
@@ -86,6 +98,7 @@ export const ItemWrap = styled.div`
     margin: 0px 30px;
     position: relative;
     .loading_avator {
+      margin-top: 20px;
       margin-right: 10px;
     }
   }

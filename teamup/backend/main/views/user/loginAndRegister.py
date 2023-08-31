@@ -7,7 +7,7 @@ from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCo
 from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
 from django.core.cache import cache
 import json
-from main.config import REGISTER_CODE_LIFECYCLE
+from main.config import REGISTER_CODE_LIFECYCLE,JWT_CACHE_TIME
 from main.task import send_async_email
 
 
@@ -105,7 +105,11 @@ class login(APIView):
                 avator_color = payload['avator_color']
             ret['access_token'] = encrypteToken(
                 self, UserInfo)
-            return JsonResponse(ret)
+        
+            response = JsonResponse(ret)
+            response['Cache-Control'] = 'max-age=' + \
+                    str(JWT_CACHE_TIME)
+            return response
 
         except Exception as e:
             # print(str(e))

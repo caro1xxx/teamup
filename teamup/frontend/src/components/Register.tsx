@@ -263,6 +263,15 @@ const Register = (props: Props) => {
               onSearch={(value) => sendMailCode(value)}
               loading={AccountInfo.isLoading === 1 ? true : false}
             />
+            <div
+              style={{
+                fontSize: "10px",
+                marginTop: "5px",
+                color: "#cecece",
+              }}
+            >
+              · 如未收到验证码邮件,请查看邮件垃圾箱
+            </div>
             <Input
               value={AccountInfo.code}
               onChange={(e) =>

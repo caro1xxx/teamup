@@ -187,9 +187,6 @@ export const AccountInfoWrap = styled.div`
   .info {
     margin-top: 10px;
     display: flex;
-    > div {
-      width: 50%;
-    }
   }
   .account {
     font-size: 15px;
@@ -209,6 +206,7 @@ export const AccountInfoWrap = styled.div`
   }
   .exprie_time {
     margin-top: 10px;
+    text-align: center;
     font-size: 10px;
     cursor: pointer;
     user-select: none;
@@ -216,6 +214,7 @@ export const AccountInfoWrap = styled.div`
   .hint {
     margin-top: 10px;
     font-size: 10px;
+    text-align: center;
   }
 `;
 

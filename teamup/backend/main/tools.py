@@ -1,5 +1,4 @@
 import time
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from backend import settings
 import jwt
@@ -41,7 +40,7 @@ def encrypteToken(self, user):
     }
     token = jwt.encode(payload, settings.JWT_SECRET_KEY,
                        algorithm=settings.JWT_ALGORITHM)
-    return token.decode('utf-8')
+    return token.decode('utf8')
 
 
 def GenertorCode():
@@ -83,7 +82,6 @@ def randomNum():
 
 
 def sendMessageToChat(room_name, message):
-    print('send notify ws')
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         room_name,
@@ -145,7 +143,7 @@ def post_request(url, data):
             elif jsonResult['msg'] == '没有可用的收款码':
                 return 'full'
     except Exception as e:
-        print(str(e))
+        # print(str(e))
         return 'error'
 
 
@@ -181,17 +179,18 @@ def fromTsToTime(timestamp):
 
 
 def toUseDiscountPrice(real_price):
-    keys = cache.keys('*')
-    isRepeatDiscount = [
-        key for key in keys if key.startswith("record_discount")]
-    discount = round(random.uniform(real_price, real_price+0.3), 1)
-    if len(isRepeatDiscount) == 0:
-        cache.set('record_discount'+str(discount),
-                  0, RECORD_DISCOUNT_EXPIRE_TIME)
-        return discount
-    else:
-        while 'record_discount'+str(discount) in isRepeatDiscount:
-            discount = round(random.uniform(real_price, real_price+0.3), 1)
-        cache.set('record_discount'+str(discount),
-                  0, RECORD_DISCOUNT_EXPIRE_TIME)
-        return discount
+    return real_price
+    # keys = cache.keys('*')
+    # isRepeatDiscount = [
+    #     key for key in keys if key.startswith("record_discount")]
+    # discount = round(random.uniform(real_price, real_price), 1)
+    # if len(isRepeatDiscount) == 0:
+    #     cache.set('record_discount'+str(discount),
+    #               0, RECORD_DISCOUNT_EXPIRE_TIME)
+    #     return discount
+    # else:
+    #     while 'record_discount'+str(discount) in isRepeatDiscount:
+    #         discount = round(random.uniform(real_price, real_price+0.3), 1)
+    #     cache.set('record_discount'+str(discount),
+    #               0, RECORD_DISCOUNT_EXPIRE_TIME)
+    #     return discount

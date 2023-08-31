@@ -1,20 +1,22 @@
 import django
 django.setup()
-from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
-from django.template.loader import render_to_string
-from django.core import serializers
-import json
-from main import models
-from backend import settings
-from celery import shared_task
+from main.config import USEING_GROUP_MAX_TIME
 from django.core.mail import send_mail
+from celery import shared_task
+from backend import settings
+from django.core.cache import cache
+from main import models
+import json
+from django.core import serializers
+from django.template.loader import render_to_string
+from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
 
 
 @shared_task  # 注册验证码
 def send_async_email(subject, message, from_email, recipient_list):
     email_content = render_to_string(
         'RegisterCode.html', {'code': str(message)})
-    send_mail(subject, message, 'Teamup Team <'+ from_email+'>', [
+    send_mail(subject, message, 'Teamup Team <' + from_email+'>', [
               recipient_list], html_message=email_content)
 
 
@@ -22,7 +24,7 @@ def send_async_email(subject, message, from_email, recipient_list):
 def send_aite_mail(subject, message, from_email, recipient_list):
     email_content = render_to_string(
         'AiteMessage.html', {'content': message['content'], 'recivceUser': message['recivceUser'], 'sendUser': message['sendUser']})
-    send_mail(subject, '', from_email, [
+    send_mail(subject, '', 'Teamup Team <' + from_email+'>', [
               recipient_list], html_message=email_content)
 
 
@@ -37,7 +39,7 @@ def sendChatNotifyMessage(topic, message):
 @shared_task
 def sendDepartureNotify(topic, userList):
     email_content = render_to_string('Departure.html')
-    send_mail(topic, '', settings.EMAIL_HOST_USER,
+    send_mail(topic, '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>',
               userList, html_message=email_content)
 
 
@@ -47,8 +49,7 @@ def checkAllUserPayed(memoryallUser, roomId, orderId):
         if i["state"] == 0:
             return
     models.Room.objects.filter(pk=roomId).update(state=2)
-    sendMessageToChat('room_'+roomId, '全员付款完毕')
-    generatorAccount(roomId, memoryallUser, orderId)
+    sendMessageToChat('room_'+roomId, '全员付款完毕,正在生成账号中请稍等')
 
 
 @shared_task
@@ -56,9 +57,7 @@ def generatorAccount(roomId, users, orderId):
     usersCount = len(users)
     if usersCount == 0:
         return
-
     roomFieldsType = models.Room.objects.filter(pk=roomId).first()
-
     # 判断是否是自备邮箱类型
     if roomFieldsType.type.type == 2:
         sendMessageToChat('room_'+str(roomId),
@@ -71,16 +70,19 @@ def generatorAccount(roomId, users, orderId):
         models.NeedChargeRoomAccounts.objects.create(
             room_id=roomId, all_user_mail_info=json.dumps(allUsersId))
         return
-
     specifyTypeModel = models.Group.objects.filter(
         type=roomFieldsType.type.name).all()
-
     eqGroup = []
+    currentUseingGroup = ''
     for group in specifyTypeModel:
         if (group.remaining == usersCount):
+            currentUseingGroup = 'useing_group'+str(group.pk)
+            # 判断当前账号组是否正在生成账号中
+            if cache.get(currentUseingGroup, None) is not None:
+                continue
+            cache.set(currentUseingGroup, 1, USEING_GROUP_MAX_TIME)
             eqGroup.append(group)
             break
-
     if len(eqGroup) == 0:
         for group in specifyTypeModel:
             if (group.remaining > usersCount):
@@ -93,37 +95,58 @@ def generatorAccount(roomId, users, orderId):
 
         allUsersUsername = [item['user'] for item in users]
 
-        if (len(allUsersUsername) != len(allSameGroupAccounts)):
-            sendMessageToChat('room_'+str(roomId), '账号分配数量和当前团队人员数量发生异常')
+        # 人数>组账号数对应
+        if (len(allUsersUsername) > len(allSameGroupAccounts)):
+            sendMessageToChat('room_'+str(roomId), '账号分配数量和当前团队人员数量发生异常,请联系客服')
         else:
             allUsersFields = models.User.objects.filter(
                 username__in=allUsersUsername)
 
             mainNotifys = []
 
-            for index, value in enumerate(allSameGroupAccounts):
-                value.distribute_user_id = allUsersFields[index].pk
-                value.user_buy_expire_time = getCurrentTimestamp() + models.Order.objects.filter(
-                    order_id=orderId).first().time * 60 * 60 * 24
-                value.save()
-                mainNotifys.append(
-                    {"email": allUsersFields[index].email, "account": value.username, "password": value.password, "seat": value.seat_code})
+            # 人数 == 组账号数对应
+            if (len(allUsersUsername) == len(allSameGroupAccounts)):
+                for index, value in enumerate(allSameGroupAccounts):
+                    value.distribute_user_id = allUsersFields[index].pk
+                    value.user_buy_expire_time = getCurrentTimestamp() + models.Order.objects.filter(
+                        order_id=orderId).first().time * 60 * 60 * 24
+                    value.save()
+                    mainNotifys.append(
+                        {"email": allUsersFields[index].email, "account": value.username, "password": value.password, "seat": value.seat_code})
+
+            # 人数 < 组账号数对应
+            else:
+                currentUserIdx = 0
+                for index, value in enumerate(allSameGroupAccounts):
+                    if value.distribute_user_id is not None:
+                        continue
+                    value.distribute_user_id = allUsersFields[currentUserIdx].pk
+                    value.user_buy_expire_time = getCurrentTimestamp() + models.Order.objects.filter(
+                        order_id=orderId).first().time * 60 * 60 * 24
+                    value.save()
+                    mainNotifys.append(
+                        {"email": allUsersFields[currentUserIdx].email, "account": value.username, "password": value.password, "seat": value.seat_code})
+
+                    # 如果当前人数已经分配完毕就退出
+                    if currentUserIdx+1 == len(allUsersUsername):
+                        break
+                    currentUserIdx = currentUserIdx+1
 
             eqGroup[0].distribute = eqGroup[0].distribute + usersCount
             eqGroup[0].save()
 
             roomFieldsType.state = 3
             roomFieldsType.save()
-
             for item in mainNotifys:
                 email_content = render_to_string('AccountGenertor.html', {
                                                  'account': item["account"], "password": item["password"], "seat": item["seat"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
                 send_mail(
-                    'Teamup@账号生成通知', '', settings.EMAIL_HOST_USER, [item["email"]], html_message=email_content)
-
+                    'Teamup@账号生成通知', '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>', [item["email"]], html_message=email_content)
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
     else:
         sendMessageToChat('room_'+str(roomId), '账号不足,正在补货中')
+
+    cache.delete(currentUseingGroup)
 
 
 @shared_task
@@ -133,56 +156,50 @@ def generatorAccountOfrPerson(OrderId, username):
         type=orderFields.type).all()
 
     AccountFields = []
-    for group in specifyTypeModel:
-        if (group.remaining == 1):
-            AccountFields.append(group)
-            break
 
-    if len(AccountFields) == 0:
+    remainingFlag = 0
+    currentUseingGroup = ''
+    while len(AccountFields) == 0 and remainingFlag <= 5:
+        remainingFlag = remainingFlag+1
         for group in specifyTypeModel:
-            if (group.remaining == 2):
-                AccountFields.append(group)
-                break
-
-    if len(AccountFields) == 0:
-        for group in specifyTypeModel:
-            if (group.remaining == 3):
-                AccountFields.append(group)
-                break
-
-    if len(AccountFields) == 0:
-        for group in specifyTypeModel:
-            if (group.remaining == 4):
-                AccountFields.append(group)
-                break
-
-    if len(AccountFields) == 0:
-        for group in specifyTypeModel:
-            if (group.remaining == 5):
+            if (group.remaining == remainingFlag):
+                currentUseingGroup = 'useing_group'+str(group.pk)
+                # 判断当前账号组是否正在生成账号中
+                if cache.get(currentUseingGroup, None) is not None:
+                    continue
+                cache.set(currentUseingGroup, 1, USEING_GROUP_MAX_TIME)
                 AccountFields.append(group)
                 break
 
     if len(AccountFields) == 1:
         dispatchAccount = models.Account.objects.filter(
-            related_group_id=AccountFields[0].pk).first()
+            related_group_id=AccountFields[0].pk).all()
+
+        idleAccount = ''
+        for account in dispatchAccount:
+            if account.distribute_user_id is None:
+                idleAccount = account
+                break
 
         # 如果用户没有登录,那么将user表中的guest用户关联到account
         if username == 'unknown':
-            dispatchAccount.distribute_user_id = 1
+            idleAccount.distribute_user_id = 1
         else:
             userFiedls = models.User.objects.filter(username=username).first()
-            dispatchAccount.distribute_user_id = userFiedls.pk
-        dispatchAccount.user_buy_expire_time = getCurrentTimestamp() + \
-            orderFields.time * 60 * 60 * 24
-        dispatchAccount.save()
+            idleAccount.distribute_user_id = userFiedls.pk
 
+        idleAccount.user_buy_expire_time = getCurrentTimestamp() + \
+            orderFields.time * 60 * 60 * 24
+        idleAccount.save()
         AccountFields[0].distribute = AccountFields[0].distribute + 1
         AccountFields[0].save()
 
         sendMessageToChat('pay_notify_'+OrderId,
-                          json.dumps({"username": dispatchAccount.username, 'password': dispatchAccount.password, "seat": dispatchAccount.seat_code}))
+                          json.dumps({"username": idleAccount.username, 'password': idleAccount.password, "seat": idleAccount.seat_code}))
     else:
         sendMessageToChat('pay_notify_'+OrderId, '分配失败,无可用账号')
+
+    cache.delete(currentUseingGroup)
 
 
 @shared_task
@@ -205,5 +222,5 @@ def batchChangePasswordMail(accountFields):
     for account in accountFields:
         email_content = render_to_string('ChangeAccountPassword.html', {
                                          'password': account['password']})
-        send_mail('Teamup车队{}密码修改通知'.format(account['username']), '', settings.EMAIL_HOST_USER,
+        send_mail('Teamup车队{}密码修改通知'.format(account['username']), '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>',
                   [account['email']], html_message=email_content)

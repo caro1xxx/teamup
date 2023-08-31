@@ -110,12 +110,12 @@ class Group(models.Model):
 class Account(models.Model):
     username = models.CharField(max_length=32)
     password = models.CharField(max_length=10)
-    email = models.CharField(max_length=64, unique=True)
+    email = models.CharField(max_length=64)
     create_time = models.IntegerField()
     expire_time = models.IntegerField()
     user_buy_expire_time = models.IntegerField(
         default=0, verbose_name='用户购买的到期时间')
-    distribute_user = models.OneToOneField(
+    distribute_user = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name='distributeUser'
     )
 

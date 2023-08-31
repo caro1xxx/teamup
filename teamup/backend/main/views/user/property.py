@@ -152,5 +152,5 @@ class ChangeAccountPassword(APIView):
 
             return JsonResponse({"code": 200, "message": '批量修改成功', 'password': newPassword})
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

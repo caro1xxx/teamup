@@ -33,7 +33,7 @@ const Activity = (props: Props) => {
       {activityList.map((item) => {
         return (
           <img
-            src={`http://192.168.31.69/media/activity/${item.image}`}
+            src={`https://teamup.best/media/activity/${item.image}`}
             key={item.key}
             alt=""
           />

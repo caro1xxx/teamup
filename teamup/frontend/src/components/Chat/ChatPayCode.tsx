@@ -25,8 +25,12 @@ const ChatPayCode = (props: Props) => {
   };
 
   React.useEffect(() => {
-    if (props.expire_time === 0 || qrState === true) return;
-    setQrState(true);
+    if (props.expire_time === 0) return;
+    if (props.expire_time < new Date().getTime() / 1000) {
+      setQrState(false);
+    } else {
+      setQrState(true);
+    }
   }, [props.expire_time]);
 
   React.useEffect(() => {

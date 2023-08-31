@@ -151,7 +151,7 @@ const AccountInfo = (props: {
           alt=""
         />
         <div className="info">
-          <div>
+          <div style={{ flex: 1 }}>
             <div className="account">账号:</div>
             <div className="account_">{props.username}</div>
           </div>
@@ -159,19 +159,13 @@ const AccountInfo = (props: {
             <div className="password">密码:</div>
             <div className="password_">{props.password}</div>
           </div>
-          <div>
-            <div className="password">座位PIN:</div>
-            <div className="password_">{props.seat}</div>
-          </div>
+        </div>
+        <div>
+          <div className="password">座位PIN:</div>
+          <div className="password_">{props.seat}</div>
         </div>
         <div className="exprie_time">
-          <div>
-            {parseStampTime(
-              parseInt(new Date().getTime() / 1000 + "") +
-                props.time * 60 * 60 * 24
-            )}
-            到期
-          </div>
+          <div>账号将于{props.time}天后到期</div>
         </div>
         {props.isLogin ? null : (
           <div className="hint">登录后购买账号可享受平台免费保管</div>

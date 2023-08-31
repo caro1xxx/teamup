@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { Popover, Segmented } from "antd";
 import UserIcon from "../assets/images/user.webp";
+import HotIcon from "../assets/images/hot.webp";
 import Base from "./User/Base";
 import Info from "./User/Info";
 import Favorite from "./User/Favorite";
@@ -70,6 +71,7 @@ const Options = styled.div`
     margin: 0px 20px;
     text-decoration: none;
     color: #cccccccc;
+    position: relative;
   }
   .link_item:hover {
     color: #fff;
@@ -106,7 +108,7 @@ const User = styled.div`
 `;
 const OptionLis = [
   { title: "车站", key: nanoid(), path: "/home/netflix" },
-  { title: "官方小店", key: nanoid(), path: "/store" },
+  { title: "官方店铺", key: nanoid(), path: "/store" },
   { title: "活动", key: nanoid(), path: "/discount" },
   { title: "帮助", key: nanoid(), path: "/support" },
   { title: "更新日志", key: nanoid(), path: "/logs" },
@@ -142,6 +144,13 @@ const NavBar = (props: Props) => {
           return (
             <Link className="link_item" key={item.key} to={item.path}>
               {item.title}
+              {item.title === "官方店铺" ? (
+                <img
+                  style={{ position: "absolute", width: "15px", top: "-10px" }}
+                  src={HotIcon}
+                  alt="hot"
+                />
+              ) : null}
             </Link>
           );
         })}

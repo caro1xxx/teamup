@@ -37,7 +37,7 @@ const Activity = (props: Props) => {
         style={{
           backgroundImage:
             activityInfo.image !== ""
-              ? `url('http://192.168.31.69/media/activity/${activityInfo.image}')`
+              ? `url('https://teamup.best/media/activity/${activityInfo.image}')`
               : "",
         }}
       >

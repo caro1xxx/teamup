@@ -4,7 +4,7 @@ from main.contants import CommonErrorcode, RoomResponseCode, PayResponseCode
 import json
 from main.tools import sendMessageToChat, getCurrentTimestamp, toMD5
 from django.core.cache import cache
-from main.task import checkAllUserPayed, generatorAccountOfrPerson
+from main.task import checkAllUserPayed, generatorAccountOfrPerson, generatorAccount
 from main.config import ORDER_LIFEYCLE, API_SERCET
 from main.models import Order
 from django.http import HttpResponse
@@ -66,6 +66,14 @@ class Pay(APIView):
                         checkAllUserPayed.delay(
                             serializeMemoryTeamAllPayOrder, roomId, i["order_id"])
 
+                        isAllPayed = True
+                        for i in serializeMemoryTeamAllPayOrder:
+                            if i["state"] == 0:
+                                isAllPayed = False
+                                break
+                        if isAllPayed == True:
+                            generatorAccount.delay(
+                                roomId, serializeMemoryTeamAllPayOrder, i["order_id"])
                         return HttpResponse("success")
                         # return JsonResponse(PayResponseCode.paySuccess)
 
@@ -95,5 +103,5 @@ class Pay(APIView):
                 return HttpResponse("success")
                 # return JsonResponse(PayResponseCode.paySuccess)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)

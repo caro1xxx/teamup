@@ -172,7 +172,7 @@ class Team(APIView):
             except ObjectDoesNotExist:
                 return JsonResponse(RoomResponseCode.roomOrUserNotFound)
 
-            users_in_room = room.users.all()
+            users_in_room = room.users.all().order_by('-pk')
             user_join_list = [{"username": user.username,
                                "avator_color": user.avator_color} for user in users_in_room]
 
@@ -228,6 +228,8 @@ class Team(APIView):
             room.users.add(user)
             room.save()
 
+            sendMessageToChat('room_'+str(roomId),
+                              '{}加入车队'.format(username))
             return JsonResponse(RoomResponseCode.joinSuccess)
 
         except Exception as e:
@@ -267,6 +269,8 @@ class Team(APIView):
             room.take_seat_quorum -= 1
             room.save()
 
+            sendMessageToChat('room_'+str(roomId),
+                              '{}离开座位'.format(username))
             return JsonResponse(RoomResponseCode.quitSuccess)
 
         except Exception as e:
@@ -400,7 +404,7 @@ class Handler(APIView):
                 sendDepartureNotify.delay(
                     'Temaup车队@您加入的'+room.name + room.type.name+'车队已发车', users_email)
             except Exception as e:
-                print(str(e))
+                # print(str(e))
                 room.state = 0
                 room.save()
                 return JsonResponse(CommonErrorcode.serverError)
@@ -408,7 +412,7 @@ class Handler(APIView):
             return JsonResponse(RoomResponseCode.fleetDepartureSuccess)
 
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # favorite
@@ -466,7 +470,7 @@ class Handler(APIView):
                               '队长将{}从座位上扒拉下来了'.format(kickUser))
             return JsonResponse({'code': 200, 'message': "成功将{}踢下座位".format(kickUser)})
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
 
@@ -612,7 +616,7 @@ class PayState(APIView):
             ret['qrcode'] = result['qr']
             return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # 刷新二维码
