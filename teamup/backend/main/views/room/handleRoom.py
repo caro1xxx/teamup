@@ -10,6 +10,7 @@ from django.core.cache import cache
 from main.task import sendDepartureNotify
 from main.config import ROOM_LIFECYCLE, ORDER_LIFEYCLE, TYPE_PRICE_CACHETIME, PAY_HOST, ACCOUNT_ORDER_LIFEYCLE
 from concurrent.futures import ThreadPoolExecutor
+from django.db.models import Case, When, IntegerField, Value
 
 
 class Rooms(APIView):
@@ -26,6 +27,14 @@ class Rooms(APIView):
 
             roomResponse = RoomResponseCode()
             rooms = []
+
+            custom_order = Case(
+                # take_seat_quorum等于5的记录优先级为2
+                When(take_seat_quorum=5, then=Value(2)),
+                default=Value(1),  # 其他情况的记录优先级为1
+                output_field=IntegerField(),
+            )
+
             if search == 'None':
                 if orderby == 'self':
                     authorization_header = request.META.get(
@@ -42,8 +51,16 @@ class Rooms(APIView):
                     rooms = Room.objects.filter(
                         creator_id=payload['username']).all()
                 else:
-                    rooms = Room.objects.filter(type__name=type).order_by(
-                        '-take_seat_quorum' if orderby is None or orderby == 'None' else "create_time" if orderby == 'asce'else "-create_time")
+                    if orderby is None or orderby == 'None':
+                        rooms = Room.objects.filter(type__name=type).annotate(
+                            custom_order=custom_order).order_by('custom_order', '-take_seat_quorum')
+                    elif orderby == 'asce':
+                        rooms = Room.objects.filter(
+                            type__name=type).order_by('create_time')
+                    else:
+                        rooms = Room.objects.filter(
+                            type__name=type).order_by('-create_time')
+
             else:
                 rooms = Room.objects.filter(name__contains=search).all()
 
@@ -92,7 +109,7 @@ class Rooms(APIView):
             return JsonResponse(ret)
 
         except Exception as e:
-            # print(str(e))
+            print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
 
     # create room

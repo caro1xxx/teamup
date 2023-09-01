@@ -4,6 +4,7 @@ from main.views.user import loginAndRegister, property
 from main.views.room import handleRoom
 from main.views.pay import dealings, account
 from main.views.function import activity, questionnaire
+from main.views.admin import rooms
 
 
 urlpatterns = [
@@ -25,6 +26,10 @@ urlpatterns = [
     re_path(r'^api/v1/teamup/changepwdaccount/$',
             property.ChangeAccountPassword.as_view()),
     re_path(r'^api/v1/teamup/check/$', questionnaire.Check.as_view()),
+
+    # fake
+    re_path(r'^api/v1/teamup/batchfakeroom/$',
+            rooms.batchFakeUserToRoom.as_view()),
 
 
     # pay

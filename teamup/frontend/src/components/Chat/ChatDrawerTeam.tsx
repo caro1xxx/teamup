@@ -204,7 +204,7 @@ const TeamType = (props: {
           style={{ marginLeft: "2px" }}
           alt="icon"
         />
-        当前价格:{props.data.price} RMB /人{" "}
+        当前价格:{(props.data.price).toFixed(2)} RMB /人{" "}
         <span style={{ color: "#05b665", marginLeft: "10px" }}>
           (集齐5人可享受超低价格{(props.data.price / 5).toFixed(2)}RMB /人)
         </span>

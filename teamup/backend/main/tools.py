@@ -197,3 +197,24 @@ def toUseDiscountPrice(real_price):
         cache.set('record_discount'+str(discount),
                   0, RECORD_DISCOUNT_EXPIRE_TIME)
         return discount
+
+
+# 包含大小写的随机字符
+def generate_random_string():
+    length = random.randint(6, 10)  # 生成长度在6到10之间的随机数
+    characters = string.ascii_letters  # 获取所有大小写字母
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
+
+def generate_random_color():
+    # 生成6个随机的十六进制字符
+    color = '#' + ''.join(random.choice('0123456789ABCDEF') for _ in range(6))
+    return color
+
+
+def generate_random_Upper_string():
+    length = 6
+    characters = string.ascii_uppercase  # 获取所有大写字母
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
