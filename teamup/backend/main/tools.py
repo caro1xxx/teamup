@@ -105,7 +105,7 @@ def discountPrice(real_price):
     keys = cache.keys('*')
     isRepeatDiscount = [
         key for key in keys if key.startswith("record_discount")]
-    discount = round(random.uniform(real_price-1, real_price), 1)
+    discount = round(random.uniform(real_price-0.30, real_price), 2)
     if len(isRepeatDiscount) == 0:
         cache.set('record_discount'+str(discount),
                   0, RECORD_DISCOUNT_EXPIRE_TIME)
@@ -179,18 +179,17 @@ def fromTsToTime(timestamp):
 
 
 def toUseDiscountPrice(real_price):
-    return real_price
-    # keys = cache.keys('*')
-    # isRepeatDiscount = [
-    #     key for key in keys if key.startswith("record_discount")]
-    # discount = round(random.uniform(real_price, real_price), 1)
-    # if len(isRepeatDiscount) == 0:
-    #     cache.set('record_discount'+str(discount),
-    #               0, RECORD_DISCOUNT_EXPIRE_TIME)
-    #     return discount
-    # else:
-    #     while 'record_discount'+str(discount) in isRepeatDiscount:
-    #         discount = round(random.uniform(real_price, real_price+0.3), 1)
-    #     cache.set('record_discount'+str(discount),
-    #               0, RECORD_DISCOUNT_EXPIRE_TIME)
-    #     return discount
+    keys = cache.keys('*')
+    isRepeatDiscount = [
+        key for key in keys if key.startswith("record_discount")]
+    discount = round(random.uniform(real_price, real_price+0.10), 2)
+    if len(isRepeatDiscount) == 0:
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount
+    else:
+        while 'record_discount'+str(discount) in isRepeatDiscount:
+            discount = round(random.uniform(real_price, real_price+0.10), 2)
+        cache.set('record_discount'+str(discount),
+                  0, RECORD_DISCOUNT_EXPIRE_TIME)
+        return discount

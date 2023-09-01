@@ -385,7 +385,7 @@ class Handler(APIView):
                 # 修改即将存入redis的集合
                 for payOrder in requestUsersOrderQrValue:
                     for order in ordersInsert:
-                        if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discount_price'])+'0':
+                        if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discount_price']):
                             order['qrcode'] = payOrder['qr_value']
                             break
 

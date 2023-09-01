@@ -1,15 +1,15 @@
+from main.config import USEING_GROUP_MAX_TIME
+from django.core.mail import send_mail
+from celery import shared_task
+from backend import settings
+from django.core.cache import cache
+from main import models
+import json
+from django.core import serializers
+from django.template.loader import render_to_string
+from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
 import django
 django.setup()
-from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
-from django.template.loader import render_to_string
-from django.core import serializers
-import json
-from main import models
-from django.core.cache import cache
-from backend import settings
-from celery import shared_task
-from django.core.mail import send_mail
-from main.config import USEING_GROUP_MAX_TIME
 
 
 @shared_task  # 注册验证码
