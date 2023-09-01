@@ -39,7 +39,7 @@ export const ItemWrap = styled.div`
   background-color: #232323;
   border-radius: 5px;
   position: relative;
-  height: 350px;
+  height: 370px;
   .tags {
     font-size: 15px;
     margin: 20px 30px 10px 30px;
@@ -49,7 +49,7 @@ export const ItemWrap = styled.div`
 
   .options {
     position: absolute;
-    bottom: 50px;
+    bottom: 70px;
     left: 30px;
     display: flex;
     img {

@@ -402,7 +402,7 @@ class Handler(APIView):
 
                 sendMessageToChat('room_'+str(roomId), '队长'+username+'已发车')
                 sendDepartureNotify.delay(
-                    'Temaup车队@您加入的'+room.name + room.type.name+'车队已发车', users_email)
+                    'Teamup车队@您加入的'+room.name + room.type.name+'车队已发车', users_email)
             except Exception as e:
                 # print(str(e))
                 room.state = 0

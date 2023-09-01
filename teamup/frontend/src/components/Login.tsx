@@ -225,7 +225,7 @@ const Login = (props: Props) => {
               </span>
             </div>
             <Cookie>
-              登录表示 "接受所有 cookie"，即表示您同意 Temaup
+              登录表示 "接受所有 cookie"，即表示您同意 Teamup
               可以在您的设备上存储 cookie,并根据我们的 Cookie 政策披露信息
             </Cookie>
             <div style={{ fontSize: "12px", textAlign: "center" }}>

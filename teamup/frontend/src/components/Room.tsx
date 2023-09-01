@@ -976,9 +976,11 @@ const Item = (props: RoomItemProps) => {
         </Badge>
       </div>
       <div className="tag">
-        <Tag>4K ultra</Tag>
+        <Tag>4K Ultra</Tag>
         <Tag>翻车包赔</Tag>
-        <Tag>24 × 7售后</Tag>
+        <Tag>24×7售后</Tag>
+        <Tag style={{ marginTop: "5px" }}>全平台解锁</Tag>
+        <Tag style={{ marginTop: "5px" }}>独立观影记录</Tag>
       </div>
 
       <div
