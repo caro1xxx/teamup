@@ -82,8 +82,8 @@ const ChatDrawerBody = (props: Props) => {
           style={{
             height:
               props.roomType === 2
-                ? "calc(100vh - 350px - 80px)"
-                : "calc(100vh - 350px - 50px)",
+                ? "calc(100vh - 350px - 90px)"
+                : "calc(100vh - 350px - 70px)",
           }}
         >
           {props.message.map((item: any) => {

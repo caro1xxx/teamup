@@ -204,9 +204,16 @@ const TeamType = (props: {
           style={{ marginLeft: "2px" }}
           alt="icon"
         />
-        当前价格:{(props.data.price).toFixed(2)} RMB /人{" "}
+        {props.data.level.includes("30")
+          ? "超低价格:16.6 RMB /人"
+          : "超低价格:49.8 RMB /人"}
         <span style={{ color: "#05b665", marginLeft: "10px" }}>
-          (集齐5人可享受超低价格{(props.data.price / 5).toFixed(2)}RMB /人)
+          (价格公式 总价 / 当前人数 = 单价)
+        </span>
+      </div>
+      <div>
+        <span style={{ color: "#05b665", marginLeft: "10px" }}>
+          (当前价格:{props.data.price.toFixed(2)} RMB /人,满员可享受超低价格)
         </span>
       </div>
       <div className="hint">如需更改,请@车队队长协商</div>
