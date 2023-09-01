@@ -20,6 +20,7 @@ type Props = {
     username: string;
     password: string;
     seat: string;
+    number: number;
     isPayed: number;
   };
   qrcodeExpire: () => void;
@@ -66,6 +67,7 @@ const BuyAccount = (props: Props) => {
         <AccountInfo
           username={props.payinfo.username}
           password={props.payinfo.password}
+          number={props.payinfo.number}
           seat={props.payinfo.seat}
           isLogin={props.isLogin}
           time={props.time}
@@ -149,6 +151,7 @@ const GenrotorError = (props: { order: string }) => {
 const AccountInfo = (props: {
   username: string;
   password: string;
+  number: number;
   seat: string;
   isLogin: boolean;
   time: number;
@@ -172,9 +175,15 @@ const AccountInfo = (props: {
             <div className="password_">{props.password}</div>
           </div>
         </div>
-        <div>
-          <div className="password">座位PIN:</div>
-          <div className="password_">{props.seat}</div>
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "50%" }}>
+            <div className="password">座位PIN:</div>
+            <div className="password_">{props.seat}</div>
+          </div>
+          <div style={{ width: "50%" }}>
+            <div className="password">座位号:</div>
+            <div className="password_">{props.number}号位</div>
+          </div>
         </div>
         <div className="exprie_time">
           <div>账号将于{props.time}天后到期</div>

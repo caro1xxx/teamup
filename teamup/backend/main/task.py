@@ -1,15 +1,15 @@
 import django
 django.setup()
-from main.config import USEING_GROUP_MAX_TIME
-from django.core.mail import send_mail
-from celery import shared_task
-from backend import settings
-from django.core.cache import cache
-from main import models
-import json
-from django.core import serializers
-from django.template.loader import render_to_string
 from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
+from django.template.loader import render_to_string
+from django.core import serializers
+import json
+from main import models
+from django.core.cache import cache
+from backend import settings
+from celery import shared_task
+from django.core.mail import send_mail
+from main.config import USEING_GROUP_MAX_TIME
 
 
 @shared_task  # 注册验证码
@@ -112,7 +112,7 @@ def generatorAccount(roomId, users, orderId):
                         order_id=orderId).first().time * 60 * 60 * 24
                     value.save()
                     mainNotifys.append(
-                        {"email": allUsersFields[index].email, "account": value.username, "password": value.password, "seat": value.seat_code})
+                        {"email": allUsersFields[index].email, "account": value.username, "password": value.password, "seat": value.seat_code, "number": value.seat_number})
 
             # 人数 < 组账号数对应
             else:
@@ -125,7 +125,7 @@ def generatorAccount(roomId, users, orderId):
                         order_id=orderId).first().time * 60 * 60 * 24
                     value.save()
                     mainNotifys.append(
-                        {"email": allUsersFields[currentUserIdx].email, "account": value.username, "password": value.password, "seat": value.seat_code})
+                        {"email": allUsersFields[currentUserIdx].email, "account": value.username, "password": value.password, "seat": value.seat_code, "number": value.seat_number})
 
                     # 如果当前人数已经分配完毕就退出
                     if currentUserIdx+1 == len(allUsersUsername):
@@ -139,7 +139,7 @@ def generatorAccount(roomId, users, orderId):
             roomFieldsType.save()
             for item in mainNotifys:
                 email_content = render_to_string('AccountGenertor.html', {
-                                                 'account': item["account"], "password": item["password"], "seat": item["seat"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
+                                                 'account': item["account"], "password": item["password"], "seat": item["seat"], "number": item["number"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
                 send_mail(
                     'Teamup@账号生成通知', '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>', [item["email"]], html_message=email_content)
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
@@ -159,9 +159,7 @@ def generatorAccountOfrPerson(OrderId, username):
 
     remainingFlag = 0
     currentUseingGroup = ''
-    print(1)
     while len(AccountFields) == 0 and remainingFlag <= 5:
-        print(5)
         remainingFlag = remainingFlag+1
         for group in specifyTypeModel:
             if (group.remaining == remainingFlag):
@@ -172,7 +170,6 @@ def generatorAccountOfrPerson(OrderId, username):
                 cache.set(currentUseingGroup, 1, USEING_GROUP_MAX_TIME)
                 AccountFields.append(group)
                 break
-    print(2)
     if len(AccountFields) == 1:
         dispatchAccount = models.Account.objects.filter(
             related_group_id=AccountFields[0].pk).all()
@@ -189,7 +186,6 @@ def generatorAccountOfrPerson(OrderId, username):
         else:
             userFiedls = models.User.objects.filter(username=username).first()
             idleAccount.distribute_user_id = userFiedls.pk
-        print(4)
         idleAccount.user_buy_expire_time = getCurrentTimestamp() + \
             orderFields.time * 60 * 60 * 24
         idleAccount.save()
@@ -197,10 +193,9 @@ def generatorAccountOfrPerson(OrderId, username):
         AccountFields[0].save()
 
         sendMessageToChat('pay_notify_'+OrderId,
-                          json.dumps({"username": idleAccount.username, 'password': idleAccount.password, "seat": idleAccount.seat_code}))
+                          json.dumps({"username": idleAccount.username, 'password': idleAccount.password, "seat": idleAccount.seat_code, "number": idleAccount.seat_number}))
     else:
         sendMessageToChat('pay_notify_'+OrderId, '分配失败,无可用账号')
-    print(3)
     cache.delete(currentUseingGroup)
 
 

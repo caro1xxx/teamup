@@ -42,7 +42,9 @@ const Order = (props: { order: OrderFieldsState[] }) => {
                     修改密码
                   </div>
                 </div>
-                <div className="ac">座位PIN:{item.seat_code}</div>
+                <div className="ac">
+                  座位PIN:{item.seat_code} 座位号:{item.seat_number}号位
+                </div>
               </div>
             );
           })}

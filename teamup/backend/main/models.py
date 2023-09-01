@@ -123,6 +123,7 @@ class Account(models.Model):
         Group, null=True, blank=True, on_delete=models.SET_NULL, related_name='group'
     )
     seat_code = models.IntegerField()
+    seat_number = models.IntegerField()
 
     # 获取当前账号是否被分配
     @property

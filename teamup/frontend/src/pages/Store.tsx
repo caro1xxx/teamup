@@ -108,6 +108,7 @@ const Store = (props: Props) => {
   const [PayedInfo, setPayedInfo] = React.useState({
     username: "",
     password: "",
+    number: 0,
     seat: "",
     isPayed: 0,
   });
@@ -204,10 +205,12 @@ const Store = (props: Props) => {
             isPayed: 1,
           });
         } else if (!jsonMsg.message.includes("分配失败")) {
+          let JSONdata = JSON.parse(jsonMsg.message);
           let data = {
-            username: JSON.parse(jsonMsg.message).username,
-            password: JSON.parse(jsonMsg.message).password,
-            seat: JSON.parse(jsonMsg.message).seat,
+            username: JSONdata.username,
+            password: JSONdata.password,
+            seat: JSONdata.seat,
+            number: JSONdata.number,
             userFlag: getStorage("userFlag"),
             order_id: OrderInfo.order_id,
           };
@@ -215,6 +218,7 @@ const Store = (props: Props) => {
             username: data.username,
             password: data.password,
             seat: data.seat,
+            number: data.number,
             isPayed: 2,
           });
           if (isLogin) return;
