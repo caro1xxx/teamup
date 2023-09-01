@@ -385,7 +385,7 @@ class Handler(APIView):
                 # 修改即将存入redis的集合
                 for payOrder in requestUsersOrderQrValue:
                     for order in ordersInsert:
-                        if payOrder['user'] == order['user'] and payOrder['pay_amount'] == str(order['discount_price']):
+                        if payOrder['user'] == order['user'] and (payOrder['pay_amount'] == str(order['discount_price']) or payOrder['pay_amount'] == str(order['discount_price'])+'0'):
                             order['qrcode'] = payOrder['qr_value']
                             break
 
@@ -544,6 +544,10 @@ class PayState(APIView):
             useOrderFields = Order.objects.get(order_id=orderId)
             if useOrderFields.discount_code != 'random':
                 return JsonResponse(CodeResonseCode.orderUsed)
+
+            # 只能用于30天的账号
+            if useOrderFields.time != 30:
+                return JsonResponse({"code": 489, "message": '该折扣码仅适用于30天的账号'})
 
             # 计算折扣
             useOrderFields.discount_code = discountCode

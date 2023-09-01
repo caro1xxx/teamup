@@ -105,7 +105,11 @@ def discountPrice(real_price):
     keys = cache.keys('*')
     isRepeatDiscount = [
         key for key in keys if key.startswith("record_discount")]
-    discount = round(random.uniform(real_price-0.30, real_price), 2)
+    discount = 999.00
+    if real_price == 49.8 or real_price == 49.80:
+        discount = round(random.uniform(real_price-0.10, real_price), 2)
+    else:
+        discount = round(random.uniform(real_price-0.30, real_price), 2)
     if len(isRepeatDiscount) == 0:
         cache.set('record_discount'+str(discount),
                   0, RECORD_DISCOUNT_EXPIRE_TIME)
