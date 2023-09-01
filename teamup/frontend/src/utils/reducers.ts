@@ -51,8 +51,8 @@ export const payStateReducer = (state: any, action: any) => {
     case "changeOrderDiscountPrice":
       return {
         isDeparture: true,
-        selfPayCode: state.selfPayCode,
-        expire_time: action.payload.expire_time,
+        selfPayCode: action.action.code,
+        expire_time: action.action.expire_time,
         payState: state.payState,
         price: state.price,
         order_id: state.order_id,

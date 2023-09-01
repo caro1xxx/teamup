@@ -287,10 +287,13 @@ const Store = (props: Props) => {
         qrstate: true,
         expire_time: new Date().getTime() / 1000 + QRCODE_FLUSH_TIME,
       });
+      dispatch(changeMessage([result.message, true]));
+    } else if (result.code == 500) {
+      dispatch(changeMessage(["支付通道繁忙,请稍后再试", false]));
+    } else {
+      dispatch(changeMessage([result.message, false]));
     }
-    dispatch(
-      changeMessage([result.message, result.code === 200 ? true : false])
-    );
+
     isUseingDiscount.current = false;
   };
 

@@ -696,6 +696,7 @@ const Room = () => {
         type: "changeOrderDiscountPrice",
         payload: {
           discountPrice: result.discountPrice,
+          code:result.qrcode,
           expire_time:
             parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
         },
