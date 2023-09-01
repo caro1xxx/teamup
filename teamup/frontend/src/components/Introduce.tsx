@@ -11,7 +11,7 @@ type Props = {};
 
 const Wrap = styled.div`
   display: flex;
-  margin-top: 100px;
+  margin-top: 50px;
   img {
     flex: 1;
     margin-top: 50px;

@@ -143,6 +143,10 @@ const Store = (props: Props) => {
       expire_time: result.order.create_time + QRCODE_FLUSH_TIME,
       qrstate: true,
     });
+    setPayedInfo({
+      ...PayedInfo,
+      isPayed: 0,
+    });
     setCreateRoomModel(true);
   };
 
@@ -200,12 +204,47 @@ const Store = (props: Props) => {
             isPayed: 1,
           });
         } else if (!jsonMsg.message.includes("分配失败")) {
-          setPayedInfo({
+          let data = {
             username: JSON.parse(jsonMsg.message).username,
             password: JSON.parse(jsonMsg.message).password,
             seat: JSON.parse(jsonMsg.message).seat,
+            userFlag: getStorage("userFlag"),
+            order_id: OrderInfo.order_id,
+          };
+          setPayedInfo({
+            username: data.username,
+            password: data.password,
+            seat: data.seat,
             isPayed: 2,
           });
+          if (isLogin) return;
+          // 如果用户未登录那么就在本地存储订单
+          if (getStorage("temporary_order_record_account")) {
+            const oldOrder = JSON.parse(
+              getStorage("temporary_order_record_account")
+            );
+            oldOrder.push(data);
+            setStorage(
+              "temporary_order_record_account",
+              JSON.stringify(oldOrder)
+            );
+          } else {
+            setStorage(
+              "temporary_order_record_account",
+              JSON.stringify([data])
+            );
+          }
+          if (WsRef.current?.readyState === 1) {
+            WsRef.current.close();
+          }
+        } else {
+          setPayedInfo({
+            ...PayedInfo,
+            isPayed: 3,
+          });
+          if (WsRef.current?.readyState === 1) {
+            WsRef.current.close();
+          }
         }
       };
     };
@@ -341,6 +380,7 @@ const Store = (props: Props) => {
           discountPrice={OrderInfo.discountPrice}
           isLogin={isLogin}
           timeLeft={OrderInfo.expire_time}
+          orderid={OrderInfo.order_id}
         />
       </Modal>
     </>

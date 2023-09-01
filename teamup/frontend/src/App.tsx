@@ -3,6 +3,7 @@ import styled from "styled-components";
 import NavBar from "./components/NavBar";
 import Bottom from "./components/Bottom";
 import CookieAsk from "./components/CookieAsk";
+import CheckTemporaryOrder from "./components/CheckTemporaryOrder";
 import {
   getStorage,
   setStorage,
@@ -80,6 +81,7 @@ const App = (props: Props) => {
   ) as boolean;
   const [isActivity, setIsActivity] = React.useState(false);
   const [showAgreeCookie, setshowAgreeCookie] = React.useState(false);
+  const [isTemporaryOrder, setisTemporaryOrder] = React.useState(false);
   const getUserInfo = async (token: string) => {
     dispatch(saveUserInfo(["", "", ""]));
     let result = await fecther(`login/`, {}, "get");
@@ -129,12 +131,17 @@ const App = (props: Props) => {
     } else if (
       getStorage("activityNetTs") &&
       getStorage("activityNetTs") < new Date().getTime() / 1000
-    )
+    ) {
       setIsActivity(true);
+    }
     if (!getStorage("db_version")) setStorage("db_version", 1);
     if (!getStorage("agreeCookiePotoce")) setshowAgreeCookie(true);
-    if (!getStorage("access_token")) return;
-    getUserInfo(getStorage("access_token")); // eslint-disable-next-line
+    if (!getStorage("access_token")) {
+      getStorage("temporary_order_record_account") && setisTemporaryOrder(true);
+      return;
+    } else {
+      getUserInfo(getStorage("access_token")); // eslint-disable-next-line
+    }
   }, []);
 
   return (
@@ -168,6 +175,7 @@ const App = (props: Props) => {
             </div>
           </div>
           {showAgreeCookie ? <CookieAsk close={setshowAgreeCookie} /> : null}
+          {isTemporaryOrder ? <CheckTemporaryOrder /> : null}
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}

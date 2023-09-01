@@ -1,14 +1,14 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from main.models import User
+from main.models import User, Account
 from backend import settings
 from main.contants import RegisterResponseCode, CommonErrorcode, LoginResponseCode
 from main.tools import checkIsNotEmpty, getCurrentTimestamp, encrypteToken, GenertorCode, validateEmailFormat, decodeToken
 from django.core.cache import cache
 import json
-from main.config import REGISTER_CODE_LIFECYCLE,JWT_CACHE_TIME
-from main.task import send_async_email
+from main.config import REGISTER_CODE_LIFECYCLE, JWT_CACHE_TIME
+from main.task import send_async_email, relatedAccounts
 
 
 class register(APIView):
@@ -39,6 +39,10 @@ class register(APIView):
             RegisterUser = User.objects.create(username=UserData['username'], password=UserData['password'],
                                                email=UserData['email'], create_time=getCurrentTimestamp(), avator_color=UserData['avator_color'])
 
+            if UserData['temporary_orders'] != 'None':
+                relatedAccounts.delay(
+                    UserData['temporary_orders'], RegisterUser.pk)
+            
             ret = {'code': 200, 'message': '注册成功'}
             ret['access_token'] = encrypteToken(
                 self, RegisterUser)
@@ -105,10 +109,10 @@ class login(APIView):
                 avator_color = payload['avator_color']
             ret['access_token'] = encrypteToken(
                 self, UserInfo)
-        
+
             response = JsonResponse(ret)
             response['Cache-Control'] = 'max-age=' + \
-                    str(JWT_CACHE_TIME)
+                str(JWT_CACHE_TIME)
             return response
 
         except Exception as e:
@@ -140,6 +144,11 @@ class login(APIView):
                 premium = UserFields.premium
                 email = UserFields.email
                 avator_color = UserFields.avator_color
+
+            if UserData['temporary_orders'] != 'None':
+                relatedAccounts.delay(
+                    UserData['temporary_orders'], UserFields.pk)
+
             ret['access_token'] = encrypteToken(
                 self, UserInfo)
 

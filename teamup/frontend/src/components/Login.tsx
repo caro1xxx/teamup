@@ -8,7 +8,7 @@ import { Input, Button } from "antd";
 import { LoginUserInfo } from "../types/methodTypes";
 import { Validator, stopEventPropagation } from "../utils/tools";
 import { fecther } from "../utils/fecther";
-import { batchSetStorage } from "../utils/localstorage";
+import { batchSetStorage, getStorage } from "../utils/localstorage";
 import { changeRegisterPupup } from "../redux/modules/userSlice";
 import md5 from "md5";
 type Props = {};
@@ -135,11 +135,15 @@ const Login = (props: Props) => {
           data: {
             username: userInfo.username,
             password: md5(userInfo.password),
+            temporary_orders: getStorage("temporary_order_record_account")
+              ? JSON.parse(getStorage("temporary_order_record_account"))
+              : "None",
           },
         },
         "post"
       );
       if (result.code === 200) {
+        localStorage.removeItem("temporary_order_record_account");
         batchSetStorage({
           access_token: result.access_token,
           avator_color: result.avator_color,

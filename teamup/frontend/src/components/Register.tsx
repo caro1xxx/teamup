@@ -12,7 +12,7 @@ import {
   stopEventPropagation,
   randomHexColor,
 } from "../utils/tools";
-import { batchSetStorage } from "../utils/localstorage";
+import { batchSetStorage, getStorage } from "../utils/localstorage";
 import md5 from "md5";
 
 type Props = {};
@@ -174,11 +174,15 @@ const Register = (props: Props) => {
             ...userInfo,
             password: md5(userInfo.password),
             avator_color,
+            temporary_orders: getStorage("temporary_order_record_account")
+              ? JSON.parse(getStorage("temporary_order_record_account"))
+              : "None",
           },
         },
         "post"
       );
       if (result.code === 200) {
+        localStorage.removeItem("temporary_order_record_account");
         batchSetStorage({
           access_token: result.access_token,
           avator_color,
@@ -189,6 +193,7 @@ const Register = (props: Props) => {
         closeRegister();
 
         dispatch(changeMessage([`欢迎回来,${userInfo.username}`, false]));
+        window.location.reload();
         return;
       }
       dispatch(changeMessage([result.message, false]));

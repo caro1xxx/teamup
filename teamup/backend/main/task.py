@@ -159,7 +159,9 @@ def generatorAccountOfrPerson(OrderId, username):
 
     remainingFlag = 0
     currentUseingGroup = ''
+    print(1)
     while len(AccountFields) == 0 and remainingFlag <= 5:
+        print(5)
         remainingFlag = remainingFlag+1
         for group in specifyTypeModel:
             if (group.remaining == remainingFlag):
@@ -170,7 +172,7 @@ def generatorAccountOfrPerson(OrderId, username):
                 cache.set(currentUseingGroup, 1, USEING_GROUP_MAX_TIME)
                 AccountFields.append(group)
                 break
-
+    print(2)
     if len(AccountFields) == 1:
         dispatchAccount = models.Account.objects.filter(
             related_group_id=AccountFields[0].pk).all()
@@ -187,7 +189,7 @@ def generatorAccountOfrPerson(OrderId, username):
         else:
             userFiedls = models.User.objects.filter(username=username).first()
             idleAccount.distribute_user_id = userFiedls.pk
-
+        print(4)
         idleAccount.user_buy_expire_time = getCurrentTimestamp() + \
             orderFields.time * 60 * 60 * 24
         idleAccount.save()
@@ -198,7 +200,7 @@ def generatorAccountOfrPerson(OrderId, username):
                           json.dumps({"username": idleAccount.username, 'password': idleAccount.password, "seat": idleAccount.seat_code}))
     else:
         sendMessageToChat('pay_notify_'+OrderId, '分配失败,无可用账号')
-
+    print(3)
     cache.delete(currentUseingGroup)
 
 
@@ -224,3 +226,13 @@ def batchChangePasswordMail(accountFields):
                                          'password': account['password']})
         send_mail('Teamup车队{}密码修改通知'.format(account['username']), '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>',
                   [account['email']], html_message=email_content)
+
+
+@shared_task
+def relatedAccounts(accounts, userId):
+    for i in accounts:
+        orderPayed = models.Order.objects.filter(
+            order_id=i['order_id'], state=1, userFlag=i['userFlag']).first()
+        if orderPayed is not None:
+            models.Account.objects.filter(username=i['username'], password=i['password'],
+                                          seat_code=i['seat'], distribute_user_id=1).update(distribute_user_id=userId)

@@ -6,6 +6,7 @@ import { parseStampTime } from "../../utils/tools";
 import { useCountDown } from "ahooks";
 
 type Props = {
+  orderid: string;
   qrcode: string;
   qrstate: boolean;
   flush: () => Promise<void>;
@@ -69,6 +70,8 @@ const BuyAccount = (props: Props) => {
           isLogin={props.isLogin}
           time={props.time}
         />
+      ) : props.payinfo.isPayed == 3 ? (
+        <GenrotorError order={props.orderid} />
       ) : (
         <>
           <QRCode
@@ -130,6 +133,15 @@ const Loading = () => {
         <div className="loading"></div>
       </div>
       <div className="text">正在生成账号中</div>
+    </LoadingWrap>
+  );
+};
+
+const GenrotorError = (props: { order: string }) => {
+  return (
+    <LoadingWrap>
+      <div>账号生成失败,请联系客服</div>
+      <div>{props.order}</div>
     </LoadingWrap>
   );
 };

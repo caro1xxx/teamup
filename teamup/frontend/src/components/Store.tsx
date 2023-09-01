@@ -16,6 +16,7 @@ const Wrap = styled.div`
   cursor: pointer;
   user-select: none;
   color: #fff;
+  margin-top: 30px;
   span {
     color: #05b665;
   }
@@ -30,7 +31,7 @@ const Store = (props: Props) => {
       <img width={25} src={StoreIcon} alt="store" />
       <div>
         <Link className="link" key={"123123123"} to={"/store"}>
-          <span style={{ color: "#fff" }}>官方店铺,</span>
+          <span style={{ color: "#fff" }}>官方店铺已上线,</span>
           <span>无需组队</span>
           <span style={{ color: "#fff" }}>拼车即可</span>
           <span>享受组队最低价</span>
