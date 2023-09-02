@@ -5,6 +5,7 @@ import Room from "../components/Room";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import TabBar from "../components/TabBar";
 import Store from "../components/Store";
+import HomeStore from "../components/HomeStore";
 type Props = {};
 
 const MemoizedRoom = React.memo(Room);
@@ -22,6 +23,7 @@ const Station = (props: Props) => {
   return (
     <>
       <Store />
+      <HomeStore />
       <Introduce />
       <Routes>
         <Route path="/netflix" element={<TabBar />} />

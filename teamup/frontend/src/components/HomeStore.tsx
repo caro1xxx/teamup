@@ -313,12 +313,10 @@ const Store = (props: Props) => {
   return (
     <>
       <StoreWrap>
-        <div className="title">🎉无需组队,选择你喜欢的计划后即可享受服务</div>
         <div className="plan">
           {serviceList.map((item, index) => {
             return (
               <div key={item.key}>
-                <img className="logo" src={item.icon} alt="logo" />
                 <div className="render_item">
                   {item.plan.map((childitem, indexdeep) => {
                     return (
@@ -365,7 +363,12 @@ const Store = (props: Props) => {
             );
           })}
         </div>
-        <div style={{ textAlign: "center" }}>敬请期待更多Plan</div>
+        <div
+          style={{ textAlign: "center", fontSize: "17px" }}
+          className="title"
+        >
+          翻车包赔 24小时售后 技术服务生活 无视Netflix禁止共享检测
+        </div>
       </StoreWrap>
       <Modal
         title="付款 - 微信支付"
