@@ -205,8 +205,8 @@ const TeamType = (props: {
           alt="icon"
         />
         {props.data.level.includes("30")
-          ? "超低价格:16.6 RMB /人"
-          : "超低价格:49.8 RMB /人"}
+          ? "超低价格:22 RMB /人"
+          : "超低价格:67 RMB /人"}
         <span style={{ color: "#05b665", marginLeft: "10px" }}>
           (价格公式 总价 / 当前人数 = 单价)
         </span>

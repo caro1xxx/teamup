@@ -53,6 +53,7 @@ const Wrap = styled.div`
   .back {
     bottom: -50px;
     left: 150px;
+    right: 150px;
     z-index: 0;
     position: fixed;
   }
@@ -165,12 +166,7 @@ const App = (props: Props) => {
           <div className="back">
             <div className="backwarp">
               <img src={BackNetIcon} alt="image" />
-              <div className="mask"></div>
-            </div>
-          </div>
-          <div className="back2">
-            <div className="backwarp">
-              <img src={BackNetIcon2} alt="image" />
+              <img className="back2" src={BackNetIcon2} alt="image" />
               <div className="mask"></div>
             </div>
           </div>
