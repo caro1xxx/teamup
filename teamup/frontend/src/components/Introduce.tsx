@@ -11,6 +11,8 @@ type Props = {};
 
 const Wrap = styled.div`
   display: flex;
+  position: relative;
+  z-index: 2;
   margin-top: 50px;
   img {
     flex: 1;
@@ -63,7 +65,6 @@ const Introduce = (props: Props) => {
       // @ts-ignore
       if (checkInfo[i] === "" || checkInfo[i] === 0) {
         // @ts-ignore
-        console.log(checkInfo[i], i);
         dispatch(changeMessage(["请填写完整", false]));
         return;
       }

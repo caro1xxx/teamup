@@ -1,15 +1,16 @@
 import django
 django.setup()
-from main.config import USEING_GROUP_MAX_TIME
-from django.core.mail import send_mail
-from celery import shared_task
-from backend import settings
-from django.core.cache import cache
-from main import models
-import json
-from django.core import serializers
-from django.template.loader import render_to_string
 from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
+from django.template.loader import render_to_string
+from django.core import serializers
+import json
+from main import models
+from django.core.cache import cache
+from backend import settings
+from celery import shared_task
+from django.core.mail import send_mail
+from main.config import USEING_GROUP_MAX_TIME
+from main.config import PATH_NAME
 
 
 @shared_task  # 注册验证码
@@ -231,3 +232,9 @@ def relatedAccounts(accounts, userId):
         if orderPayed is not None:
             models.Account.objects.filter(username=i['username'], password=i['password'],
                                           seat_code=i['seat'], distribute_user_id=1).update(distribute_user_id=userId)
+
+
+@shared_task
+def saveFlow(path, ip):
+    models.Flow.objects.create(ip=ip, path=PATH_NAME.get(
+        path, '未知'), visit_time=getCurrentTimestamp())

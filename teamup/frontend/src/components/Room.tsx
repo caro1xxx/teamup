@@ -696,7 +696,7 @@ const Room = () => {
         type: "changeOrderDiscountPrice",
         payload: {
           discountPrice: result.discountPrice,
-          code:result.qrcode,
+          code: result.qrcode,
           expire_time:
             parseInt(new Date().getTime() / 1000 + "") + QRCODE_FLUSH_TIME,
         },
@@ -714,9 +714,6 @@ const Room = () => {
       { room_id: userToRoomInfo.pk, kick_username: username },
       "delete"
     );
-    if (result.code == 200) {
-      console.log(123123);
-    }
     dispatch(
       changeMessage([result.message, result.code === 200 ? true : false])
     );

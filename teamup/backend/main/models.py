@@ -201,3 +201,9 @@ class NeedChangePaaaword(models.Model):
         Group, to_field='id', null=True, on_delete=models.SET_NULL, related_name='gourp_id')
     submit_time = models.IntegerField()
     state = models.IntegerField(verbose_name='0未处理,1已处理')
+
+
+class Flow(models.Model):
+    ip = models.CharField(max_length=32)
+    path = models.CharField(max_length=32)
+    visit_time = models.IntegerField()

@@ -1,7 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import JsonResponse
 from main.contants import CommonErrorcode
-from main.tools import decodeToken
+from main.tools import decodeToken, getClientIp
+from main.task import saveFlow
 
 
 class CheckAccessToken(MiddlewareMixin):
@@ -12,6 +13,9 @@ class CheckAccessToken(MiddlewareMixin):
                 '/api/v1/teamup/', '').split('/')[0]
 
             requestMethods = str(request.method)
+            ip = getClientIp(request)
+
+            saveFlow.delay(pathInfo, ip)
 
             allowPath = []
 

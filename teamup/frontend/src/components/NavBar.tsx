@@ -112,11 +112,15 @@ const OptionLis = [
   { title: "活动", key: nanoid(), path: "/discount" },
   { title: "帮助", key: nanoid(), path: "/support" },
   { title: "更新日志", key: nanoid(), path: "/logs" },
+  { title: "管理", key: nanoid(), path: "/manage" },
 ];
 
 const NavBar = (props: Props) => {
   const dispatch = useAppDispatch();
   const username = useAppSelector((state) => state.user.username) as string;
+  const admin = useAppSelector(
+    (state) => state.user.detailInfo.admin
+  ) as boolean;
   const isLogin = useAppSelector((state) => state.user.isLogin) as boolean;
   const avator_color = useAppSelector(
     (state) => state.user.avator_color
@@ -142,7 +146,14 @@ const NavBar = (props: Props) => {
       <Options>
         {OptionLis.map((item) => {
           return (
-            <Link className="link_item" key={item.key} to={item.path}>
+            <Link
+              style={{
+                display: admin === false && item.title === "管理" ? "none" : "",
+              }}
+              className="link_item"
+              key={item.key}
+              to={item.path}
+            >
               {item.title}
               {item.title === "官方店铺" ? (
                 <img

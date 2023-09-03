@@ -24,6 +24,7 @@ import Activity from "./components/Activity";
 import ActivityPage from "./pages/Activity";
 import Support from "./pages/Support";
 import Logs from "./pages/Logs";
+import Manage from "./pages/Manage";
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 import BackNetIcon from "./assets/images/undraw_netflix_q00o.webp";
 import BackNetIcon2 from "./assets/images/back_maks2.webp";
@@ -161,6 +162,7 @@ const App = (props: Props) => {
             <Route path="/discount" element={<ActivityPage />} />
             <Route path="/support" element={<Support />} />
             <Route path="/logs" element={<Logs />} />
+            <Route path="/manage" element={<Manage />} />
           </Routes>
           <Bottom />
           <div className="back">

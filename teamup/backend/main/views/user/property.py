@@ -127,30 +127,3 @@ class ChangeAccountPassword(APIView):
         except Exception as e:
             # print(str(e))
             return JsonResponse(CommonErrorcode.serverError)
-
-    # 手动修改密码  群发邮件
-    def post(self, request, *args, **kwargs):
-        try:
-            account = json.loads(request.body).get('account', None)
-
-            username = request.payload_data['username']
-
-            if username != 'bezos':
-                return JsonResponse(CommonErrorcode.illegallyError)
-
-            accountFields = Account.objects.filter(username=account).all()
-
-            mailNotify = []
-            newPassword = generateRandomnumber(8)
-            for account in accountFields:
-                mailNotify.append(
-                    {"username": account.username, "password": account.password, "email": account.distribute_user.email})
-                account.password = newPassword
-                account.save()
-
-            batchChangePasswordMail.delay(mailNotify)
-
-            return JsonResponse({"code": 200, "message": '批量修改成功', 'password': newPassword})
-        except Exception as e:
-            # print(str(e))
-            return JsonResponse(CommonErrorcode.serverError)

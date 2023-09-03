@@ -218,3 +218,7 @@ def generate_random_Upper_string():
     characters = string.ascii_uppercase  # 获取所有大写字母
     random_string = ''.join(random.choice(characters) for _ in range(length))
     return random_string
+
+
+def getClientIp(request):
+    return request.META.get('HTTP_X_REAL_IP', '')
