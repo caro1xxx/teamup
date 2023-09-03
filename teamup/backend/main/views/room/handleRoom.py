@@ -540,7 +540,7 @@ class PayState(APIView):
             username = request.payload_data['username']
 
             try:
-                codeFields = DiscountCode.objects.get(code=discountCode)
+                codeFields = DiscountCode.objects.get(code=str(discountCode))
             except ObjectDoesNotExist:
                 return JsonResponse(CodeResonseCode.codeError)
 

@@ -157,6 +157,9 @@ const Login = (props: Props) => {
         );
         window.location.reload();
         return;
+      } else {
+        setUserInfo({ ...userinfo, isLoading: false });
+        dispatch(changeMessage(["账号或密码错误", false]));
       }
     }
   };
