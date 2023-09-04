@@ -20,6 +20,10 @@ export const Wrap = styled.div`
     justify-content: center;
     align-items: center;
   }
+  @media (max-width: 500px) {
+    grid-template-columns: repeat(1, 1fr);
+    margin: 20px 10%;
+  }
 `;
 
 export const BottomOptions = styled.div`

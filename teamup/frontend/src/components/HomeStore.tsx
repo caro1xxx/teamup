@@ -363,10 +363,7 @@ const Store = (props: Props) => {
             );
           })}
         </div>
-        <div
-          style={{ textAlign: "center", fontSize: "17px" }}
-          className="title"
-        >
+        <div style={{ textAlign: "center" }} className="title">
           翻车包赔 24小时售后 技术服务生活 无视Netflix禁止共享检测
         </div>
       </StoreWrap>

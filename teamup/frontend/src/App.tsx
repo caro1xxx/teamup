@@ -31,6 +31,7 @@ import BackNetIcon2 from "./assets/images/back_maks2.webp";
 import { message, ConfigProvider, theme } from "antd";
 import { fecther } from "./utils/fecther";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { isMobileDevice } from "./utils/tools";
 
 type Props = {};
 
@@ -63,6 +64,21 @@ const Wrap = styled.div`
     right: 200px;
     z-index: 0;
     position: fixed;
+  }
+  @media (max-width: 500px) {
+    .mask {
+      display: none;
+    }
+    .backwarp {
+      display: none;
+    }
+    .back {
+      display: none;
+    }
+    .back2 {
+      display: none;
+    }
+    width: calc(100vw);
   }
 `;
 

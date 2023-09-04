@@ -77,6 +77,9 @@ export const CategoryWrap = styled.div`
       box-shadow: none;
     }
   }
+  @media (max-width: 500px) {
+    display: none;
+  }
 `;
 
 export const FavoriteWarp = styled.div`
@@ -245,6 +248,9 @@ export const ActivityWrap = styled.div`
       cursor: pointer;
     }
   }
+  @media (max-width: 500px) {
+    display: none;
+  }
 `;
 
 export const PayedOrderWrap = styled.div`
@@ -312,5 +318,8 @@ export const AskWrap = styled.div`
     .hulu:hover {
       background-color: #cecece;
     }
+  }
+  @media (max-width: 500px) {
+    display: none;
   }
 `;

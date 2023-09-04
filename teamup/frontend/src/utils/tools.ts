@@ -125,3 +125,9 @@ export const parseTimeStmapToShowFormat = (ts: number) => {
   const D = new Date(ts * 1000);
   return `${D.getFullYear()}年 ${D.getMonth() + 1}月`;
 };
+
+export const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};

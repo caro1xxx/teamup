@@ -38,6 +38,10 @@ const Wrap = styled.div`
   .select {
     border-bottom: 3px solid #0ab666 !important;
   }
+  @media (max-width: 500px) {
+    width: 80%;
+    margin: 0px 10%;
+  }
 `;
 
 const TabBar = (props: Props) => {

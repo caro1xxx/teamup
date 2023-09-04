@@ -149,7 +149,9 @@ export const PleaseWrap = styled.div`
   height: calc(100vh - 350px - 50px);
   width: 100%;
   position: relative;
-
+  @media (max-width: 500px) {
+    height: calc(100vh - 150px);
+  }
   .mask {
     position: absolute;
     top: 0px;

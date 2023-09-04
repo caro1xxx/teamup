@@ -22,6 +22,7 @@ import {
   OrderFieldsState,
 } from "../types/componentsPropsTypes";
 import { fecther } from "../utils/fecther";
+
 type Props = {};
 
 const Wrap = styled.div`
@@ -75,6 +76,10 @@ const Options = styled.div`
   }
   .link_item:hover {
     color: #fff;
+  }
+
+  @media (max-width: 500px) {
+    display: none;
   }
 `;
 const User = styled.div`

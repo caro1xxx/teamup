@@ -42,6 +42,19 @@ const Wrap = styled.div`
       font-weight: bolder;
     }
   }
+  @media (max-width: 500px) {
+    .detailWrap {
+      display: none;
+    }
+    margin-top: 10px;
+    img {
+      margin-left: 0px;
+      width: 80%;
+      height: 70px;
+      margin: 10% 30px;
+      margin-top: 0px;
+    }
+  }
 `;
 const { TextArea } = Input;
 

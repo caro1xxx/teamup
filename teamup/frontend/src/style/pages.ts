@@ -3,6 +3,10 @@ export const StoreWrap = styled.div`
   position: relative;
   z-index: 2;
   margin: 40px 0px;
+  @media (max-width: 500px) {
+    position: none;
+    z-index: 0;
+  }
   .title {
     text-align: center;
     font-size: 20px;
@@ -11,6 +15,11 @@ export const StoreWrap = styled.div`
     color: transparent;
     user-select: none;
     cursor: pointer;
+  }
+  @media (max-width: 500px) {
+    .title {
+      font-size: 12px;
+    }
   }
   .plan {
     margin: 20px 0px;
@@ -66,7 +75,32 @@ export const StoreWrap = styled.div`
             text-align: center;
           }
         }
+        @media (max-width: 500px) {
+          .wrap {
+            background-repeat: no-repeat;
+          }
+        }
       }
+    }
+    @media (max-width: 500px) {
+      .render_item {
+        grid-template-columns: repeat(1, 1fr);
+      }
+      .plan {
+        margin: 20px 0px;
+        padding: 0px 20px;
+      }
+    }
+  }
+  @media (max-width: 500px) {
+    .plan {
+      margin: 20px 0px;
+      padding: 0px 40px;
+      position: none;
+      z-index: 0;
+    }
+    .title {
+      font-size: 10px;
     }
   }
 `;

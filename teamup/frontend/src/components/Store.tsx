@@ -23,6 +23,9 @@ const Wrap = styled.div`
   .link:focus {
     text-decoration: none;
   }
+  @media (max-width: 500px) {
+    font-size: 12px;
+  }
 `;
 
 const Store = (props: Props) => {
