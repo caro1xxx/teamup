@@ -24,24 +24,41 @@ const Wrap = styled.div`
     text-decoration: none;
   }
   @media (max-width: 500px) {
-    font-size: 12px;
+    font-size: 15px;
+    margin: 10px 10%;
+    img {
+      display: none;
+    }
+  }
+`;
+
+const Kefu = styled.div`
+  text-align: center;
+  span {
+    color: #05b665;
+    font-weight: bolder;
   }
 `;
 
 const Store = (props: Props) => {
   return (
-    <Wrap>
-      <img width={25} src={StoreIcon} alt="store" />
-      <div>
-        <Link className="link" key={"123123123"} to={"/store"}>
-          <span style={{ color: "#fff" }}>官方店铺已上线,</span>
-          <span>无需组队</span>
-          <span style={{ color: "#fff" }}>拼车即可</span>
-          <span>享受组队最低价</span>
-          <span style={{ color: "#fff" }}>👉点我直达👈</span>
-        </Link>
-      </div>
-    </Wrap>
+    <>
+      <Wrap>
+        <img width={25} src={StoreIcon} alt="store" />
+        <div>
+          <Link className="link" key={"123123123"} to={"/store"}>
+            <span style={{ color: "#fff" }}>官方店铺已上线,</span>
+            <span>无需组队</span>
+            <span style={{ color: "#fff" }}>拼车即可</span>
+            <span>享受组队最低价</span>
+            <span style={{ color: "#fff" }}>👉点我直达👈</span>
+          </Link>
+        </div>
+      </Wrap>
+      <Kefu>
+        有任何问题都可以联系<span>客服公众号:teamupteam</span>{" "}
+      </Kefu>
+    </>
   );
 };
 

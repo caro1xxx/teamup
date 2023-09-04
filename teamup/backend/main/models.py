@@ -109,7 +109,7 @@ class Group(models.Model):
 
 class Account(models.Model):
     username = models.CharField(max_length=32)
-    password = models.CharField(max_length=10)
+    password = models.CharField(max_length=16)
     email = models.CharField(max_length=64)
     create_time = models.IntegerField()
     expire_time = models.IntegerField()

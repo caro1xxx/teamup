@@ -323,3 +323,15 @@ export const AskWrap = styled.div`
     display: none;
   }
 `;
+
+export const ErrorWrap = styled.div`
+  text-align: center;
+  .public {
+    margin: 20px 0px;
+    width: 100%;
+    display: inline-flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+  }
+`;

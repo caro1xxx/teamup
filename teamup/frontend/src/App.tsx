@@ -25,6 +25,7 @@ import ActivityPage from "./pages/Activity";
 import Support from "./pages/Support";
 import Logs from "./pages/Logs";
 import Manage from "./pages/Manage";
+import Public from "./components/Public";
 import { useAppSelector, useAppDispatch } from "./redux/hooks";
 import BackNetIcon from "./assets/images/undraw_netflix_q00o.webp";
 import BackNetIcon2 from "./assets/images/back_maks2.webp";
@@ -190,6 +191,7 @@ const App = (props: Props) => {
           </div>
           {showAgreeCookie ? <CookieAsk close={setshowAgreeCookie} /> : null}
           {isTemporaryOrder ? <CheckTemporaryOrder /> : null}
+          <Public />
         </Wrap>
         {isregisterPupup ? <Register /> : null}
         {isLoginPupup ? <Login /> : null}

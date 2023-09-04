@@ -1,9 +1,10 @@
 import React from "react";
 import { QRCode, Input } from "antd";
 import styled from "styled-components";
-import { LoadingWrap, AccountInfoWrap } from "../../style/other";
+import { LoadingWrap, AccountInfoWrap, ErrorWrap } from "../../style/other";
 import { parseStampTime } from "../../utils/tools";
 import { useCountDown } from "ahooks";
+import PublicPng from "../../assets/images/public.png";
 
 type Props = {
   orderid: string;
@@ -141,10 +142,13 @@ const Loading = () => {
 
 const GenrotorError = (props: { order: string }) => {
   return (
-    <LoadingWrap>
-      <div>账号生成失败,请联系客服</div>
+    <ErrorWrap>
+      <div className="public">
+        <img width={200} src={PublicPng} alt="public" />
+      </div>
+      <div>账号生成失败,请联系客服公众号</div>
       <div>{props.order}</div>
-    </LoadingWrap>
+    </ErrorWrap>
   );
 };
 

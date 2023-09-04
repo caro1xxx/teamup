@@ -1,16 +1,16 @@
+from main.config import PATH_NAME
+from main.config import USEING_GROUP_MAX_TIME
+from django.core.mail import send_mail
+from celery import shared_task
+from backend import settings
+from django.core.cache import cache
+from main import models
+import json
+from django.core import serializers
+from django.template.loader import render_to_string
+from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
 import django
 django.setup()
-from main.tools import sendMessageToChat, getCurrentTimestamp, fromTsToTime
-from django.template.loader import render_to_string
-from django.core import serializers
-import json
-from main import models
-from django.core.cache import cache
-from backend import settings
-from celery import shared_task
-from django.core.mail import send_mail
-from main.config import USEING_GROUP_MAX_TIME
-from main.config import PATH_NAME
 
 
 @shared_task  # 注册验证码
@@ -140,7 +140,7 @@ def generatorAccount(roomId, users, orderId):
             roomFieldsType.save()
             for item in mainNotifys:
                 email_content = render_to_string('AccountGenertor.html', {
-                                                 'account': item["account"], "password": item["password"], "seat": item["seat"], "number": item["number"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
+                                                 'account': item["account"], "password": item["password"], "seat": item["seat"] if item["seat"] != '9999' and item["seat"] != 9999 else '无PIN', "number": item["number"], "expire": '将于'+fromTsToTime(getCurrentTimestamp()+roomFieldsType.type.time*60*60*24)+'到期'})
                 send_mail(
                     'Teamup@账号生成通知', '', 'Teamup Team <' + settings.EMAIL_HOST_USER+'>', [item["email"]], html_message=email_content)
             sendMessageToChat('room_'+str(roomId), '账号分配成功,请查看站点消息或邮箱')
