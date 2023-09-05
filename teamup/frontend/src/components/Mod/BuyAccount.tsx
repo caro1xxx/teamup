@@ -95,6 +95,7 @@ const BuyAccount = (props: Props) => {
                   {Math.round(countdown / 1000)}秒
                 </span>
                 后失效
+                <div>付款成功后将显示账号密码</div>
               </>
             )}
           </div>
