@@ -33,10 +33,12 @@ const Store = (props: Props) => {
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
             { title: "独立观影记录 享受4K蓝光", key: nanoid() },
+            { title: "奈飞节点 限时赠送 联系客服", key: nanoid() },
           ],
-          money: 22,
+          money: 16,
           loading: false,
           emtry: false,
+          originalPrice: 22,
         },
         {
           time: 90,
@@ -49,10 +51,12 @@ const Store = (props: Props) => {
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
             { title: "独立观影记录 享受4K蓝光", key: nanoid() },
+            { title: "奈飞节点 限时赠送 联系客服", key: nanoid() },
           ],
-          money: 66,
+          money: 46,
           loading: false,
           emtry: false,
+          originalPrice: 66,
         },
         {
           time: 180,
@@ -65,10 +69,12 @@ const Store = (props: Props) => {
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
             { title: "独立观影记录 享受4K蓝光", key: nanoid() },
+            { title: "奈飞节点 限时赠送 联系客服", key: nanoid() },
           ],
-          money: 70,
+          money: 85,
           loading: false,
-          emtry: true,
+          emtry: false,
+          originalPrice: 140,
         },
         {
           time: 365,
@@ -81,10 +87,12 @@ const Store = (props: Props) => {
             { title: "密码变更邮件推送", key: nanoid() },
             { title: "账号有效期内免费质保", key: nanoid() },
             { title: "独立观影记录 享受4K蓝光", key: nanoid() },
+            { title: "奈飞节点 限时赠送 联系客服", key: nanoid() },
           ],
-          money: 100,
+          money: 155,
           loading: false,
-          emtry: true,
+          emtry: false,
+          originalPrice: 264,
         },
       ],
     },
@@ -355,6 +363,19 @@ const Store = (props: Props) => {
                             {childitem.emtry
                               ? "补货中"
                               : `立即购买 ￥${childitem.money}`}
+                            <div className="discount">
+                              <span>
+                                -
+                                {parseInt(
+                                  ((childitem.originalPrice - childitem.money) /
+                                    childitem.originalPrice) *
+                                    100 +
+                                    ""
+                                )}
+                                %
+                              </span>
+                              &nbsp;&nbsp;原价￥{childitem.originalPrice}&nbsp;
+                            </div>
                           </Button>
                         </div>
                       </div>

@@ -106,8 +106,8 @@ def discountPrice(real_price):
     isRepeatDiscount = [
         key for key in keys if key.startswith("record_discount")]
     discount = 999.00
-    if real_price == 66 or real_price == 66.00:
-        discount = round(random.uniform(real_price-0.20, real_price), 2)
+    if real_price >= 46 or real_price >= 46.00:
+        discount = round(random.uniform(real_price-0.10, real_price), 2)
     else:
         discount = round(random.uniform(real_price-0.30, real_price), 2)
     if len(isRepeatDiscount) == 0:

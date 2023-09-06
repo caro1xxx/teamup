@@ -63,8 +63,20 @@ export const StoreWrap = styled.div`
             margin-bottom: 10px;
             width: 100%;
             margin-top: 20px;
-            text-align: center;
+            text-align: start;
             border: none;
+            position: relative;
+            .discount {
+              position: absolute;
+              right: 0px;
+              top: 0;
+              background-color: #f0a329;
+              border-radius: 0px 20px 20px 0px;
+              height: 32px;
+              line-height: 32px;
+              text-align: center;
+              width: 50%;
+            }
           }
           .buy:hover {
             background-color: #2a9263ac;
@@ -72,7 +84,7 @@ export const StoreWrap = styled.div`
             margin-bottom: 10px;
             width: 100%;
             margin-top: 20px;
-            text-align: center;
+            text-align: start;
           }
         }
         @media (max-width: 500px) {
