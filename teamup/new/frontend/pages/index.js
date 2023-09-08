@@ -53,7 +53,9 @@ export default function Home() {
     showLogin: false,
     loginToken: "",
   });
-
+  const [order, setOrder] = React.useState({
+    showOrder: false,
+  });
   const [allNetflixGoods, setAllNetflixGoods] = React.useState([
     [
       {
@@ -205,6 +207,7 @@ export default function Home() {
     }
   };
 
+  // 登录
   const changeLogin = async (type) => {
     if (type === false) {
       setUserinfo({ ...userinfo, showLogin: type });
@@ -214,6 +217,7 @@ export default function Home() {
     }
   };
 
+  // 获取商品价格
   const getNetflixPrice = async () => {
     let result = await fether("goods/", {}, "get");
     if (result.code === 200) {
@@ -225,6 +229,11 @@ export default function Home() {
       });
       setAllNetflixGoods(data);
     }
+  };
+
+  // 下单
+  const changeOrderPopup = (type) => {
+    setOrder({ showOrder: type });
   };
 
   React.useEffect(() => {
@@ -270,10 +279,13 @@ export default function Home() {
       {userinfo.showLogin ? (
         <Login close={changeLogin} token={userinfo.loginToken} />
       ) : null}
-      <Order />
+      {order.showOrder ? <Order close={() => changeOrderPopup(false)} /> : null}
       <main className="main">
         <div className="body">
-          <Commodity goods={allNetflixGoods[0]} />
+          <Commodity
+            goods={allNetflixGoods[0]}
+            open={() => changeOrderPopup(true)}
+          />
         </div>
         <Footer />
       </main>

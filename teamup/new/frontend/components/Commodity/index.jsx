@@ -8,7 +8,6 @@ import Image from "next/image";
 
 const index = (props) => {
   const [currentShowDirection, setCurrentShowDirection] = React.useState(1);
-
   const moveScroll = (type) => {
     let ponit = null;
     if (type === 1) {
@@ -45,7 +44,9 @@ const index = (props) => {
                 <div className="price">
                   ￥{item.price}/{item.showTime}
                 </div>
-                <div className="choose">购买</div>
+                <div className="choose" onClick={props.open}>
+                  购买
+                </div>
                 <div className="feature">
                   {item.support.map((childItem) => {
                     return (
