@@ -3,7 +3,7 @@ import { Wrap } from "./style";
 const index = () => {
   return (
     <footer>
-      <Wrap></Wrap>
+      <Wrap>Teamup</Wrap>
     </footer>
   );
 };

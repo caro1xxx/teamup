@@ -5,12 +5,13 @@ import Image from "next/image";
 const index = (props) => {
   const [qrCodeUrl, setQRCodeUrl] = React.useState("");
   React.useEffect(() => {
-    QRCode.toDataURL("http://192.168.31.69/#")
+    console.log("http://192.168.31.69/login?token=" + props.token);
+    QRCode.toDataURL("http://192.168.31.69/login?token=" + props.token)
       .then((url) => {
         setQRCodeUrl(url);
       })
       .catch((error) => {});
-  }, []);
+  }, [props.token]);
 
   return (
     <Wrap onClick={() => props.close(false)}>

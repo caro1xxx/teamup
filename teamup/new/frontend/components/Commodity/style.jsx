@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 export const Wrap = styled.div`
   position: relative;
-
   .title {
     margin-top: 70px;
     display: flex;
@@ -10,13 +9,7 @@ export const Wrap = styled.div`
     justify-content: center;
     align-items: center;
     margin-bottom: 20px;
-    background-image: linear-gradient(
-      to right,
-      #eb3329,
-      #962626
-    ); /* 渐变颜色设置 */
-    -webkit-background-clip: text; /* 将文字作为背景图像剪切 */
-    color: transparent; /* 隐藏文字本身的颜色 */
+    color: #fff;
     cursor: pointer;
     user-select: none;
   }
@@ -27,13 +20,22 @@ export const Wrap = styled.div`
     width: 1200px;
     white-space: nowrap; /* 防止内容换行 */
     scrollbar-width: none;
-
     .item {
+      margin-right: 20px;
+      background-color: #cce4e3c5;
       position: relative;
       display: inline-block;
       width: 220px;
       padding: 20px;
       border-radius: 10px;
+      .toright {
+        position: absolute;
+        right: 0px;
+      }
+      .toleft {
+        position: absolute;
+        left: 0px;
+      }
       .stock {
         font-size: 10px;
         position: absolute;
@@ -82,9 +84,6 @@ export const Wrap = styled.div`
           font-weight: bolder;
         }
       }
-    }
-    .item:hover {
-      background-color: #e8e8e8c5;
     }
     .choose:hover {
       color: #000;
