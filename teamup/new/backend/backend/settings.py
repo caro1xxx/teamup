@@ -7,6 +7,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.31.80:3000",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -119,7 +122,6 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = 'wakeups@qq.com'
 EMAIL_HOST_PASSWORD = 'tsxwwpxunwiaechh'
 EMAIL_USER_TLS = True
-
 
 
 # redis
