@@ -1,3 +1,5 @@
+import { getStorage } from "./localStorage";
+
 export function getCurrentDateFormatted() {
   const today = new Date();
   const year = today.getFullYear().toString().slice(-2); // 获取年份的最后两位
@@ -7,3 +9,11 @@ export function getCurrentDateFormatted() {
   const formattedDate = `20${year}.${month}.${day}`;
   return formattedDate;
 }
+
+export const isLogin = () => {
+  return getStorage("accessToken") ? true : false;
+};
+
+export const getCurrentTs = () => {
+  return parseInt(new Date().getTime() / 1000 + "");
+};

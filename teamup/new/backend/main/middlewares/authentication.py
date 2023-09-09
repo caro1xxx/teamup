@@ -1,6 +1,6 @@
 from django.utils.deprecation import MiddlewareMixin
 from django.http import JsonResponse
-from main.tools import decodeToken, getClientIp
+from main.tools import decodeToken
 
 
 class CheckAccessToken(MiddlewareMixin):
@@ -11,22 +11,17 @@ class CheckAccessToken(MiddlewareMixin):
                 '/api/v1/teamup/', '').split('/')[0]
 
             requestMethods = str(request.method)
-            ip = getClientIp(request)
 
             allowPath = []
 
-            return None
-
             if requestMethods == 'GET':
-                allowPath = ['login', 'sendcode', 'room',
-                             'team', 'handler', 'connect_paynofity_sse', 'activity']
+                allowPath = ['login', 'goods']
 
             if requestMethods == 'POST':
-                allowPath = ['login', 'register', 'accountorder', 'paynotify']
+                allowPath = ['login', 'order']
                 pass
 
             if requestMethods == 'PUT':
-                allowPath = ['accountorder']
                 pass
 
             if requestMethods == 'DELETE':

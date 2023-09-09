@@ -1,13 +1,13 @@
 // import isOnline from "is-online";
-// import { getStorage } from "./localstorage";
+import { getStorage } from "./localStorage";
 
 export const fether = async (path, params, method) => {
   // let online = await isOnline();
   // if (!online) return "网络错误";
   let headers = {
-    // Authorization: `Bearer ${
-    //   getStorage("access_token") ? getStorage("access_token") : ""
-    // }`,
+    Authorization: `Bearer ${
+      getStorage("accessToken") ? getStorage("accessToken") : ""
+    }`,
     "Content-Type": "application/json",
   };
   if (method === "get") {

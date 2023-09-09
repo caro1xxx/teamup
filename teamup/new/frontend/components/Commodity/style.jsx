@@ -56,10 +56,16 @@ export const Wrap = styled.div`
       .choose {
         color: white;
         height: 30px;
+        width: 100%;
         text-align: center;
-        line-height: 30px;
         border-radius: 5px;
         background: linear-gradient(to right, #eb3329, #962626);
+        border: none;
+      }
+      .choose:focus {
+        color: rgb(255, 255, 255);
+        background: #bf1d0a;
+        border-color: #bf1d0a;
       }
       .feature {
         cursor: pointer;
@@ -67,6 +73,9 @@ export const Wrap = styled.div`
         margin: 10px 0px;
         > div {
           margin-bottom: 5px;
+          overflow: hidden;
+          white-space: pre-wrap;
+          word-wrap: break-word;
         }
         .support {
           color: #eb3329;

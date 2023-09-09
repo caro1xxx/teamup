@@ -23,7 +23,7 @@ class Login(APIView):
             ret['token'] = loginRoomToken
             return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonResponse.serverError)
 
     def post(self, request, *args, **kwargs):
@@ -38,10 +38,8 @@ class Login(APIView):
                 return JsonResponse(CommonResponse.parmasErrpr)
 
             # 判断是否是微信
-            # if 'MicroMessenger' not in userAgent:
-            #     return JsonResponse({'code': 403, 'message': '登录异常'})
-
-            # time.sleep(200)
+            if 'MicroMessenger' not in userAgent:
+                return JsonResponse({'code': 403, 'message': '登录异常'})
 
             UserFiedls = User.objects.filter(sign=sign).first()
             if UserFiedls is None:
@@ -54,8 +52,7 @@ class Login(APIView):
                                                "level": UserFiedls.level, "email": UserFiedls.email})
             sendMessageToChat(
                 'login_token_'+token, {'message': {"username": UserFiedls.username, "token": accessToken}})
-
             return JsonResponse(ret)
         except Exception as e:
-            print(str(e))
+            # print(str(e))
             return JsonResponse(CommonResponse.serverError)

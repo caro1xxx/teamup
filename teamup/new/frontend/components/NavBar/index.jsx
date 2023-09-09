@@ -1,17 +1,43 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Wrap } from "./style.jsx";
 import Image from "next/image";
 import CarIcon from "../../assets/icon/car.png";
 import LogoPng from "../../assets/images/logo.png";
+import { Tooltip, Input } from "antd";
+import { fether } from "../../utils/fether.js";
+import { getStorage, setStorage } from "../../utils/localStorage.js";
 
 const index = (props) => {
+  const [showPopup, setShowPopup] = React.useState({
+    showMail: false,
+    mail: "",
+  });
+  const isClientRef = React.useRef(false);
+
+  const bandMail = async (mail) => {
+    let result = await fether(`band/?email=${mail}`, {}, "get");
+    if (result.code === 200) {
+      setShowPopup({ showMail: false });
+      setStorage("bandMail", mail);
+    }
+  };
+
+  useEffect(() => {
+    isClientRef.current = true;
+    if (getStorage("bandMail")) {
+      setShowPopup({ showMail: false, mail: getStorage("bandMail") });
+    } else {
+      setShowPopup({ showMail: true, mail: "" });
+    }
+  }, []);
+
   return (
     <Wrap>
       <div className="body">
         <div className="tag">
           <div>车站</div>
           <div>帮助</div>
-          <div>客服</div>
+          <div>关于</div>
         </div>
         <div className="logo">
           <Image src={LogoPng} width={150} height={70} />
@@ -23,11 +49,31 @@ const index = (props) => {
             </div>
           ) : (
             <div className="user">
-              <div>用户:{props.username}</div>
+              {isClientRef.current ? (
+                <Tooltip
+                  placement="bottom"
+                  title={<SaveEmail show={showPopup.mail} band={bandMail} />}
+                  color={"#fff"}
+                  arrow={true}
+                  open={showPopup.showMail}
+                >
+                  <div>用户:{props.username}</div>
+                </Tooltip>
+              ) : null}
             </div>
           )}
           <div className="car">
-            <Image src={CarIcon} alt="car" width={25} height={25} />
+            {isClientRef.current ? (
+              <Tooltip
+                placement="right"
+                title={<div style={{ color: "#000" }}>查看历史订单</div>}
+                color={"#fff"}
+                arrow={true}
+                open={showPopup.showMail}
+              >
+                <Image src={CarIcon} alt="car" width={25} height={25} />
+              </Tooltip>
+            ) : null}
           </div>
         </div>
       </div>
@@ -36,3 +82,21 @@ const index = (props) => {
 };
 
 export default index;
+
+const { Search } = Input;
+
+const SaveEmail = (props) => {
+  return (
+    <div style={{ padding: "5px 10px" }}>
+      <div style={{ color: "#787878", fontSize: "10px" }}>
+        绑定邮箱才会接收密码更改通知
+      </div>
+      <Search
+        defaultValue={props.show}
+        placeholder="常用邮箱"
+        enterButton="绑定"
+        onSearch={(value) => props.band(value)}
+      />
+    </div>
+  );
+};

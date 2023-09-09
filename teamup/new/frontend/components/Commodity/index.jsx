@@ -5,9 +5,11 @@ import toRightIcon from "../../assets/icon/toright.png";
 import toLeftIcon from "../../assets/icon/toleft.png";
 import HotIcon from "../../assets/icon/hot.png";
 import Image from "next/image";
+import { Button } from "antd";
 
 const index = (props) => {
   const [currentShowDirection, setCurrentShowDirection] = React.useState(1);
+  const [loadings, setLoadings] = React.useState([]);
   const moveScroll = (type) => {
     let ponit = null;
     if (type === 1) {
@@ -29,14 +31,17 @@ const index = (props) => {
     <>
       <Wrap>
         <div className="title">
-          Netflix Premium 标准账号五人车
+          {props.goods[0].reigon === "全球"
+            ? "Netflix Premium 全球区五人车"
+            : props.goods[0].reigon === "土耳其"
+            ? "Netflix Premium 低价区五人车"
+            : "机场"}
           <Image width={25} height={30} src={HotIcon} alt="settings" />
         </div>
         <div className="body">
           {props.goods.map((item, index) => {
             return (
               <div className="item" key={item.key}>
-                <div className="stock">库存:{item.stock}</div>
                 <div className="top">
                   <Image className="logo" src={netflix} alt="settings" />
                   <div>{item.title}</div>
@@ -44,9 +49,29 @@ const index = (props) => {
                 <div className="price">
                   ￥{item.price}/{item.showTime}
                 </div>
-                <div className="choose" onClick={props.open}>
+                <Button
+                  className="choose"
+                  onClick={() => {
+                    setTimeout(() => {
+                      setLoadings((prevLoadings) => {
+                        const newLoadings = [...prevLoadings];
+                        newLoadings[index] = true;
+                        return newLoadings;
+                      });
+                    });
+                    setTimeout(() => {
+                      setLoadings((prevLoadings) => {
+                        const newLoadings = [...prevLoadings];
+                        newLoadings[index] = false;
+                        return newLoadings;
+                      });
+                    }, 1000);
+                    props.open(true, item.type, item.price, item.reigon);
+                  }}
+                  loading={loadings[index]}
+                >
                   购买
-                </div>
+                </Button>
                 <div className="feature">
                   {item.support.map((childItem) => {
                     return (
@@ -68,17 +93,19 @@ const index = (props) => {
               </div>
             );
           })}
-          <ToFowrad
-            onClick={() => moveScroll(currentShowDirection)}
-            $orientations={currentShowDirection}
-          >
-            <Image
-              width={25}
-              height={30}
-              src={currentShowDirection === 1 ? toRightIcon : toLeftIcon}
-              alt="settings"
-            />
-          </ToFowrad>
+          {props.goods.length > 5 ? (
+            <ToFowrad
+              onClick={() => moveScroll(currentShowDirection)}
+              $orientations={currentShowDirection}
+            >
+              <Image
+                width={25}
+                height={30}
+                src={currentShowDirection === 1 ? toRightIcon : toLeftIcon}
+                alt="settings"
+              />
+            </ToFowrad>
+          ) : null}
         </div>
       </Wrap>
     </>

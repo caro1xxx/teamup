@@ -17,8 +17,8 @@ class GoodsPrice(APIView):
 
             ret['data'] = []
             for goods in allGoods:
-                ret['data'].append({"type": goods.type, "price": [goods.experience_price, goods.month_price,
-                                                                  goods.two_month_price, goods.three_month_price, goods.half_year_price, goods.year_price]})
+                ret['data'].append({"type": goods.type, "region": goods.region, "price": [goods.experience_price, goods.month_price,
+                                                                                          goods.two_month_price, goods.three_month_price, goods.half_year_price, goods.year_price]})
             return JsonResponse(ret)
         except Exception as e:
             print(str(e))

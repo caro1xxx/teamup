@@ -4,7 +4,7 @@ from main.tools import randomString, getCurrentTimestamp
 
 class User(models.Model):
     username = models.CharField(
-        max_length=16, default=randomString(8), unique=True)
+        max_length=16, default=randomString(8), unique=True, db_index=True)
     password = models.CharField(max_length=32, default='None')
     level = models.BooleanField(default=False)
     email = models.CharField(max_length=128, unique=True,
@@ -14,7 +14,7 @@ class User(models.Model):
 
 
 class AccountType(models.Model):
-    type = models.CharField(max_length=32, unique=True)
+    type = models.CharField(max_length=32)
     max_seat = models.IntegerField()
     experience_price = models.CharField(max_length=16)
     month_price = models.CharField(max_length=16)
@@ -23,6 +23,7 @@ class AccountType(models.Model):
     half_year_price = models.CharField(max_length=16)
     half_year_price = models.CharField(max_length=16)
     year_price = models.CharField(max_length=16)
+    region = models.CharField(max_length=16)
 
 
 class Account(models.Model):
@@ -33,6 +34,7 @@ class Account(models.Model):
     region = models.CharField(max_length=128)
     type = models.ForeignKey(
         AccountType, to_field='id', on_delete=models.CASCADE)
+    expire_time = models.IntegerField(verbose_name='账号到期时间')
 
 
 class AccountGroup(models.Model):
@@ -40,6 +42,32 @@ class AccountGroup(models.Model):
         Account, to_field='id', on_delete=models.CASCADE)
     seat_number = models.IntegerField()
     seat_pin = models.CharField(max_length=4, default=None)
+    used = models.BooleanField(default=False)
+    expire_time = models.IntegerField(verbose_name='用户购买到期时间', default=0)
+
+
+class Order(models.Model):
+    order_id = models.CharField(
+        max_length=32, unique=True, db_index=True)
+    trade_name = models.CharField(max_length=32)
+    pay_type = models.CharField(max_length=8, default='wechat')
+    order_amount = models.CharField(max_length=16, verbose_name='实际支付价格')
+    order_uid = models.CharField(max_length=16, verbose_name='订单用户名')
+    order_price = models.CharField(max_length=16, verbose_name='订单原本价格')
+    use_time = models.IntegerField(verbose_name='购买时长')
+    discount_code = models.CharField(max_length=6, default='')
+    state = models.BooleanField(default=False, verbose_name='支付状态')
+    order_time = models.IntegerField(
+        default=1804235184, verbose_name='订单是否被请求二维码')
+    accountgroup_id = models.IntegerField(default=0, verbose_name='分配的账号')
+    buy_account_type = models.TextField(verbose_name='购买的类型')
+    buy_account_regin = models.TextField(default='全球', verbose_name='购买的地区')
+
+
+class Qrcode(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    qrcode = models.TextField(verbose_name='支付二维码')
+    expirce_time = models.IntegerField()
 
 
 # from main.tools import getCurrentTimestamp

@@ -12,6 +12,7 @@ import { nanoid } from "nanoid";
 import Image from "next/image";
 import { fether } from "../utils/fether.js";
 import { useWebSocket } from "ahooks";
+import { isLogin } from "../utils/tools";
 import { setStorage, getStorage } from "../utils/localStorage";
 
 const Wrap = styled.div`
@@ -55,6 +56,14 @@ export default function Home() {
   });
   const [order, setOrder] = React.useState({
     showOrder: false,
+    order_id: "",
+    use_time: 0,
+    order_price: 0,
+    order_amount: 0,
+    product: "",
+    discount_code: "",
+    order_qrcode: "",
+    qrcode_expire_time: 0,
   });
   const [allNetflixGoods, setAllNetflixGoods] = React.useState([
     [
@@ -64,7 +73,7 @@ export default function Home() {
         time: 7,
         showTime: "7天",
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 0, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -83,7 +92,7 @@ export default function Home() {
         time: 30,
         showTime: "30天",
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -102,7 +111,7 @@ export default function Home() {
         showTime: "60天",
         time: 60,
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -121,7 +130,7 @@ export default function Home() {
         showTime: "90天",
         time: 60,
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -140,7 +149,7 @@ export default function Home() {
         time: 90,
         showTime: "180天",
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -159,7 +168,7 @@ export default function Home() {
         time: 360,
         showTime: "365天",
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -178,7 +187,7 @@ export default function Home() {
         time: 1000,
         showTime: "定制",
         type: "netflix",
-        stock: 333,
+        reigon: "全球",
         support: [
           { title: "全设备支持", support: 1, key: nanoid() },
           { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
@@ -192,6 +201,77 @@ export default function Home() {
         key: nanoid(),
       },
     ],
+    [
+      {
+        title: "体验套餐",
+        price: "N",
+        time: 7,
+        showTime: "7天",
+        type: "netflix",
+        reigon: "土耳其",
+        support: [
+          { title: "全设备支持", support: 1, key: nanoid() },
+          { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
+          { title: "平台邮件通知", support: 1, key: nanoid() },
+          { title: "翻车包退", support: 1, key: nanoid() },
+          {
+            title: "首月限制土耳其 乌克兰 德国 新西兰节点",
+            support: 1,
+            key: nanoid(),
+          },
+          { title: "赠送奈飞节点", support: 0, key: nanoid() },
+          { title: "续费不换号", support: 0, key: nanoid() },
+          { title: "售后群", support: 0, key: nanoid() },
+        ],
+        key: nanoid(),
+      },
+      {
+        title: "月抛套餐",
+        price: "N",
+        time: 30,
+        showTime: "30天",
+        type: "netflix",
+        reigon: "土耳其",
+        support: [
+          { title: "全设备支持", support: 1, key: nanoid() },
+          { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
+          { title: "平台邮件通知", support: 1, key: nanoid() },
+          { title: "翻车包退", support: 1, key: nanoid() },
+          {
+            title: "首月限制土耳其 乌克兰 德国 新西兰节点",
+            support: 1,
+            key: nanoid(),
+          },
+          { title: "次月解锁全球节点", support: 0, key: nanoid() },
+          { title: "赠送奈飞节点", support: 0, key: nanoid() },
+          { title: "首月免费 买一送一", support: 0, key: nanoid() },
+        ],
+        key: nanoid(),
+      },
+      {
+        title: "短期套餐",
+        price: "N",
+        time: 60,
+        showTime: "60天",
+        type: "netflix",
+        reigon: "土耳其",
+        support: [
+          { title: "全设备支持", support: 1, key: nanoid() },
+          { title: "Ultra HD 4K观看", support: 1, key: nanoid() },
+          { title: "平台邮件通知", support: 1, key: nanoid() },
+          { title: "翻车包退", support: 1, key: nanoid() },
+          {
+            title: "首月限制土耳其 乌克兰 德国 新西兰节点",
+            support: 1,
+            key: nanoid(),
+          },
+          { title: "次月解锁全球节点", support: 1, key: nanoid() },
+          { title: "赠送奈飞节点", support: 1, key: nanoid() },
+          { title: "首月免费 买一送一", support: 1, key: nanoid() },
+        ],
+        key: nanoid(),
+      },
+    ],
   ]);
 
   const { readyState, latestMessage, disconnect } = useWebSocket(
@@ -200,6 +280,7 @@ export default function Home() {
       : ""
   );
 
+  // 请求登录对话token
   const requestLoginToken = async (type) => {
     let result = await fether("login/", {}, "get");
     if (result.code === 200) {
@@ -223,17 +304,70 @@ export default function Home() {
     if (result.code === 200) {
       let data = [...allNetflixGoods];
       result.data.forEach((item) => {
-        item.price.forEach((childItem, index) => {
-          data[0][index].price = childItem;
-        });
+        if (item.type === "netflix" && item.region === "全球") {
+          item.price.forEach((childItem, index) => {
+            if (childItem !== "0") {
+              data[0][index].price = childItem;
+            }
+          });
+        } else if (item.type === "netflix" && item.region === "土耳其") {
+          item.price.forEach((childItem, index) => {
+            if (childItem !== "0") {
+              data[1][index].price = childItem;
+            }
+          });
+        }
       });
       setAllNetflixGoods(data);
     }
   };
 
   // 下单
-  const changeOrderPopup = (type) => {
-    setOrder({ showOrder: type });
+  const changeOrderPopup = (type, goodsType, goodsPrice, regin) => {
+    if (type === false) {
+      setOrder({ showOrder: false });
+      return;
+    }
+    if (isLogin()) {
+      createOrder(goodsType, goodsPrice, regin);
+    } else {
+      changeLogin(true);
+    }
+  };
+
+  // 创建订单
+  const createOrder = async (goodsType, goodsPrice, regin) => {
+    let result = await fether(
+      `order/?type=${goodsType}&price=${goodsPrice}&regin=${regin}`,
+      {},
+      "get"
+    );
+    if (result.code === 200) {
+      setOrder({ ...order, ...result.order, showOrder: true });
+    }
+  };
+
+  // 使用折扣码
+  const useDiscountCode = async (order_id, code) => {
+    let result = await fether(`discount/?order_id=${order_id}&code=${code}`);
+    if (result.code === 200) {
+      setOrder({
+        ...order,
+        order_amount: result.order_amount,
+        discount_code: code,
+      });
+    }
+  };
+
+  // 支付
+  const pay = async (order_id) => {
+    let result = await fether("order/", { order_id }, "put");
+    if (result.code === 200) {
+      setOrder({
+        ...order,
+        ...result.data,
+      });
+    }
   };
 
   React.useEffect(() => {
@@ -279,13 +413,20 @@ export default function Home() {
       {userinfo.showLogin ? (
         <Login close={changeLogin} token={userinfo.loginToken} />
       ) : null}
-      {order.showOrder ? <Order close={() => changeOrderPopup(false)} /> : null}
+      {order.showOrder ? (
+        <Order
+          pay={pay}
+          order={order}
+          code={useDiscountCode}
+          close={() => changeOrderPopup(false)}
+        />
+      ) : null}
       <main className="main">
         <div className="body">
-          <Commodity
-            goods={allNetflixGoods[0]}
-            open={() => changeOrderPopup(true)}
-          />
+          <Commodity goods={allNetflixGoods[0]} open={changeOrderPopup} />
+        </div>
+        <div className="body">
+          <Commodity goods={allNetflixGoods[1]} open={changeOrderPopup} />
         </div>
         <Footer />
       </main>

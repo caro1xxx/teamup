@@ -124,7 +124,7 @@ export const Wrap = styled.div`
     .pay {
       cursor: pointer;
       user-select: none;
-      height: 30px;
+      height: 35px;
       width: 100%;
       background: linear-gradient(to right, #eb3329, #962626);
       color: #fff;
@@ -137,9 +137,15 @@ export const Wrap = styled.div`
       justify-content: center;
       align-items: center;
       font-size: 14px;
+      border: none;
+    }
+    .pay:focus {
+      color: rgb(255, 255, 255);
+      background: #bf1d0a;
+      border-color: #bf1d0a;
     }
     .pay:hover {
-      transform: scale(0.96);
+      color: #fff;
     }
     .public {
       margin-top: 20px;
@@ -160,16 +166,27 @@ export const Wrap = styled.div`
     }
     .qrcode {
       margin-top: 10px;
-      display: flex;
-      vertical-align: top;
-      justify-content: center;
-      align-items: center;
+
+      > div {
+        display: flex;
+        vertical-align: top;
+        justify-content: center;
+        align-items: center;
+      }
     }
     .close {
       position: absolute;
       top: 0px;
       right: -50px;
       cursor: pointer;
+    }
+    .account {
+      padding: 10px;
+      border: 2px solid #eb3329;
+      margin-top: 10px;
+      border-radius: 5px;
+      background-color: #d04f48b1;
+      color: #fff;
     }
   }
 `;

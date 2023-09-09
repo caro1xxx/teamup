@@ -6,6 +6,8 @@ import jwt
 import hashlib
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.core.cache import cache
+from main.config import discountPriceMemoryExsitTime
 
 
 def decodeToken(token):
@@ -61,3 +63,20 @@ def sendMessageToChat(token, message):
             'create_time': getCurrentTimestamp()
         }
     )
+
+
+def discountPrice(real_price):
+    keys = cache.keys('*')
+    isRepeatDiscount = [
+        key for key in keys if key.startswith("record_discount")]
+    discount = round(random.uniform(real_price-0.10, real_price), 2)
+    if len(isRepeatDiscount) == 0:
+        cache.set('record_discount'+str(discount),
+                  0, discountPriceMemoryExsitTime)
+        return discount
+    else:
+        while 'record_discount'+str(discount) in isRepeatDiscount:
+            discount = round(random.uniform(real_price-0.10, real_price), 2)
+        cache.set('record_discount'+str(discount),
+                  0, discountPriceMemoryExsitTime)
+        return discount
