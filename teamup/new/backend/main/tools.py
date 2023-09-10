@@ -66,17 +66,9 @@ def sendMessageToChat(token, message):
 
 
 def discountPrice(real_price):
-    keys = cache.keys('*')
-    isRepeatDiscount = [
-        key for key in keys if key.startswith("record_discount")]
-    discount = round(random.uniform(real_price-0.10, real_price), 2)
-    if len(isRepeatDiscount) == 0:
-        cache.set('record_discount'+str(discount),
-                  0, discountPriceMemoryExsitTime)
-        return discount
-    else:
-        while 'record_discount'+str(discount) in isRepeatDiscount:
-            discount = round(random.uniform(real_price-0.10, real_price), 2)
-        cache.set('record_discount'+str(discount),
-                  0, discountPriceMemoryExsitTime)
-        return discount
+    discount = round(random.uniform(real_price-0.30, real_price), 2)
+    while cache.get('record_discount'+str(discount)) is not None:
+        discount = round(random.uniform(real_price-0.30, real_price), 2)
+    cache.set('record_discount'+str(discount),
+              0, discountPriceMemoryExsitTime)
+    return discount

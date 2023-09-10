@@ -46,12 +46,12 @@ class Order(models.Model):
     order_uid = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="create_user")
     order_type = models.ForeignKey(
-        Goods, on_delete=models.SET_NULL, null=True, related_name="type_info")
+        Type, on_delete=models.SET_NULL, null=True, related_name="type_info")
     discount_code = models.CharField(max_length=6, default='empty')
     state = models.BooleanField(default=False, verbose_name="支付状态")
     create_time = models.IntegerField()
-    pay_qr_state = models.BooleanField(
-        default=False, verbose_name='该订单是否被请求过二维码')
+    qrcode = models.TextField(default='empty')
+    qrcode_expire_time = models.IntegerField(default=0)
 
     def __str__(self):
         return self.no

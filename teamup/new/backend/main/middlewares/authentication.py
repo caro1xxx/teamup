@@ -18,7 +18,7 @@ class CheckAccessToken(MiddlewareMixin):
                 allowPath = ['login', 'goods']
 
             if requestMethods == 'POST':
-                allowPath = ['login', 'order']
+                allowPath = ['login']
                 pass
 
             if requestMethods == 'PUT':
