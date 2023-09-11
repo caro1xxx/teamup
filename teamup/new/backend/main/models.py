@@ -70,3 +70,5 @@ class Account(models.Model):
         Order, on_delete=models.SET_NULL, null=True, default=None, related_name="pay_order")
     user_buy_expire_time = models.IntegerField()
     state = models.BooleanField(default=True)
+    region = models.CharField(max_length=64)
+    type = models.ForeignKey(Goods, on_delete=models.CASCADE)

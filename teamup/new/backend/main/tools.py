@@ -72,3 +72,9 @@ def discountPrice(real_price):
     cache.set('record_discount'+str(discount),
               0, discountPriceMemoryExsitTime)
     return discount
+
+
+def tsToFormatDate(ts):
+    struct_time = time.localtime(ts)
+    formatted_time = time.strftime("%Y-%m-%d %H:%M", struct_time)
+    return formatted_time

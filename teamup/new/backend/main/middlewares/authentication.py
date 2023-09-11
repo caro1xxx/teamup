@@ -11,17 +11,17 @@ class CheckAccessToken(MiddlewareMixin):
                 '/api/v1/teamup/', '').split('/')[0]
 
             requestMethods = str(request.method)
-
             allowPath = []
 
             if requestMethods == 'GET':
                 allowPath = ['login', 'goods']
 
             if requestMethods == 'POST':
-                allowPath = ['login']
+                allowPath = ['login', 'notify', 'admin_login']
                 pass
 
             if requestMethods == 'PUT':
+                allowPath = ['login']
                 pass
 
             if requestMethods == 'DELETE':

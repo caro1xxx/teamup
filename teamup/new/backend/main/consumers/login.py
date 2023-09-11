@@ -32,7 +32,6 @@ class Login(AsyncWebsocketConsumer):
         pass
 
     async def chat_message(self, event):
-        print(12313)
         messageBody = {
             'username': event['message']['message']['username'],
             'accessToken': event['message']['message']['accessToken'],
